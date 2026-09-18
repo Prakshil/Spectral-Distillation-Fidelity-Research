@@ -48,6 +48,21 @@ llm_export:
   n_layers: 32
   n_heads: 32
 
+# Synthetic ERP graph generator (used by run_diagnostic / compare_methods)
+synthetic:
+  n: 256
+  seed: 42
+
+# Experiment sweep settings
+experiments:
+  diagnostic:
+    seeds: 3
+    budget_factor: 10
+  compare_methods:
+    ns: [64, 128, 256, 512]
+    budget_factors: [1, 2, 4, 6, 10, 15]
+    seed: 0
+
 # Logging
 logging:
   level: "INFO"

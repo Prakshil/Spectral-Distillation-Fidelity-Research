@@ -15,7 +15,7 @@ test-fast:
 	pytest -x -q
 
 test-theory:
-	pytest tests/test_theoretical_bounds.py -v
+	pytest spectral_distillation/tests/test_theoretical_bounds.py -v
 
 # Experiments (see SPECTRAL_DISTILLATION_IMPLEMENTATION_GUIDE.md §9)
 diagnostic:

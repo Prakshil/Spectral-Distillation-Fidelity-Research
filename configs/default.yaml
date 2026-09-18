@@ -1,0 +1,55 @@
+# Spectral Distillation Default Configuration
+seed: 42
+device: "cuda"                     # RTX 4060 Ti locally; T4/A100 on Kaggle/Colab
+
+# Graph construction
+attention_aggregation: "mean"      # mean | max | weighted_by_head_norm
+symmetrize: true                   # W = (A + A^T) / 2
+
+# Spectral sparsification
+sparsification:
+  epsilon: 0.1
+  budget_factor: 10                # edges = budget_factor * n * log(n)
+  top_k_eigenvectors: 100          # for R_eff top-k approximation on large n
+  oracle_filter:
+    enabled: true
+    delta: 0.5
+    score_type: "business_rule"    # or "attention_weight"
+
+# Spectral distortion
+distortion:
+  eps: 1e-8                        # guard against lambda_1 = 0 division
+
+# Router protocol
+protocol:
+  n_splits: 10
+  n_seeds: 3
+  oracle_thresholds: { h_low: 0.4, h_high: 0.6 }
+  statistical_test: "wilcoxon"     # wilcoxon | ttest
+  correction: "holm"
+
+# Planted control (PC-1c-R)
+planted_control:
+  n_nodes: 10000
+  n_patches: 50
+  regime_ratio: [0.4, 0.4, 0.2]    # L, H, M
+  dilution_values: [0.0, 0.25, 0.5, 0.75, 1.0]
+
+# GNN router
+gnn_router:
+  hidden_dim: 64
+  n_layers: 3
+  expert_types: ["low_pass", "high_pass", "identity"]
+  dropout: 0.1
+
+# LLM attention export (Llama-3.1-8B default)
+llm_export:
+  model_id: "meta-llama/Llama-3.1-8B"
+  n_layers: 32
+  n_heads: 32
+
+# Logging
+logging:
+  level: "INFO"
+  log_dir: "logs"
+  wandb: { enabled: false, project: "spectral-distillation", entity: null }

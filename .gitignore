@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.agents/
+
+# Data (large / generated)
+data/erp_attention/
+data/benchmarks/
+*.npy
+*.npz
+*.pt
+*.pkl
+*.onnx
+
+# Logs and run artifacts
+logs/
+*.log
+wandb/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Large cloned agent repos (if present at workspace root)
+agents/
+
+# Secrets
+.env
+*.key
+*.pem
+
+# Model cache (attention exports are large)
+models/
+cache/

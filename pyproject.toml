@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "spectral-distillation"
+version = "0.1.0"
+description = "Spectral Distillation Fidelity: bounding routing-signal loss when compressing LLM attention into sparse graphs"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = [
+    "numpy>=1.24",
+    "scipy>=1.10",
+    "torch>=2.0",
+    "networkx>=3.0",
+    "scikit-learn>=1.2",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "ruff>=0.1",
+    "ty>=0.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["spectral_distillation*"]
+
+[tool.pytest.ini_options]
+testpaths = ["spectral_distillation/tests"]
+addopts = "-ra"

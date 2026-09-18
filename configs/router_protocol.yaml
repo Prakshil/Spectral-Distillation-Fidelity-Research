@@ -1,0 +1,32 @@
+# Router evaluation protocol configuration
+# See SPECTRAL_DISTILLATION_IMPLEMENTATION_GUIDE.md §6.
+
+router_conditions:
+  - label_free     # method's own router (structural or learned) — under evaluation
+  - oracle         # label-derived regime buckets; h>=0.6 low-pass, h<=0.4 high-pass, else identity
+  - random         # usage-matched fixed random assignment (floor for label-free)
+  - uniform        # equal mixing, gates frozen at (1/3, 1/3, 1/3)
+
+oracle:
+  h_low: 0.4
+  h_high: 0.6
+  soft_gates: [0.8, 0.1, 0.1]      # soft variant for channel-mixing methods
+
+protocol:
+  n_splits: 10
+  n_seeds: 3
+  seeds_averaged_within_split: true # technical replicates
+  primary_test: "wilcoxon_exact"
+  sensitivity_test: "paired_t"
+  correction: "holm_bonferroni"
+  report: ["mean_diff", "95%_ci", "effect_size_dz"]
+
+decision_rules:
+  D1: "oracle > uniform"                # signal exists
+  D2: "label_free > random"             # router finds it
+  D3: "oracle > random at ident. params" # not capacity
+  D4: "D1 holds on mechanism-matched positive control"  # instrument works
+
+frozen_model_intervention:
+  gate_settings: ["learned", "node_shuffled", "global_mean", "equal", "oracle_onehot"]
+  n_permutations: 20

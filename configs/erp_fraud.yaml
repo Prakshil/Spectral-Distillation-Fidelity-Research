@@ -1,0 +1,25 @@
+# ERP fraud detection configuration
+# Overrides default.yaml for the enterprise-graph setting.
+
+attention_aggregation: "weighted_by_head_norm"
+symmetrize: true
+
+sparsification:
+  epsilon: 0.1
+  budget_factor: 10
+  oracle_filter:
+    enabled: true
+    delta: 0.5
+    score_type: "business_rule"
+
+planted_control:
+  n_nodes: 10000
+  n_patches: 50
+  regime_ratio: [0.4, 0.4, 0.2]
+  dilution_values: [0.0, 0.25, 0.5, 0.75, 1.0]
+
+gnn_router:
+  hidden_dim: 64
+  n_layers: 3
+  expert_types: ["low_pass", "high_pass", "identity"]
+  dropout: 0.1

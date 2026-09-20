@@ -25,6 +25,7 @@ make figures          # all paper figures
 - `docs/Spectral_Distillation_Complete_Guide.md` — the mathematical foundations
 - `docs/does-your-router-actually-route 4.pdf` — the router evaluation protocol
 - `SPECTRAL_DISTILLATION_IMPLEMENTATION_GUIDE.md` — this repo's implementation spec
+- `docs/Insights.md` — plain-English walkthrough of the model, the results, and next steps (no background needed)
 - `docs/reproducibility.md` — implementation status, verified results, your next steps, further phases
 
 ## Hardware

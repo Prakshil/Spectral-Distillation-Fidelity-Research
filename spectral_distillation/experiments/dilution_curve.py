@@ -26,7 +26,13 @@ from spectral_distillation.src.router_protocol import (
     random_assignment,
     uniform_assignment,
 )
-from spectral_distillation.src.utils import ensure_dir, get_logger, load_yaml_config, set_seed
+from spectral_distillation.src.utils import (
+    device_config,
+    ensure_dir,
+    get_logger,
+    load_yaml_config,
+    set_seed,
+)
 
 
 def build_conditions(graph: dict, args) -> dict[str, np.ndarray]:
@@ -35,7 +41,7 @@ def build_conditions(graph: dict, args) -> dict[str, np.ndarray]:
     uniform = uniform_assignment(W.shape[0], 3)
     random = random_assignment(oracle, rng=args.random_seed)
     label_free, _ = label_free_assignment(
-        W, X, epochs=args.router_epochs, seed=args.router_seed
+        W, X, epochs=args.router_epochs, seed=args.router_seed, device=args.device
     )
     return {
         "oracle": oracle,
@@ -96,6 +102,7 @@ def main() -> None:
     parser.add_argument("--random-seed", type=int, default=1)
     parser.add_argument("--dilution-seed", type=int, default=3)
     parser.add_argument("--out", default="logs")
+    parser.add_argument("--device", default="cuda")
     args = parser.parse_args()
 
     config = load_yaml_config(args.config)
@@ -108,6 +115,7 @@ def main() -> None:
     args.splits = args.splits or 6
     args.seeds = args.seeds or 2
     args.router_epochs = args.router_epochs or 60
+    args.device = device_config(args.device)
     if args.dilutions is None:
         args.dilutions = dil_cfg.get("dilution_values", [0.0, 0.25, 0.5, 0.75, 1.0])
 

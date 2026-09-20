@@ -147,10 +147,10 @@ def label_free_assignment(
     from sklearn.cluster import KMeans
 
     from spectral_distillation.src.gnn_router import train_condition
-    from spectral_distillation.src.laplacian import compute_laplacian
+    from spectral_distillation.src.laplacian import compute_laplacian, eigh_symmetric
 
     L = compute_laplacian(W)
-    evals, V = np.linalg.eigh(L)
+    evals, V = eigh_symmetric(L, device=device)
     feats = structural_features(W, X, evals, V)
     std = (feats - feats.mean(axis=0)) / (feats.std(axis=0) + 1e-8)
 

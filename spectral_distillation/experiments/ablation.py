@@ -15,7 +15,6 @@ from __future__ import annotations
 import argparse
 import csv
 import json
-import time
 from pathlib import Path
 
 import numpy as np
@@ -28,43 +27,53 @@ from spectral_distillation.src.router_protocol import (
     random_assignment,
     uniform_assignment,
 )
-from spectral_distillation.src.utils import ensure_dir, get_logger, load_yaml_config, set_seed
+from spectral_distillation.src.utils import (
+    device_config,
+    ensure_dir,
+    get_logger,
+    load_yaml_config,
+    set_seed,
+)
 
 FEATURE_FIELDS = ("hx", "spectral_ratio", "log_degree", "clustering")
 
 
-def _assignment_from_field_subset(W: np.ndarray, X: np.ndarray, fields: tuple[str, ...], seed: int) -> np.ndarray:
-    """Label-free assignment using only a subset of the structural fields."""
-    from sklearn.cluster import KMeans
-
+def _feature_cache(W: np.ndarray, X: np.ndarray, device: str = "cpu") -> dict:
+    """Compute the four label-free structural fields once (single eigh)."""
     from spectral_distillation.src.gnn_router import degree_clustering_proxy
-    from spectral_distillation.src.laplacian import compute_laplacian
+    from spectral_distillation.src.laplacian import compute_laplacian, eigh_symmetric
     from spectral_distillation.src.spectral_position import (
         node_spectral_position,
         spectral_ratio,
     )
 
     L = compute_laplacian(W)
-    evals, V = np.linalg.eigh(L)
+    evals, V = eigh_symmetric(L, device=device)
     pos = spectral_ratio(node_spectral_position(V, evals))
     degrees = W.sum(axis=1)
-    all_feats = {
+    return {
         "hx": feature_homophily(W, X),
         "spectral_ratio": pos,
         "log_degree": np.log1p(degrees),
         "clustering": degree_clustering_proxy(degrees),
     }
-    use = [all_feats[f] for f in fields]
+
+
+def _assignment_from_fields(cache: dict, fields: tuple[str, ...], seed: int) -> np.ndarray:
+    """Label-free assignment using only a subset of the cached structural fields."""
+    from sklearn.cluster import KMeans
+
+    use = [cache[f] for f in fields]
     feats = np.stack(use, axis=1)
     std = (feats - feats.mean(axis=0)) / (feats.std(axis=0) + 1e-8)
     km = KMeans(n_clusters=3, n_init=10, random_state=seed).fit(std)
-    hx = all_feats["hx"]
+    hx = cache["hx"]
     order = np.argsort([float(np.mean(hx[km.labels_ == k])) for k in range(3)])[::-1]
     relabel = np.zeros_like(km.labels_)
     for new_k, old_k in enumerate(order):
         relabel[km.labels_ == old_k] = new_k
-    assignment = np.zeros((W.shape[0], 3))
-    assignment[np.arange(W.shape[0]), relabel] = 1.0
+    assignment = np.zeros((feats.shape[0], 3))
+    assignment[np.arange(feats.shape[0]), relabel] = 1.0
     return assignment
 
 
@@ -107,11 +116,11 @@ def run_oracle_sweep(graph: dict, args, log) -> list[dict]:
     rows = []
     assignments = {}  # shared across the sweep
     uniform = uniform_assignment(n, 3)
+    h = label_homophily(W, y)  # threshold-independent; compute once
     for delta in args.delta_sweep:
         h_low, h_high = 0.5 - delta / 2, 0.5 + delta / 2
         if h_low < 0 or h_high > 1:
             continue
-        h = label_homophily(W, y)
         assign = np.zeros((n, 3))
         for i in range(n):
             if np.isnan(h[i]):
@@ -170,11 +179,21 @@ def _homophily_range_graph(n: int, seed: int = 0) -> dict:
             p = P[bi, bj]
             a0, b0 = offsets[bi], offsets[bi] + sizes[bi]
             a1, b1 = offsets[bj], offsets[bj] + sizes[bj]
-            for i in range(a0, b0):
-                for j in range(max(i + 1, a1), b1):
-                    if rng.random() < p:
-                        w = rng.uniform(*((lo, hi) if p > 0.2 else weak))
-                        W[i, j] = W[j, i] = w
+            if bi == bj:
+                ii, jj = np.triu_indices(sizes[bi], k=1)
+                ii = ii + a0
+                jj = jj + a1
+            else:
+                cols, rows = np.meshgrid(np.arange(a1, b1), np.arange(a0, b0))
+                ii = rows.ravel()
+                jj = cols.ravel()
+            keep = rng.random(ii.size) < p
+            ii, jj = ii[keep], jj[keep]
+            if ii.size == 0:
+                continue
+            w = rng.uniform(*((lo, hi) if p > 0.2 else weak), size=ii.size)
+            W[ii, jj] = w
+            W[jj, ii] = w
     build_adjacency(W)
     # safety backbone (additive, preserves block homophily)
     perm = rng.permutation(n)
@@ -212,10 +231,11 @@ def run_feature_sweep(graph: dict, args, log) -> list[dict]:
         (("loo", f), subset) for f, subset in zip(FEATURE_FIELDS, leave_one_out)
     ]
 
+    cache = _feature_cache(W, X, device=args.device)
     assignments = dict(base)
     gains: dict[str, float] = {}
     for (kind, name), fields in variants:
-        a = _assignment_from_field_subset(W, X, fields, seed=args.router_seed)
+        a = _assignment_from_fields(cache, fields, seed=args.router_seed)
         label = f"{kind}:{name}"
         assignments[label] = a
         gains[label] = _mean_gain(graph, assignments, label, "random", args)
@@ -243,10 +263,14 @@ def main() -> None:
     parser.add_argument("--splits", type=int, default=None)
     parser.add_argument("--seeds", type=int, default=None)
     parser.add_argument("--delta-sweep", type=float, nargs="+", default=None)
-    parser.add_argument("--feature-sweep", action="store_true", default=False)
+    parser.add_argument("--feature-sweep", action="store_true", default=True,
+                        help="run the PC-1c-R router-feature ablation (on by default)")
+    parser.add_argument("--oracle-sweep", action="store_true", default=True,
+                        help="run the homophily-range oracle δ-sweep (on by default)")
     parser.add_argument("--router-seed", type=int, default=0)
     parser.add_argument("--random-seed", type=int, default=1)
     parser.add_argument("--out", default="logs")
+    parser.add_argument("--device", default="cuda")
     args = parser.parse_args()
 
     config = load_yaml_config(args.config)
@@ -258,11 +282,21 @@ def main() -> None:
     args.n_patches = args.n_patches or pc.get("n_patches", 50)
     args.splits = args.splits or 4
     args.seeds = args.seeds or 2
+    args.device = device_config(args.device)
     if args.delta_sweep is None:
         args.delta_sweep = [0.1, 0.3, 0.5, 0.7, 0.9, 1.1]
     set_seed(args.router_seed)
 
-    t0 = time.perf_counter()
+    rows: list[dict] = []
+    modes = []
+    if args.oracle_sweep:
+        graph = _homophily_range_graph(args.n, seed=args.router_seed)
+        log.info("built real-like homophily-range graph n=%d (oracle sweep)", args.n)
+        f = filt.get("delta", 0.5)
+        if f not in args.delta_sweep:
+            args.delta_sweep.insert(0, float(f))
+        rows += run_oracle_sweep(graph, args, log)
+        modes.append("oracle_delta")
     if args.feature_sweep:
         graph = generate_pc_graph(
             n_nodes=args.n,
@@ -271,29 +305,19 @@ def main() -> None:
             seed=args.router_seed,
         )
         log.info("built PC-1c-R graph n=%d (feature sweep)", args.n)
-    else:
-        graph = _homophily_range_graph(args.n, seed=args.router_seed)
-        log.info("built real-like homophily-range graph n=%d (oracle sweep)", args.n)
-    log.info("graph ready in %.1fs", time.perf_counter() - t0)
-
-    rows: list[dict] = []
-    if args.feature_sweep:
         rows += run_feature_sweep(graph, args, log)
-    else:
-        f = filt.get("delta", 0.5)
-        if f not in args.delta_sweep:
-            args.delta_sweep.insert(0, float(f))
-        rows += run_oracle_sweep(graph, args, log)
+        modes.append("feature")
 
     out_dir = ensure_dir(Path(args.out) / "ablation")
     csv_path = out_dir / "ablation.csv"
     if rows:
+        field_order = list(dict.fromkeys(k for r in rows for k in r.keys()))
         with csv_path.open("w", newline="", encoding="utf-8") as fh:
-            writer = csv.DictWriter(fh, fieldnames=list(rows[0].keys()))
+            writer = csv.DictWriter(fh, fieldnames=field_order, extrasaction="ignore")
             writer.writeheader()
             writer.writerows(rows)
     json_path = out_dir / "ablation.json"
-    json_path.write_text(json.dumps({"rows": rows, "mode": "feature" if args.feature_sweep else "oracle_delta"}, indent=2), encoding="utf-8")
+    json_path.write_text(json.dumps({"rows": rows, "mode": ",".join(modes)}, indent=2), encoding="utf-8")
     log.info("wrote %s and %s", csv_path, json_path)
 
     print("\n=== Ablation ===")

@@ -29,7 +29,13 @@ from spectral_distillation.src.router_protocol import (
     random_assignment,
     uniform_assignment,
 )
-from spectral_distillation.src.utils import ensure_dir, get_logger, load_yaml_config, set_seed
+from spectral_distillation.src.utils import (
+    device_config,
+    ensure_dir,
+    get_logger,
+    load_yaml_config,
+    set_seed,
+)
 
 CONDITIONS = ("oracle", "label_free", "random", "uniform")
 
@@ -46,6 +52,7 @@ def build_conditions(graph: dict, args) -> dict[str, np.ndarray]:
         n_layers=args.n_layers,
         epochs=args.router_epochs,
         seed=args.router_seed,
+        device=args.device,
     )
     return {
         "oracle": oracle,
@@ -132,7 +139,7 @@ def main() -> None:
     parser.add_argument("--random-seed", type=int, default=1)
     parser.add_argument("--frozen-perms", type=int, default=20)
     parser.add_argument("--out", default="logs")
-    parser.add_argument("--device", default="cpu")
+    parser.add_argument("--device", default="cuda")
     args = parser.parse_args()
 
     config = load_yaml_config(args.config)
@@ -147,6 +154,7 @@ def main() -> None:
     args.router_epochs = args.router_epochs or 200
     args.hidden_dim = args.hidden_dim or 64
     args.n_layers = args.n_layers or 3
+    args.device = device_config(args.device)
 
     set_seed(args.router_seed)
 

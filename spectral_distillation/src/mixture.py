@@ -71,14 +71,15 @@ def mixture_accuracy(
         return 0.0, 0
     correct = 0
     evaluated = 0
-    for v in idx:
-        k = int(hard[v])
-        head = experts[k]
+    for k, head in enumerate(experts):
         if head is None:
             continue
-        pred = head.predict(X[v : v + 1])[0]
-        correct += int(pred == y[v])
-        evaluated += 1
+        block = idx[hard[idx] == k]
+        if block.size == 0:
+            continue
+        pred = head.predict(X[block])
+        correct += int(np.count_nonzero(pred == y[block]))
+        evaluated += int(block.size)
     if evaluated == 0:
         return 0.0, 0
     return float(correct / evaluated), evaluated

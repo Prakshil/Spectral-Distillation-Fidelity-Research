@@ -16,7 +16,7 @@ Bounding and controlling routing-relevant information loss when compressing LLM 
 make install
 make test-theory      # validates Weyl / Davis-Kahan / Cauchy on the 4-node example
 make diagnostic       # SD preview on synthetic graphs
-make protocol         # full D1-D4 findings matrix (heavy; use Kaggle/Colab)
+make protocol         # full D1-D4 findings matrix (~2.5 min on an RTX 4060)
 make figures          # all paper figures
 ```
 
@@ -25,10 +25,11 @@ make figures          # all paper figures
 - `docs/Spectral_Distillation_Complete_Guide.md` — the mathematical foundations
 - `docs/does-your-router-actually-route 4.pdf` — the router evaluation protocol
 - `SPECTRAL_DISTILLATION_IMPLEMENTATION_GUIDE.md` — this repo's implementation spec
+- `docs/reproducibility.md` — implementation status, verified results, your next steps, further phases
 
 ## Hardware
 
-- Local: RTX 4060 Ti (16 GB) — development, small-scale ablations
+- Local: RTX 4060 (8 GB) — full 10k pipeline in ~9 minutes with `--device cuda` (see `docs/reproducibility.md` §4.2 for measured runtimes)
 - Heavy protocol runs: Kaggle / Colab GPUs
 
 ## Status
@@ -58,8 +59,8 @@ python -m spectral_distillation.experiments.ablation            # oracle-filter 
 python -m spectral_distillation.experiments.reproduce_figures   # render all Phase 3 figures from logs
 ```
 
-- `make test-theory` runs the theory-bound test file only.
-- Runners accept `--n`, `--n-patches`, `--splits`, `--seeds`, `--router-epochs`, `--config`, `--out` (see each module's argparse help). Use small `--n` (600-2000) for CPU smoke runs; the defaults target the full 10k-node PC-1c-R control on a GPU.
+- `make test-theory` runs the theory-bound test file only. The Makefile targets run on `cuda` by default (runners auto-fallback to `cpu` when CUDA is absent).
+- Runners accept `--n`, `--n-patches`, `--splits`, `--seeds`, `--router-epochs`, `--device`, `--config`, `--out` (see each module's argparse help). Use small `--n` (600-2000) for CPU smoke runs; the defaults target the full 10k-node PC-1c-R control on a GPU.
 - Outputs: `logs/protocol/protocol_results.json`, `logs/dilution/dilution_curve.{csv,json}`, `logs/ablation/ablation.{csv,json}`, plus PNGs under `logs/protocol/`, `logs/dilution/`, `logs/ablation/`.
 - Config defaults live in `configs/default.yaml` (`router_protocol:`, `planted_control:`, `experiments:` sections).
 

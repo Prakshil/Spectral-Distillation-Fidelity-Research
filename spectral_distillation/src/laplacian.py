@@ -23,6 +23,42 @@ def compute_laplacian(W: np.ndarray) -> np.ndarray:
     return D - np.asarray(W, dtype=float)
 
 
+def eigh_symmetric(A: np.ndarray, device: str = "cpu", float_dtype: str = "float64") -> tuple[np.ndarray, np.ndarray]:
+    """Full eigendecomposition of a symmetric matrix, up to 4-8x faster on CUDA.
+
+    Falls back to ``np.linalg.eigh`` (CPU) when CUDA is unavailable, the
+    device is requested as the CPU, or the matrix is too small to justify
+    host<->device transfer. Eigenvalues are returned in ascending order,
+    matching ``np.linalg.eigh``, and eigenvectors are columnwise.
+    """
+    A = np.asarray(A, dtype=float)
+    n = A.shape[0]
+    use_cuda = (
+        device == "cuda"
+        and n >= 1000
+        and float_dtype in ("float32", "float64")
+    )
+    if not use_cuda:
+        return np.linalg.eigh(A)
+
+    try:
+        import torch
+    except ImportError:
+        return np.linalg.eigh(A)
+    if not torch.cuda.is_available():
+        return np.linalg.eigh(A)
+
+    dtype = getattr(torch, float_dtype)
+    try:
+        with torch.no_grad():
+            At = torch.as_tensor(A, dtype=dtype, device=torch.device("cuda"))
+            evals, V = torch.linalg.eigh(At)
+            torch.cuda.synchronize()
+        return evals.detach().cpu().numpy().astype(float_dtype), V.detach().cpu().numpy().astype(float_dtype)
+    except (RuntimeError, torch.cuda.OutOfMemoryError):
+        return np.linalg.eigh(A)
+
+
 def quadratic_form(L: np.ndarray, f: np.ndarray) -> float:
     f = np.asarray(f, dtype=float)
     return float(f @ np.asarray(L, dtype=float) @ f)

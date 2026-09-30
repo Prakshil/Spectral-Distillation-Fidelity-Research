@@ -1,9 +1,11 @@
 """Run the full D1-D4 router-fidelity protocol (guide sections 6.5-6.7).
 
-Builds a PC-1c-R planted control graph, computes the four condition
-assignments (oracle, random, uniform, label-free), trains identical expert
-heads per condition, and reports the primary comparisons plus frozen-model
-gate interventions. Verdict: all four decision rules must hold.
+Builds a PC-1c-R planted control graph (or, with ``--graph erp_fraud``, a
+scalable synthetic ERP-fraud graph with the same protocol contract),
+computes the four condition assignments (oracle, random, uniform,
+label-free), trains identical expert heads per condition, and reports the
+primary comparisons plus frozen-model gate interventions. Verdict: all four
+decision rules must hold.
 """
 
 from __future__ import annotations
@@ -128,6 +130,7 @@ def _expert_accuracy_from_assignment(graph: dict, assignment: np.ndarray) -> flo
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", default="configs/default.yaml")
+    parser.add_argument("--graph", choices=["pc", "erp_fraud"], default="pc")
     parser.add_argument("--n", type=int, default=None, help="graph size (default uses config, 10000)")
     parser.add_argument("--n-patches", type=int, default=None)
     parser.add_argument("--splits", type=int, default=None)
@@ -159,13 +162,23 @@ def main() -> None:
     set_seed(args.router_seed)
 
     t0 = time.perf_counter()
-    graph = generate_pc_graph(
-        n_nodes=args.n,
-        n_patches=args.n_patches,
-        regime_ratio=tuple(pc.get("regime_ratio", [0.4, 0.4, 0.2])),
-        seed=args.router_seed,
-    )
-    log.info("generated PC-1c-R graph n=%d (%d) in %.1fs", args.n, args.n_patches, time.perf_counter() - t0)
+    if args.graph == "erp_fraud":
+        from spectral_distillation.src.synthetic import generate_erp_fraud_graph
+
+        graph = generate_erp_fraud_graph(
+            n_nodes=args.n,
+            n_patches=args.n_patches,
+            seed=args.router_seed,
+        )
+        log.info("generated ERP-fraud graph n=%d (%s) in %.1fs", args.n, args.graph, time.perf_counter() - t0)
+    else:
+        graph = generate_pc_graph(
+            n_nodes=args.n,
+            n_patches=args.n_patches,
+            regime_ratio=tuple(pc.get("regime_ratio", [0.4, 0.4, 0.2])),
+            seed=args.router_seed,
+        )
+        log.info("generated PC-1c-R graph n=%d (%d) in %.1fs", args.n, args.n_patches, time.perf_counter() - t0)
 
     log.info("computing condition assignments...")
     t0 = time.perf_counter()
@@ -191,7 +204,7 @@ def main() -> None:
         )
 
     record = _summarize(results, args, graph, assignments)
-    out_dir = ensure_dir(Path(args.out) / "protocol")
+    out_dir = ensure_dir(Path(args.out) / ("erp_fraud_protocol" if args.graph == "erp_fraud" else "protocol"))
     out_path = out_dir / "protocol_results.json"
     out_path.write_text(json.dumps(record, indent=2, default=str), encoding="utf-8")
     log.info("wrote %s", out_path)

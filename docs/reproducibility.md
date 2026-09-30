@@ -18,10 +18,10 @@ Companion documents:
 | Phase 1 | Diagnostics + theory (SD metric, fragility, entropy; provable bounds) | **Implemented & tested** |
 | Phase 2 | Spectral sparsifiers + method comparison (threshold / random / degree / spectral) | **Implemented & tested** |
 | Phase 3 | Router evaluation protocol (label-free GNN router, D1–D4, PC-1c-R control, dilution ladder, ablations, figures) | **Implemented & tested** |
-| Phase 4 | Real ERP attention data + LLM attention export (Llama-3.1-8B) feeding the pipeline | Not started (see §7) |
+| Phase 4 | Real ERP attention data + LLM attention export (Llama-3.1-8B) feeding the pipeline | Partially (real-attention + synthetic ERP-fraud runs done; no real ERP graph files exist on disk) |
 | Phase 5 | Publication materials from verified results | Partially drafted (`docs/*`) |
 
-**Tests:** 83 pass (`python -m pytest`, 16 s on CPU, 2 cosmetic warnings).
+**Tests:** 100 pass (`python -m pytest` on CPU, 2 cosmetic warnings).
 
 **Lint:** `pyflakes` clean on `src/`, `experiments/`, and `tests/`. (`ruff`/`ty` are not installed locally; the Makefile targets remain for CI.)
 
@@ -54,7 +54,7 @@ Companion documents:
 |--------|--------------|--------|
 | `run_diagnostic.py` | Golden 4-node ERP verification + SD/fragility preview | `logs/diagnostic/diagnostic.json` |
 | `compare_methods.py` | SD vs budget for threshold / random / degree / spectral | `logs/compare_methods/results.{csv,json}` + PNGs |
-| `run_protocol.py` | D1–D4 findings matrix + frozen-gate interventions | `logs/protocol/protocol_results.json` + PNG |
+| `run_protocol.py` | D1–D4 findings matrix + frozen-gate interventions (`--graph pc` default; `--graph erp_fraud` for the fraud-like graph) | `logs/protocol/protocol_results.json` (PC) / `logs/erp_fraud_protocol/protocol_results.json` (ERP-fraud) + PNG |
 | `dilution_curve.py` | Label-free vs oracle gain across the dilution ladder | `logs/dilution/dilution_curve.{csv,json}` + PNG |
 | `ablation.py` | Oracle-bucket δ-sweep + router-feature ablation (single / leave-one-out) | `logs/ablation/ablation.{csv,json}` + PNG |
 | `reproduce_figures.py` | Renders all Phase 3 figures from cached logs | PNGs under `logs/{protocol,dilution,ablation}/` |
@@ -284,14 +284,19 @@ Every claim in §3 maps to a committed artifact:
 
 Goal: move off the synthetic ERP generator onto real attention matrices.
 
+- **DONE (fraud-like synthetic): `generate_erp_fraud_graph` in `src/synthetic.py`** — a scalable,
+  vectorized stochastic-block ERP-fraud graph (suppliers/invoices/backbone, shell-fraud hubs,
+  weak customers) returning the protocol contract (`W`, `features`, `y`, `regimes`). Run via
+  `run_protocol.py --graph erp_fraud`; all four D1–D4 rules hold and the label-free router
+  recovers the regime structure exactly (see `docs/erp_fraud_results.md`).
+- **DONE (real-attention): LLM attention export** on `HuggingFaceTB/SmolLM2-1.7B` over a
+  public-domain corpus; D1/D3/D4 hold, D2 does not (usage-imbalance artifact; see
+  `docs/real_attention_results.md`).
+- **Outstanding:** no real ERP/fraud graph files exist in the repo (`data/benchmarks/` is empty),
+  so the fraud-domain validation is currently the synthetic family; a real graph (exported ERP
+  attention or an external network dataset) remains the natural D2 resurrection candidate.
 - Finish `configs/erp_fraud.yaml` runs on real ERP graphs; use homophily-bucket oracle on real
   labels (already implemented — same path used for benchmarks).
-- Export real attention from an LLM (default `configs/default.yaml` → `meta-llama/Llama-3.1-8B`,
-  `llm_export::{model_id, n_layers, n_heads}`) and feed it through the same pipeline
-  (attention → entropy signal → spectral sparsification → router protocol). This directly
-  exercises the "pre-construction signal cannot be corrupted by distillation" claim.
-- Re-run D1–D4 and the dilution ladder on these real graphs; confirm the plant → real transfer
-  of the oracle-vs-label-free split.
 
 ### Phase 5 — Publication materials
 

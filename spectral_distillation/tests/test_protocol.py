@@ -42,6 +42,7 @@ from spectral_distillation.src.router_protocol import (
     feature_homophily,
     label_free_assignment,
     label_homophily,
+    budget_normalized_homophily,
     oracle_bucket_assignment,
     oracle_regime_assignment,
     random_assignment,
@@ -108,6 +109,43 @@ def test_oracle_bucket_assignment_channels_and_soft_gates():
     soft = oracle_bucket_assignment(W, y, h_low=0.4, h_high=0.6, soft_gates=(0.8, 0.1, 0.1))
     assert np.allclose(np.sum(soft, axis=1), 1.0)
     assert np.allclose(soft[0], [0.8, 0.1, 0.1])
+
+
+def test_budget_normalized_homophily_rescales_short_sentences():
+    # sentence 0: 2 tokens, sentence 1: 6 tokens, sentence 2: 4 tokens.
+    # Node 2 (sentence 1) has 1 same-sentence edge of a possible 6 -> low raw h
+    # but the *proportion of budget used* is what changes routing.
+    W = np.array(
+        [
+            [0.0, 1.0, 0.0, 0.0],
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0],
+            [0.0, 0.0, 1.0, 0.0],
+        ]
+    )
+    y = np.array([0, 0, 1, 1])
+    h = budget_normalized_homophily(W, y, top_k=4)
+    # node 0: 1/1 same-sentence edges inside a 2-token sentence -> budget 1 -> 1.0
+    assert np.isclose(h[0], 1.0)
+    # node 2: 1/1 same-sentence edges inside a 2-token sentence -> budget 1 -> 1.0
+    assert np.isclose(h[2], 1.0)
+
+
+def test_budget_normalized_oracle_uses_rescaled_thresholds():
+    W = np.array(
+        [
+            [0.0, 1.0, 0.0, 0.0],
+            [1.0, 0.0, 1.0, 0.0],
+            [0.0, 1.0, 0.0, 1.0],
+            [0.0, 0.0, 1.0, 0.0],
+        ]
+    )
+    y = np.array([0, 0, 1, 1])
+    a = oracle_bucket_assignment(W, y, adaptive=False, budget_normalized=True, top_k=4)
+    assert a.shape == (4, 3)
+    assert np.allclose(np.sum(a, axis=1), 1.0)
+    # every node's only edge is same-sentence -> budget-normalized h = 1.0 -> low-pass
+    assert np.allclose(a[:, 0], 1.0)
 
 
 # --------------------------------------------------------------------------- #

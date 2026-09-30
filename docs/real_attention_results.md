@@ -85,14 +85,66 @@ carry this caveat rather than the raw dilution curve.
   KMeans + RouterGNN), main protocol ~20-25 min (120 logistic-refit cells), dilution ladder ~35 min.
 - Tests: 92 pass (`python -m pytest`).
 
-## 5. Bottom line
+## 5. Density-aware oracle sweep (step 1 follow-up; closes the k=16 question)
+
+Goal: find an oracle calibration/extraction that beats uniform at top-k=16 and beat the fixed
+thresholds at every k. All variants evaluated on the same k=16 graph with the 6×2 protocol
+(primary sign/p/z held under the full 10×3 where noted).
+
+**Result: every *honest* homophily-based oracle fails D1 at k=16.**
+
+| Oracle variant (k=16) | usage hi/id/lo | D1 (o>u) | d_z | verdict |
+|---|---|---|---|---|
+| fixed 0.4/0.6 (repro) | [4697,3720,3103] | −0.0045 | −1.17 | ✗ |
+| adaptive tercile (repro) | [3875,3764,3881] | −0.0029 | −0.94 | ✗ |
+| Bayesian shrink, c=5 | [3927,3706,3887] | −0.0012 | −0.45 | ✗ |
+| Bayesian shrink, c=20 | [3940,3675,3905] | −0.0009 | −0.27 | ✗ |
+| confidence-gated (z=1) | [2062,7822,1636] | −0.0039 | −1.42 | ✗ |
+| degree-winsorized (top 15% → identity) | [2350,8091,1079] | −0.0019 | −0.76 | ✗ |
+| attention-weighted homophily, tercile | [3840,3840,3840] | −0.0038 | −0.98 | ✗ |
+| attention-weighted homophily, shrink c=5 | [3840,3840,3840] | −0.0027 | −0.94 | ✗ |
+| budget-normalized homophily, tercile | [4442,2749,4329] | −0.0081 | −2.84 | ✗ |
+| budget-normalized homophily, 0.5/0.8 | [5328,3629,2563] | −0.0049 | −1.20 | ✗ |
+
+Two apparent wins turned out to be artifacts, and their dissection is instructive:
+
+- **top-1 split** (route on whether the *single strongest* attention edge is same-sentence) gave
+  D1 = +0.0158 at both k=16 and k=32 (p=0.002, d_z≈18) — but its expert-0 "cluster" is exactly
+  **one sentence** (376 nodes, single label), so the routing reduces to a trivial majority-label
+  classifier scoring 100% on its own sentence while contributing nothing to structure. It would be
+  dishonest to report this as signal. The k-invariant result also revealed that at both k the
+  strongest edge is the *same* edge, so top-1 does not actually exercise density.
+
+**The one legitimate win: budget × tercile.** A clean 2×2 at k=32 (full 10×3 protocol) isolates
+which factor drives the oracle:
+
+| k=32 oracle | fixed 0.4/0.6 | tercile |
+|---|---|---|
+| raw homophily | D1 +0.0063 · D3 +0.0208 | D1 +0.0062 · D3 +0.0215 |
+| budget-normalized | D1 +0.0039 · D3 +0.0189 | **D1 +0.0100 · D3 +0.0244** |
+
+Budget normalization alone *hurts* (it pushes most nodes into one bucket: usage [5915,3443,2162]
+vs [2046,3840,5634]). The improvement only appears *combined with tercile thresholds*, which force
+balanced usage — then budget-normalized homophily correctly rewards a short sentence that uses its
+full in-sentence attention budget. **budget × tercile is the strongest oracle across all
+configurations tested** (D1 d_z +2.96, D3 +0.0244). Exposed via `--budget-oracle`; at k≥32 this is
+the recommended oracle setting.
+
+**Conclusion.** The k=16 D1 failure is a property of the sparse oracle *instrument*, now verified
+under ten distinct extractions/shiftings/gates. At k=16 the same-sentence signal is beneath the
+neighbor-averaging noise floor (only ~1 in 16 edges is a reliable same-sentence edge), so no
+calibration of a label-homophily oracle recovers it — while the *label-free* router (D2) stays
+significant there (+0.0132..+0.0160). We keep the honest framing: **the router's signal survives
+sparsity; the homophily oracle does not.** At k≥32, budget × tercile is the recommended oracle.
+
+## 6. Bottom line
 
 > The primary result is robust: real attention carries a label-free-detectable sentence-routing
 > signal (D2, D3 pass at every density and seed; verdict Supported for top-k ≥ 32). The only
 > caveat is D1 at top-k=16, which fails because the *oracle* instrument degenerates under sparse
 > neighborhoods — the label-free router itself remains significant there.
 
-## 6. Artifacts
+## 7. Artifacts
 
 | Run | JSON |
 |---|---|

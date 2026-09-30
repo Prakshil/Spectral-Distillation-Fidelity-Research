@@ -53,7 +53,8 @@ CONDITIONS = ("oracle", "label_free", "random", "uniform")
 
 def build_conditions(graph: dict, args) -> dict[str, np.ndarray]:
     W, X, y = graph["W"], graph["features"], graph["y"]
-    oracle = oracle_bucket_assignment(W, y, adaptive=args.adaptive_oracle)
+    oracle = oracle_bucket_assignment(W, y, adaptive=args.adaptive_oracle,
+                                      budget_normalized=args.budget_oracle, top_k=args.top_k)
     uniform = uniform_assignment(W.shape[0], 3)
     random = random_assignment(oracle, rng=args.random_seed)
     label_free, _ = label_free_assignment(
@@ -239,6 +240,7 @@ def main() -> None:
     parser.add_argument("--dilution-seed", type=int, default=3)
     parser.add_argument("--skip-dilution", action="store_true", help="skip the slow dilution ladder (D1-D4 verdict only)")
     parser.add_argument("--adaptive-oracle", action="store_true", help="use quantile-based homophily thresholds for the oracle buckets (default off: fixed 0.4/0.6)")
+    parser.add_argument("--budget-oracle", action="store_true", help="normalize oracle homophily by the available same-sentence budget (improves k>=32)")
     parser.add_argument("--no-progress", action="store_true", help="disable tqdm progress bars")
     parser.add_argument("--out", default="logs")
     parser.add_argument("--device", default="cuda")

@@ -1,0 +1,20 @@
+
+=== stage 1: label-free proxy vs true label homophily (diagnostic) ===
+candidate                rho           p
+eig_centrality       -0.5094           0
+neigh_degree          0.4492           0
+inv_mean_res_nb       0.3568   1.14e-257
+degree                0.3124   7.07e-195
+local_clust          -0.3121   1.75e-194
+neigh_feat_sim        0.1910    8.39e-72
+eig_nb_sim           -0.0317     0.00318
+
+=== stage 2: does any label-free proxy fix D2 on amazon? ===
+candidate           vs_random          p       dz    D2 fixed?
+oracle               +0.00407   0.001953    3.930          YES
+eig_centrality       +0.00094   0.003906    1.723          YES
+neigh_degree         +0.00047   0.037109    0.778           no
+degree               +0.00005   1.000000    0.061           no
+local_clust          +0.00000   0.845703    0.000           no
+inv_mean_res_nb      -0.00049   0.027344   -0.949           no
+*oracle(ref)         +0.00407   0.001953    3.930            -

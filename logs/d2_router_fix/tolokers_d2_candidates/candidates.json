@@ -1,0 +1,152 @@
+{
+  "dataset": "tolokers",
+  "screen": [
+    {
+      "candidate": "eig_nb_sim",
+      "spearman_rho": 0.418364778208644,
+      "p": 0.0
+    },
+    {
+      "candidate": "eig_centrality",
+      "spearman_rho": 0.3973978833074423,
+      "p": 0.0
+    },
+    {
+      "candidate": "neigh_degree",
+      "spearman_rho": -0.3472410566359704,
+      "p": 0.0
+    },
+    {
+      "candidate": "neigh_feat_sim",
+      "spearman_rho": -0.1431471329507678,
+      "p": 7.187228309984887e-55
+    },
+    {
+      "candidate": "local_clust",
+      "spearman_rho": 0.06671098664784116,
+      "p": 4.4519883031935546e-13
+    },
+    {
+      "candidate": "degree",
+      "spearman_rho": -0.06559207010022293,
+      "p": 1.0844357511375177e-12
+    }
+  ],
+  "evaluated": [
+    {
+      "name": "eig_nb_sim_vs_random",
+      "mean_diff": 0.005029199977320387,
+      "ci_low": 0.004038810116971807,
+      "ci_high": 0.006019589837668967,
+      "p_wilcoxon": 0.001953125,
+      "effect_size_dz": 3.8290782272066637,
+      "significant": true
+    },
+    {
+      "name": "eig_nb_sim_vs_uniform",
+      "mean_diff": 0.003781822305380733,
+      "ci_low": 0.0030302633198378793,
+      "ci_high": 0.004533381290923587,
+      "p_wilcoxon": 0.001953125,
+      "effect_size_dz": 3.7943690299433883,
+      "significant": true
+    },
+    {
+      "name": "eig_centrality_vs_random",
+      "mean_diff": 0.0016782899586097356,
+      "ci_low": 0.0008560780839153967,
+      "ci_high": 0.0025005018333040746,
+      "p_wilcoxon": 0.001953125,
+      "effect_size_dz": 1.5391635530385686,
+      "significant": true
+    },
+    {
+      "name": "eig_centrality_vs_uniform",
+      "mean_diff": 0.0004309122866700821,
+      "ci_low": -0.00013892017590520615,
+      "ci_high": 0.0010007447492453702,
+      "p_wilcoxon": 0.203125,
+      "effect_size_dz": 0.570221003466595,
+      "significant": false
+    },
+    {
+      "name": "neigh_degree_vs_random",
+      "mean_diff": 0.0002494755343879329,
+      "ci_low": -0.0003745572136725776,
+      "ci_high": 0.0008735082824484434,
+      "p_wilcoxon": 0.4921875,
+      "effect_size_dz": 0.3014547280445999,
+      "significant": false
+    },
+    {
+      "name": "neigh_degree_vs_uniform",
+      "mean_diff": -0.0009979021375517206,
+      "ci_low": -0.0013116128363400818,
+      "ci_high": -0.0006841914387633594,
+      "p_wilcoxon": 0.001953125,
+      "effect_size_dz": -2.3986127739228085,
+      "significant": false
+    },
+    {
+      "name": "neigh_feat_sim_vs_random",
+      "mean_diff": 0.0014288144242217693,
+      "ci_low": 0.0008284897287125954,
+      "ci_high": 0.002029139119730943,
+      "p_wilcoxon": 0.001953125,
+      "effect_size_dz": 1.794696996653948,
+      "significant": true
+    },
+    {
+      "name": "neigh_feat_sim_vs_uniform",
+      "mean_diff": 0.00018143675228211588,
+      "ci_low": -0.000348022880935351,
+      "ci_high": 0.0007108963854995827,
+      "p_wilcoxon": 0.49609375,
+      "effect_size_dz": 0.2584008443261197,
+      "significant": false
+    },
+    {
+      "name": "oracle_vs_random",
+      "mean_diff": 0.037795543459772075,
+      "ci_low": 0.03566793989341255,
+      "ci_high": 0.0399231470261316,
+      "p_wilcoxon": 0.001953125,
+      "effect_size_dz": 13.395267914467444,
+      "significant": true
+    }
+  ],
+  "d2_family": [
+    {
+      "candidate": "eig_nb_sim",
+      "mean_diff": 0.005029199977320387,
+      "p_wilcoxon": 0.001953125,
+      "alpha_corrected": 0.0125,
+      "effect_size_dz": 3.8290782272066637,
+      "d2_supported": true
+    },
+    {
+      "candidate": "eig_centrality",
+      "mean_diff": 0.0016782899586097356,
+      "p_wilcoxon": 0.001953125,
+      "alpha_corrected": 0.016666666666666666,
+      "effect_size_dz": 1.5391635530385686,
+      "d2_supported": true
+    },
+    {
+      "candidate": "neigh_feat_sim",
+      "mean_diff": 0.0014288144242217693,
+      "p_wilcoxon": 0.001953125,
+      "alpha_corrected": 0.025,
+      "effect_size_dz": 1.794696996653948,
+      "d2_supported": true
+    },
+    {
+      "candidate": "neigh_degree",
+      "mean_diff": 0.0002494755343879329,
+      "p_wilcoxon": 0.4921875,
+      "alpha_corrected": 0.05,
+      "effect_size_dz": 0.3014547280445999,
+      "d2_supported": false
+    }
+  ]
+}

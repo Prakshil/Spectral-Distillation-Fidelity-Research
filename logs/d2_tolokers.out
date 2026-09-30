@@ -1,0 +1,20 @@
+
+=== stage 1: label-free proxy vs true label homophily (diagnostic) ===
+candidate                rho           p
+eig_nb_sim            0.4184           0
+eig_centrality        0.3974           0
+neigh_degree         -0.3472           0
+neigh_feat_sim       -0.1431    7.19e-55
+inv_mean_res_nb      -0.0882     9.7e-22
+local_clust           0.0667    4.45e-13
+degree               -0.0656    1.08e-12
+
+=== stage 2: does any label-free proxy fix D2 on tolokers? ===
+candidate           vs_random          p       dz    D2 fixed?
+oracle               +0.03780   0.001953   13.395          YES
+eig_nb_sim           +0.00503   0.001953    3.829          YES
+inv_mean_res_nb      +0.00182   0.001953    1.689          YES
+eig_centrality       +0.00168   0.001953    1.539          YES
+neigh_feat_sim       +0.00143   0.001953    1.795          YES
+neigh_degree         +0.00025   0.492188    0.301           no
+*oracle(ref)         +0.03780   0.001953   13.395            -

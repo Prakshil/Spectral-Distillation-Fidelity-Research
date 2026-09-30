@@ -1,0 +1,20 @@
+
+=== Real fraud-graph (tolokers) router fidelity ===
+comparison             mean_diff  p_wilcoxon     d_z   sig
+oracle_vs_uniform         0.0365    0.001953  14.936   yes
+label_free_vs_random     -0.0003      0.6953  -0.340    no
+oracle_vs_random          0.0368    0.001953  13.305   yes
+
+Decision rules: Not supported; failed rule(s): D2.
+Frozen gate (20 perms):
+  learned               0.7806
+  oracle_onehot         0.8199
+  equal                 0.7824
+  global_mean           0.7824
+  node_shuffled_mean    0.7806
+  node_shuffled_std     0.0008
+
+Positive control (D4, PC n=2000):
+  oracle_vs_uniform                   0.2534     0.03125
+  label_free_vs_random                0.0265     0.03125
+  oracle_vs_random                    0.2799     0.03125

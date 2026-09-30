@@ -1,0 +1,118 @@
+{
+  "config": {
+    "config": "configs/default.yaml",
+    "dataset": "amazon",
+    "amazon_mat": null,
+    "data_path": null,
+    "top_k": 32,
+    "splits": 10,
+    "seeds": 3,
+    "router_epochs": 200,
+    "hidden_dim": 64,
+    "n_layers": 3,
+    "frozen_perms": 20,
+    "router_seed": 0,
+    "random_seed": 1,
+    "adaptive_oracle": true,
+    "budget_oracle": false,
+    "label_free_strategy": "proxy_quantile",
+    "order_feature": "eig_nb_sim",
+    "spectral_k": 8,
+    "no_progress": true,
+    "out": "logs",
+    "device": "cuda"
+  },
+  "graph": {
+    "n_nodes": 8639,
+    "d_features": 25,
+    "n_edges": 3298534,
+    "positive_ratio": 0.09503414747077207,
+    "n_labels": 2,
+    "source": "DGL Amazon (FraudAmazonDataset, homo block 3305+)"
+  },
+  "assignments_usage": {
+    "oracle": [
+      2881,
+      2878,
+      2880
+    ],
+    "label_free": [
+      2880,
+      2879,
+      2880
+    ],
+    "random": [
+      2926,
+      2783,
+      2930
+    ],
+    "uniform": [
+      8639,
+      0,
+      0
+    ]
+  },
+  "findings": {
+    "D1": true,
+    "D2": false,
+    "D3": true,
+    "D4": true,
+    "D1_p": 0.001953125,
+    "D2_p": 0.232421875,
+    "D3_p": 0.001953125,
+    "D4_p": 0.03125,
+    "verdict": "Not supported; failed rule(s): D2."
+  },
+  "comparisons": {
+    "oracle_vs_uniform": {
+      "mean_diff": 0.002800925925925901,
+      "ci_low": 0.002013388675096645,
+      "ci_high": 0.0035884631767551575,
+      "p_wilcoxon": 0.001953125,
+      "p_paired_t": 2.1153550858527245e-05,
+      "effect_size_dz": 2.6818348970308983,
+      "significant": true
+    },
+    "label_free_vs_random": {
+      "mean_diff": 0.00039351851851850974,
+      "ci_low": -0.00036796853242835464,
+      "ci_high": 0.0011550055694653741,
+      "p_wilcoxon": 0.232421875,
+      "p_paired_t": 0.2724215603142812,
+      "effect_size_dz": 0.3896764601470539,
+      "significant": false
+    },
+    "oracle_vs_random": {
+      "mean_diff": 0.003834876543209875,
+      "ci_low": 0.0029905002880184954,
+      "ci_high": 0.004679252798401255,
+      "p_wilcoxon": 0.001953125,
+      "p_paired_t": 2.856085487171837e-06,
+      "effect_size_dz": 3.4246555322335364,
+      "significant": true
+    }
+  },
+  "frozen": {
+    "learned": 0.9724537037037037,
+    "oracle_onehot": 0.9761574074074074,
+    "equal": 0.9738425925925925,
+    "global_mean": 0.9738425925925925,
+    "node_shuffled_mean": 0.9722453703703703,
+    "node_shuffled_std": 0.0006419178066602605
+  },
+  "control": {
+    "pc_n_nodes": 2000,
+    "oracle_vs_uniform": {
+      "mean_diff": 0.25341325341325344,
+      "p_wilcoxon": 0.03125
+    },
+    "label_free_vs_random": {
+      "mean_diff": 0.026473526473526483,
+      "p_wilcoxon": 0.03125
+    },
+    "oracle_vs_random": {
+      "mean_diff": 0.2798867798867799,
+      "p_wilcoxon": 0.03125
+    }
+  }
+}

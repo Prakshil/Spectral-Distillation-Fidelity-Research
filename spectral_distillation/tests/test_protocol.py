@@ -38,6 +38,7 @@ from spectral_distillation.src.planted_control import (
     single_m_expert_accuracy,
 )
 from spectral_distillation.src.router_protocol import (
+    _buckets_from_score,
     evaluate_decision_rules,
     feature_homophily,
     label_free_assignment,
@@ -46,6 +47,7 @@ from spectral_distillation.src.router_protocol import (
     oracle_bucket_assignment,
     oracle_regime_assignment,
     random_assignment,
+    spectral_neighbor_similarity,
     structural_features,
     uniform_assignment,
 )
@@ -189,8 +191,99 @@ def test_structural_features_shape_and_bounds(small_pc_graph):
     L = compute_laplacian(W)
     evals, V = np.linalg.eigh(L)
     feats = structural_features(W, features, evals, V)
-    assert feats.shape == (W.shape[0], 4)
+    assert feats.shape == (W.shape[0], 5)
     assert np.all(np.isfinite(feats))
+    # column 0 is the spectral-neighborhood-similarity ordering key
+    assert feats.shape[1] == 5
+
+
+def test_buckets_from_score_orders_high_score_to_channel_zero():
+    score = np.arange(99, dtype=float)
+    a = _buckets_from_score(score, n_experts=3)
+    assert a.shape == (99, 3)
+    assert np.allclose(a.sum(axis=1), 1.0)
+    # highest score -> channel 0 (low-pass)
+    assert a[-1].argmax() == 0
+    assert a[0].argmax() == 2
+    # monotone: channel index never increases as score grows
+    ch = a.argmax(axis=1)
+    assert np.all(np.diff(ch) <= 0)
+
+
+def test_buckets_from_score_degenerate_inputs():
+    # constant score -> uniform, no crash
+    a = _buckets_from_score(np.zeros(10), n_experts=3)
+    assert np.allclose(a, 1.0 / 3.0)
+    # single distinct value
+    a = _buckets_from_score(np.ones(10), n_experts=3)
+    assert np.allclose(a.sum(axis=1), 1.0)
+    # quantiles can collide on heavy ties
+    s = np.concatenate([np.zeros(50), np.ones(50)])
+    a = _buckets_from_score(s, n_experts=3)
+    assert np.allclose(a.sum(axis=1), 1.0)
+
+
+def test_label_free_strategies_both_produce_valid_rows(small_pc_graph):
+    W = np.asarray(small_pc_graph["W"], dtype=float)
+    X = np.asarray(small_pc_graph["features"], dtype=float)
+    for strategy, feat in [
+        ("kmeans", "hx"),
+        ("kmeans", "eig_nb_sim"),
+        ("proxy_quantile", "hx"),
+        ("proxy_quantile", "eig_nb_sim"),
+    ]:
+        a, _ = label_free_assignment(
+            W, X, hidden_dim=16, n_layers=2, n_experts=3, epochs=3, seed=0,
+            strategy=strategy, order_feature=feat,
+        )
+        assert a.shape == (W.shape[0], 3), strategy
+        assert np.all(a >= 0.0), strategy
+        assert np.allclose(a.sum(axis=1), 1.0, atol=1e-9), strategy
+
+
+def test_proxy_quantile_is_monotone_in_order_feature(small_pc_graph):
+    """The D2 fix depends on the shipped router bucketing the score directly."""
+    W = np.asarray(small_pc_graph["W"], dtype=float)
+    X = np.asarray(small_pc_graph["features"], dtype=float)
+    a, _ = label_free_assignment(
+        W, X, hidden_dim=16, n_layers=2, n_experts=3, epochs=3, seed=0,
+        strategy="proxy_quantile", order_feature="eig_nb_sim",
+    )
+    L = compute_laplacian(W)
+    _, V = np.linalg.eigh(L)
+    s = spectral_neighbor_similarity(W, V, k=8)
+    ch = a.argmax(axis=1)
+    # mean score must decrease as channel index increases
+    means = [s[ch == k].mean() if (ch == k).any() else np.inf for k in range(3)]
+    assert means[0] >= means[1] - 1e-9
+    assert means[1] >= means[2] - 1e-9
+
+
+def test_spectral_neighbor_similarity_bounds(small_pc_graph):
+    W = np.asarray(small_pc_graph["W"], dtype=float)
+    L = compute_laplacian(W)
+    _, V = np.linalg.eigh(L)
+    s = spectral_neighbor_similarity(W, V, k=4)
+    assert s.shape == (W.shape[0],)
+    assert np.all(np.isfinite(s))
+    assert (s <= 1.0 + 1e-9).all()
+    assert (s >= -1.0 - 1e-9).all()
+
+
+def test_label_free_order_feature_selects_column(small_pc_graph):
+    W = np.asarray(small_pc_graph["W"], dtype=float)
+    X = np.asarray(small_pc_graph["features"], dtype=float)
+    a_new, _ = label_free_assignment(
+        W, X, hidden_dim=16, n_layers=2, n_experts=3, epochs=3, seed=0,
+        order_feature="eig_nb_sim",
+    )
+    a_legacy, _ = label_free_assignment(
+        W, X, hidden_dim=16, n_layers=2, n_experts=3, epochs=3, seed=0,
+        order_feature="hx",
+    )
+    for a in (a_new, a_legacy):
+        assert a.shape == (W.shape[0], 3)
+        assert np.allclose(a.sum(axis=1), 1.0, atol=1e-9)
 
 
 def test_label_free_assignment_returns_valid_soft_rows(small_pc_graph):

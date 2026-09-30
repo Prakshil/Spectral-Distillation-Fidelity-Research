@@ -66,6 +66,9 @@ def build_conditions(graph: dict, args) -> dict[str, np.ndarray]:
         epochs=args.router_epochs,
         seed=args.router_seed,
         device=args.device,
+        strategy=args.label_free_strategy,
+        order_feature=args.order_feature,
+        spectral_k=args.spectral_k,
     )
     return {
         "oracle": oracle,
@@ -211,6 +214,12 @@ def main() -> None:
     parser.add_argument("--adaptive-oracle", action=argparse.BooleanOptionalAction, default=True,
                         help="quantile-based homophily thresholds (default on: fixed 0.4/0.6 collapses the oracle on the skewed fraud labels)")
     parser.add_argument("--budget-oracle", action="store_true", help="normalize oracle homophily by same-label budget")
+    parser.add_argument("--label-free-strategy", default="kmeans", choices=["kmeans", "proxy_quantile"],
+                        help="legacy joint-KMeans partition (default) or direct adaptive-quantile split of the ordering score")
+    parser.add_argument("--order-feature", default="hx", choices=["hx", "eig_nb_sim"],
+                        help="score used to order/bucket routing channels: feature homophily (legacy) or spectral neighborhood similarity")
+    parser.add_argument("--spectral-k", type=int, default=8,
+                        help="number of nontrivial Laplacian modes used by eig_nb_sim")
     parser.add_argument("--no-progress", action="store_true", help="disable tqdm progress bars")
     parser.add_argument("--out", default="logs")
     parser.add_argument("--device", default="cuda")
@@ -240,10 +249,19 @@ def main() -> None:
 
     record = run_protocol_on_graph(graph, args, log)
 
-    out_dir = ensure_dir(Path(args.out) / f"{args.dataset}_fraud_protocol")
+    # Non-default label-free routers write to a suffixed directory so the
+    # committed legacy-protocol artifacts stay reproducible and are never
+    # silently overwritten by a different router.
+    variant = ""
+    if args.label_free_strategy != "kmeans" or args.order_feature != "hx":
+        variant = "_" + args.order_feature
+        if args.label_free_strategy == "proxy_quantile":
+            variant += "_pq"
+    out_dir = ensure_dir(Path(args.out) / f"{args.dataset}_fraud_protocol{variant}")
     out_path = out_dir / "protocol_results.json"
     out_path.write_text(json.dumps(record, indent=2, default=str), encoding="utf-8")
     log.info("wrote %s", out_path)
+    print(f"\nlabel-free router: strategy={args.label_free_strategy} order_feature={args.order_feature} spectral_k={args.spectral_k}")
 
     print(f"\n=== Real fraud-graph ({args.dataset}) router fidelity ===")
     print(f"{'comparison':<22}{'mean_diff':>10}{'p_wilcoxon':>12}{'d_z':>8}{'sig':>6}")

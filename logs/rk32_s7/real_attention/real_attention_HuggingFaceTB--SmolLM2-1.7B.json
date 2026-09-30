@@ -1,0 +1,114 @@
+{
+  "config": {
+    "config": "configs/default.yaml",
+    "model_id": "HuggingFaceTB/SmolLM2-1.7B",
+    "text_file": "data/erp_attention/corpus_scaled.txt",
+    "max_tokens": 480,
+    "top_k": 32,
+    "splits": 10,
+    "seeds": 3,
+    "router_epochs": 200,
+    "hidden_dim": 64,
+    "n_layers": 3,
+    "p_homophily": 0.5,
+    "dilutions": [
+      0.0,
+      0.25,
+      0.5,
+      0.75,
+      1.0
+    ],
+    "router_seed": 7,
+    "random_seed": 7,
+    "dilution_seed": 9,
+    "skip_dilution": true,
+    "no_progress": false,
+    "out": "logs/rk32_s7",
+    "device": "cuda"
+  },
+  "graph": {
+    "n_nodes": 11520,
+    "n_labels": 29,
+    "n_layers": 24,
+    "n_passages": 24
+  },
+  "assignments_usage": {
+    "oracle": [
+      2046,
+      3840,
+      5634
+    ],
+    "label_free": [
+      88,
+      11408,
+      24
+    ],
+    "random": [
+      2030,
+      3961,
+      5529
+    ],
+    "uniform": [
+      11520,
+      0,
+      0
+    ]
+  },
+  "findings": {
+    "D1": true,
+    "D2": true,
+    "D3": true,
+    "D4": true,
+    "D1_p": 0.001953125,
+    "D2_p": 0.001953125,
+    "D3_p": 0.001953125,
+    "D4_p": 0.03125,
+    "verdict": "Supported: signal exists, router finds it, not capacity, instrument valid."
+  },
+  "comparisons": {
+    "oracle_vs_uniform": {
+      "mean_diff": 0.006283631314007987,
+      "ci_low": 0.004931363464830478,
+      "ci_high": 0.007635899163185495,
+      "p_wilcoxon": 0.001953125,
+      "p_paired_t": 2.358505212747617e-06,
+      "effect_size_dz": 3.5038821621922565,
+      "significant": true
+    },
+    "label_free_vs_random": {
+      "mean_diff": 0.013979176085784362,
+      "ci_low": 0.01228732916271473,
+      "ci_high": 0.015671023008853993,
+      "p_wilcoxon": 0.001953125,
+      "p_paired_t": 1.6477259471368537e-08,
+      "effect_size_dz": 6.230487499006891,
+      "significant": true
+    },
+    "oracle_vs_random": {
+      "mean_diff": 0.020980153908464968,
+      "ci_low": 0.01847904831044787,
+      "ci_high": 0.023481259506482065,
+      "p_wilcoxon": 0.001953125,
+      "p_paired_t": 1.4428053581378367e-08,
+      "effect_size_dz": 6.325256782366242,
+      "significant": true
+    }
+  },
+  "control": {
+    "pc_n_nodes": 2000,
+    "oracle_vs_uniform": {
+      "mean_diff": 0.29716666666666663,
+      "p_wilcoxon": 0.03125
+    },
+    "label_free_vs_random": {
+      "mean_diff": 0.020999999999999946,
+      "p_wilcoxon": 0.03125
+    },
+    "oracle_vs_random": {
+      "mean_diff": 0.3181666666666666,
+      "p_wilcoxon": 0.03125
+    }
+  },
+  "dilution": null,
+  "dilution_skipped": true
+}

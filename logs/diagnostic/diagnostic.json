@@ -1,0 +1,285 @@
+{
+  "config": {
+    "seed": 42,
+    "device": "cuda",
+    "attention_aggregation": "mean",
+    "symmetrize": true,
+    "sparsification": {
+      "epsilon": 0.1,
+      "budget_factor": 10,
+      "top_k_eigenvectors": 100,
+      "oracle_filter": {
+        "enabled": true,
+        "delta": 0.5,
+        "score_type": "business_rule"
+      }
+    },
+    "distortion": {
+      "eps": "1e-8"
+    },
+    "protocol": {
+      "n_splits": 10,
+      "n_seeds": 3,
+      "oracle_thresholds": {
+        "h_low": 0.4,
+        "h_high": 0.6
+      },
+      "statistical_test": "wilcoxon",
+      "correction": "holm"
+    },
+    "planted_control": {
+      "n_nodes": 10000,
+      "n_patches": 50,
+      "regime_ratio": [
+        0.4,
+        0.4,
+        0.2
+      ],
+      "dilution_values": [
+        0.0,
+        0.25,
+        0.5,
+        0.75,
+        1.0
+      ]
+    },
+    "gnn_router": {
+      "hidden_dim": 64,
+      "n_layers": 3,
+      "expert_types": [
+        "low_pass",
+        "high_pass",
+        "identity"
+      ],
+      "dropout": 0.1
+    },
+    "llm_export": {
+      "model_id": "meta-llama/Llama-3.1-8B",
+      "n_layers": 32,
+      "n_heads": 32
+    },
+    "synthetic": {
+      "n": 256,
+      "seed": 42
+    },
+    "experiments": {
+      "diagnostic": {
+        "seeds": 3,
+        "budget_factor": 10
+      },
+      "compare_methods": {
+        "ns": [
+          64,
+          128,
+          256,
+          512
+        ],
+        "budget_factors": [
+          1,
+          2,
+          4,
+          6,
+          10,
+          15
+        ],
+        "seed": 0
+      }
+    },
+    "logging": {
+      "level": "INFO",
+      "log_dir": "logs",
+      "wandb": {
+        "enabled": false,
+        "project": "spectral-distillation",
+        "entity": null
+      }
+    }
+  },
+  "golden_4node": {
+    "SD": 0.9999999872095205,
+    "min_eigengap": 0.4852465313519674,
+    "frobenius_norm": 0.8831760866327848,
+    "davis_kahan_bound": 3.640112855506926,
+    "predicted_retention": 1.2790479453350656e-08,
+    "fragility_score": 2.0608080676337748,
+    "eigenvalues_dense": [
+      3.618831798857508e-17,
+      0.7818315404350016,
+      2.266460964106516,
+      2.7517074954584833
+    ],
+    "eigenvalues_sparse": [
+      0.0,
+      3.883612181843077e-16,
+      2.0354248688935406,
+      2.5645751311064586
+    ],
+    "relative_errors": [
+      0.0,
+      0.9999999872095205,
+      0.10193693950722198,
+      0.06800590687084856
+    ]
+  },
+  "erp_diagnostic": {
+    "n": 64,
+    "seeds": 3,
+    "budget": 486,
+    "summary": {
+      "threshold": {
+        "zero_eigenvalues": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "SD": {
+          "mean": 0.012134137221878885,
+          "std": 0.008400900148131874
+        },
+        "fragility": {
+          "mean": 0.7157558672957125,
+          "std": 0.7198774991212769
+        },
+        "retention": {
+          "mean": 0.9878658627781212,
+          "std": 0.008400900148131907
+        },
+        "fiedler_full": {
+          "mean": 0.7884358503132395,
+          "std": 0.32791756973619374
+        },
+        "n_edges_sparse": {
+          "mean": 474.0,
+          "std": 8.602325267042627
+        },
+        "fiedler_sparse": {
+          "mean": 0.7883197458572127,
+          "std": 0.32775361231240546
+        },
+        "frobenius_norm": {
+          "mean": 0.10238683947698007,
+          "std": 0.000125923511156976
+        }
+      },
+      "random": {
+        "zero_eigenvalues": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "SD": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "fragility": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "retention": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "fiedler_full": {
+          "mean": 0.7884358503132395,
+          "std": 0.32791756973619374
+        },
+        "n_edges_sparse": {
+          "mean": 475.0,
+          "std": 8.602325267042627
+        },
+        "fiedler_sparse": {
+          "mean": 0.7884358503132395,
+          "std": 0.32791756973619374
+        },
+        "frobenius_norm": {
+          "mean": 0.0,
+          "std": 0.0
+        }
+      },
+      "degree": {
+        "zero_eigenvalues": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "SD": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "fragility": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "retention": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "fiedler_full": {
+          "mean": 0.7884358503132395,
+          "std": 0.32791756973619374
+        },
+        "n_edges_sparse": {
+          "mean": 475.0,
+          "std": 8.602325267042627
+        },
+        "fiedler_sparse": {
+          "mean": 0.7884358503132395,
+          "std": 0.32791756973619374
+        },
+        "frobenius_norm": {
+          "mean": 0.0,
+          "std": 0.0
+        }
+      },
+      "spectral": {
+        "zero_eigenvalues": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "SD": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "fragility": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "retention": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "fiedler_full": {
+          "mean": 0.7884358503132395,
+          "std": 0.32791756973619374
+        },
+        "n_edges_sparse": {
+          "mean": 475.0,
+          "std": 8.602325267042627
+        },
+        "fiedler_sparse": {
+          "mean": 0.7884358503132395,
+          "std": 0.32791756973619374
+        },
+        "frobenius_norm": {
+          "mean": 0.0,
+          "std": 0.0
+        }
+      },
+      "full": {
+        "fiedler_full": {
+          "mean": 0.7884358503132395,
+          "std": 0.32791756973619374
+        },
+        "min_eigengap": {
+          "mean": 0.02485081338234026,
+          "std": 0.008046413036434254
+        },
+        "n_edges_sparse": {
+          "mean": 475.0,
+          "std": 8.602325267042627
+        },
+        "SD": {
+          "mean": 0.0,
+          "std": 0.0
+        }
+      }
+    }
+  }
+}

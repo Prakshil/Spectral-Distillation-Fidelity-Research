@@ -1,0 +1,253 @@
+{
+  "config": {
+    "seed": 42,
+    "device": "cuda",
+    "attention_aggregation": "mean",
+    "symmetrize": true,
+    "sparsification": {
+      "epsilon": 0.1,
+      "budget_factor": 10,
+      "top_k_eigenvectors": 100,
+      "oracle_filter": {
+        "enabled": true,
+        "delta": 0.5,
+        "score_type": "business_rule"
+      }
+    },
+    "distortion": {
+      "eps": "1e-8"
+    },
+    "protocol": {
+      "n_splits": 10,
+      "n_seeds": 3,
+      "oracle_thresholds": {
+        "h_low": 0.4,
+        "h_high": 0.6
+      },
+      "statistical_test": "wilcoxon",
+      "correction": "holm"
+    },
+    "planted_control": {
+      "n_nodes": 10000,
+      "n_patches": 50,
+      "regime_ratio": [
+        0.4,
+        0.4,
+        0.2
+      ],
+      "dilution_values": [
+        0.0,
+        0.25,
+        0.5,
+        0.75,
+        1.0
+      ]
+    },
+    "gnn_router": {
+      "hidden_dim": 64,
+      "n_layers": 3,
+      "expert_types": [
+        "low_pass",
+        "high_pass",
+        "identity"
+      ],
+      "dropout": 0.1
+    },
+    "llm_export": {
+      "model_id": "meta-llama/Llama-3.1-8B",
+      "n_layers": 32,
+      "n_heads": 32
+    },
+    "synthetic": {
+      "n": 256,
+      "seed": 42
+    },
+    "experiments": {
+      "diagnostic": {
+        "seeds": 3,
+        "budget_factor": 10
+      },
+      "compare_methods": {
+        "ns": [
+          64,
+          128,
+          256,
+          512
+        ],
+        "budget_factors": [
+          1,
+          2,
+          4,
+          6,
+          10,
+          15
+        ],
+        "seed": 0
+      }
+    },
+    "logging": {
+      "level": "INFO",
+      "log_dir": "logs",
+      "wandb": {
+        "enabled": false,
+        "project": "spectral-distillation",
+        "entity": null
+      }
+    }
+  },
+  "seed": 0,
+  "ns": [
+    64,
+    128
+  ],
+  "budget_factors": [
+    4.0,
+    10.0
+  ],
+  "rows": [
+    {
+      "n": 64,
+      "method_group": [
+        "threshold",
+        "random",
+        "degree",
+        "spectral"
+      ],
+      "n_edges_budget": 256,
+      "fiedler_full": 0.5648039469360173,
+      "min_eigengap": 0.013531787253187932,
+      "threshold_SD": 0.9999999942683678,
+      "threshold_fiedler": 0.0,
+      "threshold_fragility": 73.90001309935231,
+      "threshold_frobenius": 14.087482711290761,
+      "threshold_edges": 255,
+      "threshold_seconds": 0.01004800000009709,
+      "random_SD": 0.5707068919673742,
+      "random_fiedler": 0.35193882485645084,
+      "random_fragility": 42.1752470340126,
+      "random_frobenius": 21.90888601488218,
+      "random_edges": 256,
+      "random_seconds": 0.013920000000325672,
+      "degree_SD": 0.9999999969331561,
+      "degree_fiedler": 0.0,
+      "degree_fragility": 73.9000132962802,
+      "degree_frobenius": 19.203709519803287,
+      "degree_edges": 256,
+      "degree_seconds": 0.008901800000330695,
+      "spectral_SD": 0.6236158116123346,
+      "spectral_fiedler": 0.4163092078054333,
+      "spectral_fragility": 46.085216911258264,
+      "spectral_frobenius": 38.35085967475078,
+      "spectral_edges": 256,
+      "spectral_seconds": 0.013090400000237423
+    },
+    {
+      "n": 64,
+      "method_group": [
+        "threshold",
+        "random",
+        "degree",
+        "spectral"
+      ],
+      "n_edges_budget": 474,
+      "fiedler_full": 0.5648039469360173,
+      "min_eigengap": 0.013531787253187932,
+      "threshold_SD": 0.023367695874069696,
+      "threshold_fiedler": 0.5648036561102511,
+      "threshold_fragility": 1.7268730410932325,
+      "threshold_frobenius": 0.1023596785800019,
+      "threshold_edges": 473,
+      "threshold_seconds": 0.011713400000189722,
+      "random_SD": 0.0,
+      "random_fiedler": 0.5648039469360173,
+      "random_fragility": 0.0,
+      "random_frobenius": 0.0,
+      "random_edges": 474,
+      "random_seconds": 0.003418400000100519,
+      "degree_SD": 0.0,
+      "degree_fiedler": 0.5648039469360173,
+      "degree_fragility": 0.0,
+      "degree_frobenius": 0.0,
+      "degree_edges": 474,
+      "degree_seconds": 0.04037870000001931,
+      "spectral_SD": 0.0,
+      "spectral_fiedler": 0.5648039469360173,
+      "spectral_fragility": 0.0,
+      "spectral_frobenius": 0.0,
+      "spectral_edges": 474,
+      "spectral_seconds": 0.06918739999991885
+    },
+    {
+      "n": 128,
+      "method_group": [
+        "threshold",
+        "random",
+        "degree",
+        "spectral"
+      ],
+      "n_edges_budget": 512,
+      "fiedler_full": 0.7426200842538232,
+      "min_eigengap": 0.003995656611991194,
+      "threshold_SD": 0.9999999989587344,
+      "threshold_fiedler": 0.0,
+      "threshold_fragility": 250.27113021834322,
+      "threshold_frobenius": 95.99657244809204,
+      "threshold_edges": 511,
+      "threshold_seconds": 0.037971700000070996,
+      "random_SD": 0.9999999868171527,
+      "random_fiedler": 0.0,
+      "random_fragility": 250.27112717965585,
+      "random_frobenius": 82.79202589604782,
+      "random_edges": 512,
+      "random_seconds": 0.06365310000001045,
+      "degree_SD": 0.9999999993012106,
+      "degree_fiedler": 0.0,
+      "degree_fragility": 250.27113030405513,
+      "degree_frobenius": 113.42264816166812,
+      "degree_edges": 512,
+      "degree_seconds": 0.04573630000004414,
+      "spectral_SD": 0.9999999865341606,
+      "spectral_fiedler": 4.5102810375396984e-15,
+      "spectral_fragility": 250.27112710883108,
+      "spectral_frobenius": 155.68024613651923,
+      "spectral_edges": 512,
+      "spectral_seconds": 0.21631230000002688
+    },
+    {
+      "n": 128,
+      "method_group": [
+        "threshold",
+        "random",
+        "degree",
+        "spectral"
+      ],
+      "n_edges_budget": 1280,
+      "fiedler_full": 0.7426200842538232,
+      "min_eigengap": 0.003995656611991194,
+      "threshold_SD": 0.999999996047532,
+      "threshold_fiedler": 0.0,
+      "threshold_fragility": 250.2711294897533,
+      "threshold_frobenius": 30.581122351010844,
+      "threshold_edges": 1205,
+      "threshold_seconds": 0.033046399999875575,
+      "random_SD": 0.4506996903102742,
+      "random_fiedler": 0.6733637185345039,
+      "random_fragility": 112.79712100046136,
+      "random_frobenius": 35.182060201911774,
+      "random_edges": 1280,
+      "random_seconds": 0.044492300000001705,
+      "degree_SD": 0.9999999976043193,
+      "degree_fiedler": 0.0,
+      "degree_fragility": 250.27112987937224,
+      "degree_frobenius": 44.95391919521083,
+      "degree_edges": 1280,
+      "degree_seconds": 0.0319323999997323,
+      "spectral_SD": 0.5922494103694407,
+      "spectral_fiedler": 0.7148520044259742,
+      "spectral_fragility": 148.22292945864672,
+      "spectral_frobenius": 88.14973332823719,
+      "spectral_edges": 1280,
+      "spectral_seconds": 0.21891510000023118
+    }
+  ]
+}

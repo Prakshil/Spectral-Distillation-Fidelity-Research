@@ -1,0 +1,96 @@
+{
+  "config": {
+    "config": "configs/default.yaml",
+    "n": 10000,
+    "n_patches": 50,
+    "splits": 10,
+    "seeds": 3,
+    "router_epochs": 200,
+    "hidden_dim": 64,
+    "n_layers": 3,
+    "router_seed": 0,
+    "random_seed": 1,
+    "frozen_perms": 20,
+    "out": "logs",
+    "device": "cuda"
+  },
+  "graph": {
+    "n_nodes": 10000,
+    "n_classes": 5,
+    "regime_ratio": [
+      0.4,
+      0.4,
+      0.2
+    ]
+  },
+  "assignments_usage": {
+    "oracle": [
+      4000,
+      4000,
+      2000
+    ],
+    "label_free": [
+      4052,
+      2000,
+      3948
+    ],
+    "random": [
+      4023,
+      4021,
+      1956
+    ],
+    "uniform": [
+      10000,
+      0,
+      0
+    ]
+  },
+  "findings": {
+    "D1": true,
+    "D2": true,
+    "D3": true,
+    "D4": true,
+    "D1_p": 0.001953125,
+    "D2_p": 0.001953125,
+    "D3_p": 0.001953125,
+    "D4_p": 0.001953125,
+    "verdict": "Supported: signal exists, router finds it, not capacity, instrument valid."
+  },
+  "comparisons": {
+    "oracle_vs_uniform": {
+      "mean_diff": 0.25909181836367273,
+      "ci_low": 0.257287438038323,
+      "ci_high": 0.2608961986890225,
+      "p_wilcoxon": 0.001953125,
+      "p_paired_t": 1.2643979363545594e-19,
+      "effect_size_dz": 108.27473648691777,
+      "significant": true
+    },
+    "label_free_vs_random": {
+      "mean_diff": 0.2308261652330466,
+      "ci_low": 0.22911618693202793,
+      "ci_high": 0.2325361435340653,
+      "p_wilcoxon": 0.001953125,
+      "p_paired_t": 2.2046743925894114e-19,
+      "effect_size_dz": 101.7878536324142,
+      "significant": true
+    },
+    "oracle_vs_random": {
+      "mean_diff": 0.2662799226511969,
+      "ci_low": 0.26454978636346815,
+      "ci_high": 0.2680100589389256,
+      "p_wilcoxon": 0.001953125,
+      "p_paired_t": 6.771907124703039e-20,
+      "effect_size_dz": 116.0538697870256,
+      "significant": true
+    }
+  },
+  "frozen": {
+    "learned": 0.8522,
+    "oracle_onehot": 0.885,
+    "equal": 0.6306,
+    "global_mean": 0.6306,
+    "node_shuffled_mean": 0.6238699999999999,
+    "node_shuffled_std": 0.0023590464175170397
+  }
+}

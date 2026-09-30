@@ -177,6 +177,8 @@ def run_protocol(
     n_seeds: int = 3,
     primary_pairs: list[tuple[str, str]] | None = None,
     alpha: float = 0.05,
+    progress: bool = False,
+    progress_desc: str = "protocol cells",
 ) -> ProtocolResults:
     """Generic protocol runner.
 
@@ -197,10 +199,20 @@ def run_protocol(
     per_cell: dict[str, dict[tuple[int, int], float]] = {
         cond: {} for cond in {c for pair in primary_pairs for c in pair}
     }
-    for split in range(n_splits):
-        for seed in range(n_seeds):
-            for cond in per_cell:
-                per_cell[cond][(split, seed)] = float(run_fn(cond, split, seed))
+    if progress:
+        from tqdm import tqdm
+
+        iterator = tqdm(
+            ((s, seed, cond) for s in range(n_splits) for seed in range(n_seeds) for cond in per_cell),
+            total=n_splits * n_seeds * len(per_cell),
+            desc=progress_desc,
+            unit="cell",
+            ncols=100,
+        )
+    else:
+        iterator = ((s, seed, cond) for s in range(n_splits) for seed in range(n_seeds) for cond in per_cell)
+    for split, seed, cond in iterator:
+        per_cell[cond][(split, seed)] = float(run_fn(cond, split, seed))
 
     split_means: dict[str, dict[int, float]] = {}
     for cond, cells in per_cell.items():

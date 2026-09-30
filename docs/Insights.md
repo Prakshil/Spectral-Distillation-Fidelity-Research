@@ -505,7 +505,7 @@ synthetic control; now make it work on *real* inputs.
      of layers/heads) de-risks iteration before scaling to the full model.
 3. **Compare synthetic vs real.** Report oracle-vs-label-free split on both; the paper
    needs *agreement*, not just real-data success.
-
+`
 ### Phase 5 — Publication materials (~1 week)
 
 1. **Method section** (`docs/method_section.md`, currently a placeholder): write Parts

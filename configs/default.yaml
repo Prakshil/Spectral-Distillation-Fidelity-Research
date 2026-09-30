@@ -42,11 +42,16 @@ gnn_router:
   expert_types: ["low_pass", "high_pass", "identity"]
   dropout: 0.1
 
-# LLM attention export (Llama-3.1-8B default)
+# LLM attention export (open-weights default that fits 8 GB VRAM in fp16;
+# swap to meta-llama/Llama-3.1-8B (32 layers) when more VRAM / 4-bit is used)
 llm_export:
-  model_id: "meta-llama/Llama-3.1-8B"
-  n_layers: 32
+  model_id: "HuggingFaceTB/SmolLM2-1.7B"
+  n_layers: 24
   n_heads: 32
+  max_tokens: 480
+  # per-row top-k attention retained in the graph; the rest are dropped so
+  # the graph is sparse enough to carry real sentence-homophily structure
+  top_k: 32
 
 # Synthetic ERP graph generator (used by run_diagnostic / compare_methods)
 synthetic:

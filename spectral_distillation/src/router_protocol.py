@@ -70,21 +70,36 @@ def oracle_bucket_assignment(
     h_low: float = 0.4,
     h_high: float = 0.6,
     soft_gates: tuple[float, float, float] | None = None,
+    adaptive: bool = False,
+    quantiles: tuple[float, float] = (1 / 3, 2 / 3),
 ) -> np.ndarray:
     """Oracle assignment on real graphs from label homophily buckets.
 
     low-pass if h(v) >= h_high, high-pass if h(v) <= h_low, identity otherwise.
     Returns a (n, 3) soft assignment; ``soft_gates`` is the channel-mixing
     soft variant (0.8, 0.1, 0.1) applied to the winning channel only.
+
+    With ``adaptive=True`` the thresholds are the ``quantiles`` of the *finite*
+    homophily distribution instead of fixed constants (h_low/h_high are then
+    ignored). This keeps the three routing channels populated regardless of how
+    top-k shifts the homophily scale.
     """
-    h = label_homophily(W, y)
+    h_all = label_homophily(W, y)
+    finite = h_all[~np.isnan(h_all)]
+    if adaptive:
+        if finite.size == 0:
+            h_low, h_high = 0.4, 0.6
+        else:
+            h_low, h_high = np.quantile(finite, list(quantiles))
+    if h_low >= h_high:
+        h_low, h_high = 0.4, 0.6  # degenerate guard
     assignment = np.zeros((W.shape[0], 3))
     for i in range(W.shape[0]):
-        if np.isnan(h[i]):
+        if np.isnan(h_all[i]):
             assignment[i] = np.array(soft_gates) / np.sum(soft_gates) if soft_gates else np.array([1 / 3] * 3)
-        elif h[i] >= h_high:
+        elif h_all[i] >= h_high:
             assignment[i] = np.array(soft_gates) if soft_gates else np.array([1.0, 0.0, 0.0])
-        elif h[i] <= h_low:
+        elif h_all[i] <= h_low:
             assignment[i] = np.array(soft_gates)[::-1] if soft_gates else np.array([0.0, 0.0, 1.0])
         else:
             assignment[i] = soft_gates if soft_gates else np.array([0.0, 1.0, 0.0])

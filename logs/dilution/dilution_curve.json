@@ -1,0 +1,29 @@
+{
+  "ladder": [
+    {
+      "dilution": 0.0,
+      "oracle_gain": 0.2599353203974128,
+      "label_free_gain": 0.23144628925785157
+    },
+    {
+      "dilution": 0.25,
+      "oracle_gain": 0.2599353203974128,
+      "label_free_gain": 0.17025071681002868
+    },
+    {
+      "dilution": 0.5,
+      "oracle_gain": 0.2599353203974128,
+      "label_free_gain": 0.17538507701540307
+    },
+    {
+      "dilution": 0.75,
+      "oracle_gain": 0.2599353203974128,
+      "label_free_gain": 0.10705474428218976
+    },
+    {
+      "dilution": 1.0,
+      "oracle_gain": 0.2599353203974128,
+      "label_free_gain": 0.007651530306061194
+    }
+  ]
+}

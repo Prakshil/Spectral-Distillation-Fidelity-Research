@@ -19,10 +19,21 @@ data/benchmarks/
 *.pkl
 *.onnx
 
+# ...except the small corpora that reproduce the real-attention runs
+!data/erp_attention/
+!data/erp_attention/corpus.txt
+!data/erp_attention/corpus_scaled.txt
+data/erp_attention/corpus_large.txt
+
 # Logs and run artifacts
 logs/
 *.log
 wandb/
+
+# ...except tracked results (freeze reproducible state)
+!logs/
+!logs/**/
+!logs/**/*.json
 
 # IDE / OS
 .vscode/

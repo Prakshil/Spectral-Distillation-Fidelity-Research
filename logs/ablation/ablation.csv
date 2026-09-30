@@ -1,0 +1,15 @@
+sweep,delta,h_low,h_high,oracle_bucket_gain_vs_uniform,variant,kind,field,label_free_gain_vs_random
+oracle_delta,0.1,0.45,0.55,0.04049190161967606,,,,
+oracle_delta,0.3,0.35,0.65,0.08143371325734854,,,,
+oracle_delta,0.5,0.25,0.75,0.060662867426514694,,,,
+oracle_delta,0.7,0.15,0.85,0.0,,,,
+oracle_delta,0.9,0.05,0.95,0.0,,,,
+feature_variant,,,,,all:all,all,all,0.23182136427285455
+feature_variant,,,,,single:hx,single,hx,0.15053010602120423
+feature_variant,,,,,single:spectral_ratio,single,spectral_ratio,0.11369773954790957
+feature_variant,,,,,single:log_degree,single,log_degree,0.10504600920184037
+feature_variant,,,,,single:clustering,single,clustering,0.10504600920184037
+feature_variant,,,,,loo:hx,loo,hx,0.10512102420484094
+feature_variant,,,,,loo:spectral_ratio,loo,spectral_ratio,0.23144628925785155
+feature_variant,,,,,loo:log_degree,loo,log_degree,0.23142128425685138
+feature_variant,,,,,loo:clustering,loo,clustering,0.23182136427285455

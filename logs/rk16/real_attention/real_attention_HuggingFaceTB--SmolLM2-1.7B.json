@@ -1,0 +1,114 @@
+{
+  "config": {
+    "config": "configs/default.yaml",
+    "model_id": "HuggingFaceTB/SmolLM2-1.7B",
+    "text_file": "data/erp_attention/corpus_scaled.txt",
+    "max_tokens": 480,
+    "top_k": 16,
+    "splits": 10,
+    "seeds": 3,
+    "router_epochs": 200,
+    "hidden_dim": 64,
+    "n_layers": 3,
+    "p_homophily": 0.5,
+    "dilutions": [
+      0.0,
+      0.25,
+      0.5,
+      0.75,
+      1.0
+    ],
+    "router_seed": 0,
+    "random_seed": 1,
+    "dilution_seed": 3,
+    "skip_dilution": true,
+    "no_progress": false,
+    "out": "logs/rk16",
+    "device": "cuda"
+  },
+  "graph": {
+    "n_nodes": 11520,
+    "n_labels": 29,
+    "n_layers": 24,
+    "n_passages": 24
+  },
+  "assignments_usage": {
+    "oracle": [
+      4697,
+      3720,
+      3103
+    ],
+    "label_free": [
+      88,
+      11408,
+      24
+    ],
+    "random": [
+      4700,
+      3737,
+      3083
+    ],
+    "uniform": [
+      11520,
+      0,
+      0
+    ]
+  },
+  "findings": {
+    "D1": false,
+    "D2": true,
+    "D3": true,
+    "D4": true,
+    "D1_p": 0.001953125,
+    "D2_p": 0.001953125,
+    "D3_p": 0.001953125,
+    "D4_p": 0.03125,
+    "verdict": "Not supported; failed rule(s): D1."
+  },
+  "comparisons": {
+    "oracle_vs_uniform": {
+      "mean_diff": -0.004611467916449693,
+      "ci_low": -0.0061754639350899984,
+      "ci_high": -0.003047471897809388,
+      "p_wilcoxon": 0.001953125,
+      "p_paired_t": 9.161810680461043e-05,
+      "effect_size_dz": -2.223335834221564,
+      "significant": false
+    },
+    "label_free_vs_random": {
+      "mean_diff": 0.013203847728438998,
+      "ci_low": 0.011148726273527448,
+      "ci_high": 0.015258969183350547,
+      "p_wilcoxon": 0.001953125,
+      "p_paired_t": 1.4833676167220545e-07,
+      "effect_size_dz": 4.84467372065992,
+      "significant": true
+    },
+    "oracle_vs_random": {
+      "mean_diff": 0.009309726320661923,
+      "ci_low": 0.005909437162494291,
+      "ci_high": 0.012710015478829556,
+      "p_wilcoxon": 0.001953125,
+      "p_paired_t": 0.00016008966812247112,
+      "effect_size_dz": 2.0645365831029965,
+      "significant": true
+    }
+  },
+  "control": {
+    "pc_n_nodes": 2000,
+    "oracle_vs_uniform": {
+      "mean_diff": 0.25341325341325344,
+      "p_wilcoxon": 0.03125
+    },
+    "label_free_vs_random": {
+      "mean_diff": 0.026473526473526483,
+      "p_wilcoxon": 0.03125
+    },
+    "oracle_vs_random": {
+      "mean_diff": 0.2798867798867799,
+      "p_wilcoxon": 0.03125
+    }
+  },
+  "dilution": null,
+  "dilution_skipped": true
+}

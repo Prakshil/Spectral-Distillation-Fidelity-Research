@@ -1,0 +1,103 @@
+{
+  "rows": [
+    {
+      "sweep": "oracle_delta",
+      "delta": 0.1,
+      "h_low": 0.45,
+      "h_high": 0.55,
+      "oracle_bucket_gain_vs_uniform": 0.04049190161967606
+    },
+    {
+      "sweep": "oracle_delta",
+      "delta": 0.3,
+      "h_low": 0.35,
+      "h_high": 0.65,
+      "oracle_bucket_gain_vs_uniform": 0.08143371325734854
+    },
+    {
+      "sweep": "oracle_delta",
+      "delta": 0.5,
+      "h_low": 0.25,
+      "h_high": 0.75,
+      "oracle_bucket_gain_vs_uniform": 0.060662867426514694
+    },
+    {
+      "sweep": "oracle_delta",
+      "delta": 0.7,
+      "h_low": 0.15,
+      "h_high": 0.85,
+      "oracle_bucket_gain_vs_uniform": 0.0
+    },
+    {
+      "sweep": "oracle_delta",
+      "delta": 0.9,
+      "h_low": 0.05,
+      "h_high": 0.95,
+      "oracle_bucket_gain_vs_uniform": 0.0
+    },
+    {
+      "sweep": "feature_variant",
+      "variant": "all:all",
+      "kind": "all",
+      "field": "all",
+      "label_free_gain_vs_random": 0.23182136427285455
+    },
+    {
+      "sweep": "feature_variant",
+      "variant": "single:hx",
+      "kind": "single",
+      "field": "hx",
+      "label_free_gain_vs_random": 0.15053010602120423
+    },
+    {
+      "sweep": "feature_variant",
+      "variant": "single:spectral_ratio",
+      "kind": "single",
+      "field": "spectral_ratio",
+      "label_free_gain_vs_random": 0.11369773954790957
+    },
+    {
+      "sweep": "feature_variant",
+      "variant": "single:log_degree",
+      "kind": "single",
+      "field": "log_degree",
+      "label_free_gain_vs_random": 0.10504600920184037
+    },
+    {
+      "sweep": "feature_variant",
+      "variant": "single:clustering",
+      "kind": "single",
+      "field": "clustering",
+      "label_free_gain_vs_random": 0.10504600920184037
+    },
+    {
+      "sweep": "feature_variant",
+      "variant": "loo:hx",
+      "kind": "loo",
+      "field": "hx",
+      "label_free_gain_vs_random": 0.10512102420484094
+    },
+    {
+      "sweep": "feature_variant",
+      "variant": "loo:spectral_ratio",
+      "kind": "loo",
+      "field": "spectral_ratio",
+      "label_free_gain_vs_random": 0.23144628925785155
+    },
+    {
+      "sweep": "feature_variant",
+      "variant": "loo:log_degree",
+      "kind": "loo",
+      "field": "log_degree",
+      "label_free_gain_vs_random": 0.23142128425685138
+    },
+    {
+      "sweep": "feature_variant",
+      "variant": "loo:clustering",
+      "kind": "loo",
+      "field": "clustering",
+      "label_free_gain_vs_random": 0.23182136427285455
+    }
+  ],
+  "mode": "oracle_delta,feature"
+}

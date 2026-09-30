@@ -1,0 +1,137 @@
+{
+  "config": {
+    "config": "configs/default.yaml",
+    "model_id": "HuggingFaceTB/SmolLM2-1.7B",
+    "text_file": "data/erp_attention/corpus_scaled.txt",
+    "max_tokens": 480,
+    "top_k": 32,
+    "splits": 10,
+    "seeds": 3,
+    "router_epochs": 200,
+    "hidden_dim": 64,
+    "n_layers": 3,
+    "p_homophily": 0.5,
+    "dilutions": [
+      0.0,
+      0.25,
+      0.5,
+      0.75,
+      1.0
+    ],
+    "router_seed": 0,
+    "random_seed": 1,
+    "dilution_seed": 3,
+    "out": "logs",
+    "device": "cuda"
+  },
+  "graph": {
+    "n_nodes": 11520,
+    "n_labels": 29,
+    "n_layers": 24,
+    "n_passages": 24
+  },
+  "assignments_usage": {
+    "oracle": [
+      2046,
+      3840,
+      5634
+    ],
+    "label_free": [
+      88,
+      11408,
+      24
+    ],
+    "random": [
+      2081,
+      3713,
+      5726
+    ],
+    "uniform": [
+      11520,
+      0,
+      0
+    ]
+  },
+  "findings": {
+    "D1": true,
+    "D2": true,
+    "D3": true,
+    "D4": true,
+    "D1_p": 0.001953125,
+    "D2_p": 0.001953125,
+    "D3_p": 0.001953125,
+    "D4_p": 0.03125,
+    "verdict": "Supported: signal exists, router finds it, not capacity, instrument valid."
+  },
+  "comparisons": {
+    "oracle_vs_uniform": {
+      "mean_diff": 0.006283631314007987,
+      "ci_low": 0.004931363464830478,
+      "ci_high": 0.007635899163185495,
+      "p_wilcoxon": 0.001953125,
+      "p_paired_t": 2.358505212747617e-06,
+      "effect_size_dz": 3.5038821621922565,
+      "significant": true
+    },
+    "label_free_vs_random": {
+      "mean_diff": 0.013817167175294284,
+      "ci_low": 0.012170883194901673,
+      "ci_high": 0.015463451155686895,
+      "p_wilcoxon": 0.001953125,
+      "p_paired_t": 1.4358748197666721e-08,
+      "effect_size_dz": 6.328718509526798,
+      "significant": true
+    },
+    "oracle_vs_random": {
+      "mean_diff": 0.02081814499797489,
+      "ci_low": 0.01943187298028752,
+      "ci_high": 0.02220441701566226,
+      "p_wilcoxon": 0.001953125,
+      "p_paired_t": 8.185052573822578e-11,
+      "effect_size_dz": 11.323875647211947,
+      "significant": true
+    }
+  },
+  "control": {
+    "pc_n_nodes": 2000,
+    "oracle_vs_uniform": {
+      "mean_diff": 0.25341325341325344,
+      "p_wilcoxon": 0.03125
+    },
+    "label_free_vs_random": {
+      "mean_diff": 0.026473526473526483,
+      "p_wilcoxon": 0.03125
+    },
+    "oracle_vs_random": {
+      "mean_diff": 0.2798867798867799,
+      "p_wilcoxon": 0.03125
+    }
+  },
+  "dilution": [
+    {
+      "dilution": 0.0,
+      "oracle_gain": 0.007131285077822139,
+      "label_free_gain": 0.013454093208077647
+    },
+    {
+      "dilution": 0.25,
+      "oracle_gain": 0.019079442226465303,
+      "label_free_gain": 0.05236568254091673
+    },
+    {
+      "dilution": 0.5,
+      "oracle_gain": 0.010848810970317646,
+      "label_free_gain": 0.05776401093730763
+    },
+    {
+      "dilution": 0.75,
+      "oracle_gain": 0.016909680032401776,
+      "label_free_gain": 0.04809792769912639
+    },
+    {
+      "dilution": 1.0,
+      "oracle_gain": 0.0,
+      "label_free_gain": 0.08522825898281546
+    }
+  ]
+}

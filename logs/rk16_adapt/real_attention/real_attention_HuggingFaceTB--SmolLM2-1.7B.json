@@ -1,0 +1,115 @@
+{
+  "config": {
+    "config": "configs/default.yaml",
+    "model_id": "HuggingFaceTB/SmolLM2-1.7B",
+    "text_file": "data/erp_attention/corpus_scaled.txt",
+    "max_tokens": 480,
+    "top_k": 16,
+    "splits": 10,
+    "seeds": 3,
+    "router_epochs": 200,
+    "hidden_dim": 64,
+    "n_layers": 3,
+    "p_homophily": 0.5,
+    "dilutions": [
+      0.0,
+      0.25,
+      0.5,
+      0.75,
+      1.0
+    ],
+    "router_seed": 0,
+    "random_seed": 1,
+    "dilution_seed": 3,
+    "skip_dilution": true,
+    "adaptive_oracle": true,
+    "no_progress": false,
+    "out": "logs/rk16_adapt",
+    "device": "cuda"
+  },
+  "graph": {
+    "n_nodes": 11520,
+    "n_labels": 29,
+    "n_layers": 24,
+    "n_passages": 24
+  },
+  "assignments_usage": {
+    "oracle": [
+      3875,
+      3764,
+      3881
+    ],
+    "label_free": [
+      88,
+      11408,
+      24
+    ],
+    "random": [
+      3904,
+      3677,
+      3939
+    ],
+    "uniform": [
+      11520,
+      0,
+      0
+    ]
+  },
+  "findings": {
+    "D1": false,
+    "D2": true,
+    "D3": true,
+    "D4": true,
+    "D1_p": 0.02734375,
+    "D2_p": 0.001953125,
+    "D3_p": 0.001953125,
+    "D4_p": 0.03125,
+    "verdict": "Not supported; failed rule(s): D1."
+  },
+  "comparisons": {
+    "oracle_vs_uniform": {
+      "mean_diff": -0.0030376670716889542,
+      "ci_low": -0.00501089304509279,
+      "ci_high": -0.001064441098285118,
+      "p_wilcoxon": 0.02734375,
+      "p_paired_t": 0.0069117249203725474,
+      "effect_size_dz": -1.1608199664250791,
+      "significant": false
+    },
+    "label_free_vs_random": {
+      "mean_diff": 0.015975357304322813,
+      "ci_low": 0.014260374514314838,
+      "ci_high": 0.017690340094330785,
+      "p_wilcoxon": 0.001953125,
+      "p_paired_t": 5.7252425863713734e-09,
+      "effect_size_dz": 7.024126649294128,
+      "significant": true
+    },
+    "oracle_vs_random": {
+      "mean_diff": 0.013655036741306479,
+      "ci_low": 0.011363998833669769,
+      "ci_high": 0.01594607464894319,
+      "p_wilcoxon": 0.001953125,
+      "p_paired_t": 2.837529671018349e-07,
+      "effect_size_dz": 4.494300606494743,
+      "significant": true
+    }
+  },
+  "control": {
+    "pc_n_nodes": 2000,
+    "oracle_vs_uniform": {
+      "mean_diff": 0.25341325341325344,
+      "p_wilcoxon": 0.03125
+    },
+    "label_free_vs_random": {
+      "mean_diff": 0.026473526473526483,
+      "p_wilcoxon": 0.03125
+    },
+    "oracle_vs_random": {
+      "mean_diff": 0.2798867798867799,
+      "p_wilcoxon": 0.03125
+    }
+  },
+  "dilution": null,
+  "dilution_skipped": true
+}

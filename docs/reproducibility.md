@@ -18,10 +18,10 @@ Companion documents:
 | Phase 1 | Diagnostics + theory (SD metric, fragility, entropy; provable bounds) | **Implemented & tested** |
 | Phase 2 | Spectral sparsifiers + method comparison (threshold / random / degree / spectral) | **Implemented & tested** |
 | Phase 3 | Router evaluation protocol (label-free GNN router, D1–D4, PC-1c-R control, dilution ladder, ablations, figures) | **Implemented & tested** |
-| Phase 4 | Real ERP attention data + LLM attention export (Llama-3.1-8B) feeding the pipeline | Partially (real-attention + synthetic ERP-fraud runs done; no real ERP graph files exist on disk) |
+| Phase 4 | Real ERP attention data + LLM attention export (Llama-3.1-8B) feeding the pipeline | Partially (real-attention + synthetic ERP-fraud runs done; **real DGL Amazon fraud graph run at `docs/real_fraud_results.md`**) |
 | Phase 5 | Publication materials from verified results | Partially drafted (`docs/*`) |
 
-**Tests:** 100 pass (`python -m pytest` on CPU, 2 cosmetic warnings).
+**Tests:** 107 pass (`python -m pytest` on CPU, 2 cosmetic warnings).
 
 **Lint:** `pyflakes` clean on `src/`, `experiments/`, and `tests/`. (`ruff`/`ty` are not installed locally; the Makefile targets remain for CI.)
 
@@ -41,6 +41,7 @@ Companion documents:
 | `attention_entropy.py` | Pre-construction entropy routing signal from LLM attention |
 | `spectral_position.py` | Node-level spectral footprint features (ratio, position, fragility) |
 | `synthetic.py` | ERP-style graph + label generators used by all experiments |
+| `real_fraud.py` | Loaders for real public fraud graphs (DGL Amazon co-review) into the protocol schema |
 | `baselines.py` | Dummy / uniform / random routing baselines |
 | `mixture.py` | Mixture-of-experts classifier (`low_pass` / `high_pass` / `identity`) |
 | `gnn_router.py` | RouterGNN (label-free learned router, KL-divergence training) |
@@ -55,11 +56,12 @@ Companion documents:
 | `run_diagnostic.py` | Golden 4-node ERP verification + SD/fragility preview | `logs/diagnostic/diagnostic.json` |
 | `compare_methods.py` | SD vs budget for threshold / random / degree / spectral | `logs/compare_methods/results.{csv,json}` + PNGs |
 | `run_protocol.py` | D1–D4 findings matrix + frozen-gate interventions (`--graph pc` default; `--graph erp_fraud` for the fraud-like graph) | `logs/protocol/protocol_results.json` (PC) / `logs/erp_fraud_protocol/protocol_results.json` (ERP-fraud) + PNG |
+| `run_real_fraud.py` | D1–D4 protocol on a **real public fraud graph** (DGL Amazon co-review, 8,639 labeled users) | `logs/amazon_fraud_protocol/protocol_results.json` |
 | `dilution_curve.py` | Label-free vs oracle gain across the dilution ladder | `logs/dilution/dilution_curve.{csv,json}` + PNG |
 | `ablation.py` | Oracle-bucket δ-sweep + router-feature ablation (single / leave-one-out) | `logs/ablation/ablation.{csv,json}` + PNG |
 | `reproduce_figures.py` | Renders all Phase 3 figures from cached logs | PNGs under `logs/{protocol,dilution,ablation}/` |
 
-### 2.3 Tests (`spectral_distillation/tests/`, 83 tests)
+### 2.3 Tests (`spectral_distillation/tests/`, 107 tests)
 
 | File | Coverage |
 |------|----------|
@@ -70,6 +72,7 @@ Companion documents:
 | `test_spectral_position.py` | Node spectral footprint features |
 | `test_baselines.py` | Uniform / random / usage-matched assignment floors |
 | `test_protocol.py` | Homophily, assignments, RouterGNN, dilution-ladder invariants, mixture router, statistics, decision rules, frozen intervention |
+| `test_real_fraud.py` | Real-fraud loader schema/seeding, single-component invariant, oracle bucket balance, condition shapes (7 tests) |
 
 ---
 
@@ -263,15 +266,11 @@ Every claim in §3 maps to a committed artifact:
    you want tighter CIs.
 3. **Final consistency check.** Re-run `python -m pytest` and `reproduce_figures` against the
    final logs so README's stated numbers still match the committed artifacts.
-4. **Version control.** The repo is still **not a git repository**. Recommended:
+4. **Version control.** The repo is a git repository with verified-phase commits. Keep each new
+   verified run (results JSON + docs + tests) as its own commit:
    ```bash
-   cd <repo root parent>            # i.e., the codes folder
-   git init
-   git add spectral_distillation    # agents/, tmp/, pdf_text.txt are already git-ignored
-   git commit -m "Spectral distillation: Phases 1-3 implemented and verified (83 tests)"
-   git branch -M main
-   git remote add origin <your-repo-url>
-   git push -u origin main
+   git add <changed files>
+   git commit -m "feat: <what the run/writeup adds>"
    ```
 5. **Read the Phase-3 summary in README** ("Phase 3 findings") — it is kept in sync with this doc;
    if you change numbers up-stream, update both.
@@ -292,9 +291,12 @@ Goal: move off the synthetic ERP generator onto real attention matrices.
 - **DONE (real-attention): LLM attention export** on `HuggingFaceTB/SmolLM2-1.7B` over a
   public-domain corpus; D1/D3/D4 hold, D2 does not (usage-imbalance artifact; see
   `docs/real_attention_results.md`).
-- **Outstanding:** no real ERP/fraud graph files exist in the repo (`data/benchmarks/` is empty),
-  so the fraud-domain validation is currently the synthetic family; a real graph (exported ERP
-  attention or an external network dataset) remains the natural D2 resurrection candidate.
+- **DONE (real public graph): DGL Amazon co-review fraud** — real benign/fraud labels,
+  D1/D3/D4 hold, D2 does not (structural signal saturates on the strongly-homophilic
+  co-review relations; see `docs/real_fraud_results.md`). Data lives under git-ignored
+  `data/benchmarks/amazon/raw/Amazon.mat`; the loader is `src/real_fraud.py`.
+- **Outstanding:** a low-homophily *real* fraud network (transaction/ERP-style, e.g. a
+  financial network) remains the natural D2 resurrection candidate for real data.
 - Finish `configs/erp_fraud.yaml` runs on real ERP graphs; use homophily-bucket oracle on real
   labels (already implemented — same path used for benchmarks).
 

@@ -1,4 +1,4 @@
-"""Real fraud-graph D1-D4 protocol on DGL Amazon (co-review fraud).
+"""Real fraud-graph D1-D4 protocol on public fraud graphs (multi-dataset).
 
 Runs the same D1-D4 decision rules and frozen-gate interventions as the
 synthetic PC-1c-R / ERP-fraud pipeline, but on a *real publicly-available
@@ -30,7 +30,7 @@ from spectral_distillation.src.evaluation import (
 )
 from spectral_distillation.src.mixture import fit_experts, mixture_accuracy, train_test_split
 from spectral_distillation.src.planted_control import generate_pc_graph
-from spectral_distillation.src.real_fraud import load_amazon_fraud
+from spectral_distillation.src.real_fraud import load_real_fraud
 from spectral_distillation.src.router_protocol import (
     evaluate_decision_rules,
     label_free_assignment,
@@ -192,7 +192,13 @@ def _positive_control_pairs(args, log) -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", default="configs/default.yaml")
-    parser.add_argument("--amazon-mat", default=None)
+    parser.add_argument("--dataset", default="amazon",
+                        choices=["amazon", "tolokers"],
+                        help="real fraud graph to run on")
+    parser.add_argument("--amazon-mat", default=None,
+                        help="explicit path override for the amazon .mat")
+    parser.add_argument("--data-path", default=None,
+                        help="explicit path override for a non-amazon dataset dir")
     parser.add_argument("--top-k", type=int, default=32)
     parser.add_argument("--splits", type=int, default=None)
     parser.add_argument("--seeds", type=int, default=None)
@@ -224,21 +230,22 @@ def main() -> None:
     set_seed(args.router_seed)
 
     t0 = time.perf_counter()
-    graph = load_amazon_fraud(args.amazon_mat) if args.amazon_mat else load_amazon_fraud()
+    graph = load_real_fraud(args.dataset, args.data_path or args.amazon_mat)
     log.info(
-        "loaded DGL Amazon fraud graph n=%d d=%d edges=%d pos=%.4f in %.1fs",
+        "loaded %s fraud graph n=%d d=%d edges=%d pos=%.4f in %.1fs",
+             args.dataset,
         graph["n_nodes"], graph["d_features"], graph["n_edges"],
         graph["positive_ratio"], time.perf_counter() - t0,
     )
 
     record = run_protocol_on_graph(graph, args, log)
 
-    out_dir = ensure_dir(Path(args.out) / "amazon_fraud_protocol")
+    out_dir = ensure_dir(Path(args.out) / f"{args.dataset}_fraud_protocol")
     out_path = out_dir / "protocol_results.json"
     out_path.write_text(json.dumps(record, indent=2, default=str), encoding="utf-8")
     log.info("wrote %s", out_path)
 
-    print("\n=== Real fraud-graph (DGL Amazon) router fidelity ===")
+    print(f"\n=== Real fraud-graph ({args.dataset}) router fidelity ===")
     print(f"{'comparison':<22}{'mean_diff':>10}{'p_wilcoxon':>12}{'d_z':>8}{'sig':>6}")
     for name, c in record["comparisons"].items():
         print(

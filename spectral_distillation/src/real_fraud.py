@@ -31,6 +31,7 @@ import scipy.sparse as sp
 from spectral_distillation.src.laplacian import build_adjacency
 
 DEFAULT_AMAZON_MAT = "data/benchmarks/amazon/raw/Amazon.mat"
+DEFAULT_TOLOKERS_DIR = "data/benchmarks/tolokers/raw"
 
 LABELED_BLOCK_START = 3305  # DGL drops rows 0..3304 as unlabeled for amazon
 
@@ -80,3 +81,85 @@ def load_amazon_fraud(path: str | Path = DEFAULT_AMAZON_MAT) -> dict:
         "positive_ratio": float(y.mean()),
         "n_edges": int(np.count_nonzero(W) // 2),
     }
+
+
+def load_tolokers(path: str | Path = DEFAULT_TOLOKERS_DIR) -> dict:
+    """Load the Tolokers crowd-worker exclusion graph (GADBench/NEExT release).
+
+    Nodes are Toloka crowd workers; an edge joins two workers who shared at
+    least one task; the positive class marks workers banned from a project
+    (Platonov et al., ICLR 2023). Unlike the ultra-dense Amazon co-review
+    graph this network is comparatively sparse (mean degree ~88 vs ~763) and
+    far less homophilic, which makes it the natural second regime for the
+    retention ladder and for probing the label-free router (D2).
+
+    Expects ``nodes.parquet`` (node_id, feat_*, label) and ``edges.parquet``
+    (src, dst) in ``path``; download with
+    ``huggingface_hub.hf_hub_download("JaySuryavanshi/graph-anomaly-tolokers", ...)``.
+    """
+    import pandas as pd
+
+    path = Path(path)
+    nodes_pq, edges_pq = path / "nodes.parquet", path / "edges.parquet"
+    if not (nodes_pq.exists() and edges_pq.exists()):
+        raise FileNotFoundError(
+            f"Tolokers parquet files not found under {path}; download "
+            "nodes.parquet/edges.parquet from the HuggingFace mirror "
+            "JaySuryavanshi/graph-anomaly-tolokers"
+        )
+
+    nodes = pd.read_parquet(nodes_pq)
+    edges = pd.read_parquet(edges_pq)
+
+    feat_cols = sorted(
+        (c for c in nodes.columns if c.startswith("feat_")),
+        key=lambda c: int(c.split("_")[1]),
+    )
+    if not feat_cols or "label" not in nodes.columns:
+        raise ValueError(f"unexpected Tolokers node schema: {list(nodes.columns)}")
+
+    features = nodes[feat_cols].to_numpy(dtype=float)
+    y = nodes["label"].to_numpy().astype(int)
+    n = int(y.size)
+
+    src = edges["src"].to_numpy(dtype=np.int64)
+    dst = edges["dst"].to_numpy(dtype=np.int64)
+    if src.max() >= n or dst.max() >= n or src.min() < 0 or dst.min() < 0:
+        raise ValueError("Tolokers edge indices out of range for node table")
+
+    adj = sp.coo_matrix(
+        (np.ones(src.size, dtype=np.float64), (src, dst)), shape=(n, n)
+    )
+    adj = ((adj + adj.T) > 0).astype(np.float64)
+    adj.setdiag(0.0)
+    adj.eliminate_zeros()
+    W = build_adjacency(adj.toarray())
+
+    return {
+        "W": W,
+        "features": features,
+        "y": y,
+        "n_nodes": n,
+        "d_features": int(features.shape[1]),
+        "source": "Tolokers (GADBench/NEExT crowd-worker exclusion graph)",
+        "positive_ratio": float(y.mean()),
+        "n_edges": int(np.count_nonzero(W) // 2),
+    }
+
+
+REAL_FRAUD_LOADERS = {
+    "amazon": (load_amazon_fraud, DEFAULT_AMAZON_MAT),
+    "tolokers": (load_tolokers, DEFAULT_TOLOKERS_DIR),
+}
+
+
+def load_real_fraud(dataset: str = "amazon", path: str | Path | None = None) -> dict:
+    """Dispatch to a named real fraud-graph loader (``amazon`` or ``tolokers``)."""
+    key = dataset.strip().lower()
+    if key not in REAL_FRAUD_LOADERS:
+        raise KeyError(
+            f"unknown real fraud dataset {dataset!r}; "
+            f"choose from {sorted(REAL_FRAUD_LOADERS)}"
+        )
+    loader, default_path = REAL_FRAUD_LOADERS[key]
+    return loader(default_path if path is None else path)

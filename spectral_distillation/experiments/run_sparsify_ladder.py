@@ -43,7 +43,7 @@ from spectral_distillation.src.evaluation import (
 from spectral_distillation.src.laplacian import compute_laplacian
 from spectral_distillation.src.mixture import fit_experts, mixture_accuracy, train_test_split
 from spectral_distillation.src.planted_control import generate_pc_graph
-from spectral_distillation.src.real_fraud import load_amazon_fraud
+from spectral_distillation.src.real_fraud import load_real_fraud
 from spectral_distillation.src.router_protocol import (
     evaluate_decision_rules,
     label_free_assignment,
@@ -204,7 +204,13 @@ def _positive_control(args, log) -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", default="configs/default.yaml")
-    parser.add_argument("--amazon-mat", default=None)
+    parser.add_argument("--dataset", default="amazon",
+                        choices=["amazon", "tolokers"],
+                        help="real fraud graph to run on")
+    parser.add_argument("--amazon-mat", default=None,
+                        help="explicit path override for the amazon .mat")
+    parser.add_argument("--data-path", default=None,
+                        help="explicit path override for a non-amazon dataset dir")
     parser.add_argument("--budgets", default="0.8,0.6,0.45,0.3,0.2,0.12,0.07",
                         help="comma-separated retention fractions of original edges")
     parser.add_argument("--methods", default="er,random,degree",
@@ -248,8 +254,9 @@ def main() -> None:
     set_seed(args.router_seed)
 
     t0 = time.perf_counter()
-    graph = load_amazon_fraud(args.amazon_mat) if args.amazon_mat else load_amazon_fraud()
-    log.info("loaded DGL Amazon fraud graph n=%d d=%d edges=%d pos=%.4f in %.1fs",
+    graph = load_real_fraud(args.dataset, args.data_path or args.amazon_mat)
+    log.info("loaded %s fraud graph n=%d d=%d edges=%d pos=%.4f in %.1fs",
+             args.dataset,
              graph["n_nodes"], graph["d_features"], graph["n_edges"],
              graph["positive_ratio"], time.perf_counter() - t0)
 
@@ -263,7 +270,7 @@ def main() -> None:
 
     args._pc_control = _positive_control(args, log)
 
-    out_dir = ensure_dir(Path(args.out) / "amazon_fraud_ladder")
+    out_dir = ensure_dir(Path(args.out) / f"{args.dataset}_fraud_ladder")
     out_path = out_dir / "ladder_results.jsonl"
     summary = {
         "config": args.__dict__,

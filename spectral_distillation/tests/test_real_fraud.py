@@ -1,11 +1,14 @@
-"""Tests for the real-world fraud graph loader (DGL Amazon) and its protocol wiring."""
+"""Tests for the real-world fraud graph loaders (DGL Amazon, Tolokers)."""
 
 import numpy as np
 import pytest
 
 from spectral_distillation.src.real_fraud import (
     DEFAULT_AMAZON_MAT,
+    DEFAULT_TOLOKERS_DIR,
     load_amazon_fraud,
+    load_real_fraud,
+    load_tolokers,
 )
 from spectral_distillation.src.router_protocol import (
     label_free_assignment,
@@ -14,7 +17,12 @@ from spectral_distillation.src.router_protocol import (
     uniform_assignment,
 )
 
-AMAZON_AVAILABLE = __import__("pathlib").Path(DEFAULT_AMAZON_MAT).exists()
+import pathlib
+
+AMAZON_AVAILABLE = pathlib.Path(DEFAULT_AMAZON_MAT).exists()
+TOLOKERS_AVAILABLE = (
+    pathlib.Path(DEFAULT_TOLOKERS_DIR) / "nodes.parquet"
+).exists() and (pathlib.Path(DEFAULT_TOLOKERS_DIR) / "edges.parquet").exists()
 
 
 def _skip_if_missing():
@@ -96,3 +104,64 @@ def test_condition_shapes_and_usage():
 def test_loader_missing_file_raises():
     with pytest.raises(FileNotFoundError):
         load_amazon_fraud("data/benchmarks/amazon/raw/definitely_not_here.mat")
+
+
+def test_registry_dispatch_and_unknown_key():
+    _skip_if_missing()
+    assert load_real_fraud("amazon")["n_nodes"] == load_amazon_fraud()["n_nodes"]
+    assert load_real_fraud("AMAZON")["n_nodes"] == load_amazon_fraud()["n_nodes"]
+    with pytest.raises(KeyError):
+        load_real_fraud("not_a_dataset")
+
+
+def _skip_if_missing_tolokers():
+    if not TOLOKERS_AVAILABLE:
+        pytest.skip("Tolokers parquet not downloaded (data/benchmarks/tolokers/raw)")
+
+
+def test_tolokers_schema_and_labels():
+    _skip_if_missing_tolokers()
+    g = load_tolokers()
+    assert g["W"].shape == (g["n_nodes"], g["n_nodes"]) == (11758, 11758)
+    assert g["d_features"] == 10
+    assert g["features"].shape == (11758, 10)
+    assert set(np.unique(g["y"]).tolist()) == {0, 1}
+    assert int(g["y"].sum()) == 2566
+    assert 0.21 < g["positive_ratio"] < 0.23
+    assert g["n_edges"] == 519000
+
+
+def test_tolokers_adjacency_contract():
+    _skip_if_missing_tolokers()
+    W = load_tolokers()["W"]
+    assert np.allclose(W, W.T)
+    assert np.count_nonzero(np.diag(W)) == 0
+    assert np.all((W == 0) | (W == 1))
+    import scipy.sparse as sp
+    from scipy.sparse.csgraph import connected_components
+
+    n_comp, _ = connected_components(sp.csr_matrix(W > 0), directed=False)
+    assert n_comp == 1
+
+
+def test_tolokers_is_sparser_than_amazon():
+    """The two regimes differ in density and node-level homophily spread, which
+    is what the multi-dataset amplification claim relies on."""
+    _skip_if_missing()
+    _skip_if_missing_tolokers()
+    a, t = load_amazon_fraud(), load_tolokers()
+
+    def node_hom_sd(g):
+        W, y = g["W"], g["y"]
+        deg = W.sum(1)
+        h = np.divide(W @ y, deg, out=np.zeros_like(deg), where=deg > 0)
+        return float(h.std())
+
+    assert t["n_nodes"] > a["n_nodes"]
+    assert (t["n_edges"] / t["n_nodes"]) < (a["n_edges"] / a["n_nodes"])
+    assert node_hom_sd(t) > 3 * node_hom_sd(a)
+
+
+def test_tolokers_missing_dir_raises():
+    with pytest.raises(FileNotFoundError):
+        load_tolokers("data/benchmarks/tolokers/nope")

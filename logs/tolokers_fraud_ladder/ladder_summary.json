@@ -1,0 +1,1128 @@
+{
+  "config": {
+    "config": "configs/default.yaml",
+    "dataset": "tolokers",
+    "amazon_mat": null,
+    "data_path": null,
+    "budgets": "0.6,0.3,0.15,0.08,0.04",
+    "methods": "er,random,degree",
+    "top_k": 32,
+    "splits": 10,
+    "seeds": 3,
+    "router_epochs": 200,
+    "hidden_dim": 64,
+    "n_layers": 3,
+    "router_seed": 0,
+    "random_seed": 1,
+    "adaptive_oracle": true,
+    "budget_oracle": false,
+    "skip_sd": true,
+    "no_progress": true,
+    "out": "logs",
+    "device": "cuda",
+    "_er_resistance": "[[0.         0.06871606 0.06403165 ... 0.02047259 0.00615729 0.00358515]\n [0.06871606 0.         0.13023701 ... 0.08674273 0.07242455 0.06985211]\n [0.06403165 0.13023701 0.         ... 0.08205864 0.06774029 0.06516747]\n ...\n [0.02047259 0.08674273 0.08205864 ... 0.         0.0241575  0.02158698]\n [0.00615729 0.07242455 0.06774029 ... 0.0241575  0.         0.00726095]\n [0.00358515 0.06985211 0.06516747 ... 0.02158698 0.00726095 0.        ]]",
+    "_pc_control": {
+      "oracle_vs_uniform": {
+        "mean_diff": 0.25341325341325344,
+        "p_wilcoxon": 0.03125
+      },
+      "label_free_vs_random": {
+        "mean_diff": 0.026473526473526483,
+        "p_wilcoxon": 0.03125
+      },
+      "oracle_vs_random": {
+        "mean_diff": 0.2798867798867799,
+        "p_wilcoxon": 0.03125
+      }
+    }
+  },
+  "graph": {
+    "n_nodes": 11758,
+    "d_features": 10,
+    "n_edges": 519000,
+    "positive_ratio": 0.21823439360435448,
+    "source": "Tolokers (GADBench/NEExT crowd-worker exclusion graph)"
+  },
+  "control": {
+    "pc_n_nodes": 2000,
+    "oracle_vs_uniform": {
+      "mean_diff": 0.25341325341325344,
+      "p_wilcoxon": 0.03125
+    },
+    "label_free_vs_random": {
+      "mean_diff": 0.026473526473526483,
+      "p_wilcoxon": 0.03125
+    },
+    "oracle_vs_random": {
+      "mean_diff": 0.2798867798867799,
+      "p_wilcoxon": 0.03125
+    }
+  },
+  "points": [
+    {
+      "method": "er",
+      "retention": 0.6,
+      "n_edges_kept": 311400,
+      "n_edges_orig": 519000,
+      "fraction_kept": 0.6,
+      "sd_laplacian": 0.0,
+      "edge_label_homophily": 0.6317204355285926,
+      "assignments_usage": {
+        "oracle": [
+          4265,
+          3679,
+          3814
+        ],
+        "label_free": [
+          945,
+          7488,
+          3325
+        ],
+        "random": [
+          4009,
+          3736,
+          4013
+        ],
+        "uniform": [
+          11758,
+          0,
+          0
+        ]
+      },
+      "comparisons": {
+        "oracle_vs_uniform": {
+          "mean_diff": 0.03472812836650226,
+          "ci_low": 0.03335396781944044,
+          "ci_high": 0.03610228891356409,
+          "p_wilcoxon": 0.001953125,
+          "p_paired_t": 7.717649797701195e-13,
+          "effect_size_dz": 19.05660016819592,
+          "significant": true
+        },
+        "label_free_vs_random": {
+          "mean_diff": 0.0004932811702670125,
+          "ci_low": -0.0005583369990770183,
+          "ci_high": 0.0015448993396110435,
+          "p_wilcoxon": 0.431640625,
+          "p_paired_t": 0.3162849636594373,
+          "effect_size_dz": 0.3537023751109931,
+          "significant": false
+        },
+        "oracle_vs_random": {
+          "mean_diff": 0.03486420593071382,
+          "ci_low": 0.03348391355196077,
+          "ci_high": 0.03624449830946687,
+          "p_wilcoxon": 0.001953125,
+          "p_paired_t": 7.755266214521288e-13,
+          "effect_size_dz": 19.046281881387568,
+          "significant": true
+        }
+      },
+      "findings": {
+        "D1": true,
+        "D2": false,
+        "D3": true,
+        "D4": true,
+        "D1_p": 0.001953125,
+        "D2_p": 0.431640625,
+        "D3_p": 0.001953125,
+        "D4_p": 0.03125,
+        "verdict": "Not supported; failed rule(s): D2."
+      }
+    },
+    {
+      "method": "random",
+      "retention": 0.6,
+      "n_edges_kept": 311400,
+      "n_edges_orig": 519000,
+      "fraction_kept": 0.6,
+      "sd_laplacian": 0.0,
+      "edge_label_homophily": 0.6355886995081903,
+      "assignments_usage": {
+        "oracle": [
+          4222,
+          3698,
+          3838
+        ],
+        "label_free": [
+          1413,
+          7881,
+          2464
+        ],
+        "random": [
+          4102,
+          3697,
+          3959
+        ],
+        "uniform": [
+          11758,
+          0,
+          0
+        ]
+      },
+      "comparisons": {
+        "oracle_vs_uniform": {
+          "mean_diff": 0.03590746725633616,
+          "ci_low": 0.034336928107114605,
+          "ci_high": 0.037478006405557714,
+          "p_wilcoxon": 0.001953125,
+          "p_paired_t": 1.896592671398562e-12,
+          "effect_size_dz": 17.24001049663549,
+          "significant": true
+        },
+        "label_free_vs_random": {
+          "mean_diff": 0.00052163066281109,
+          "ci_low": -0.00032091617064767197,
+          "ci_high": 0.0013641774962698519,
+          "p_wilcoxon": 0.375,
+          "p_paired_t": 0.19487561757234978,
+          "effect_size_dz": 0.46684270966016417,
+          "significant": false
+        },
+        "oracle_vs_random": {
+          "mean_diff": 0.0364857969042354,
+          "ci_low": 0.03440606613101223,
+          "ci_high": 0.03856552767745858,
+          "p_wilcoxon": 0.001953125,
+          "p_paired_t": 2.0370022884645473e-11,
+          "effect_size_dz": 13.228732595588237,
+          "significant": true
+        }
+      },
+      "findings": {
+        "D1": true,
+        "D2": false,
+        "D3": true,
+        "D4": true,
+        "D1_p": 0.001953125,
+        "D2_p": 0.375,
+        "D3_p": 0.001953125,
+        "D4_p": 0.03125,
+        "verdict": "Not supported; failed rule(s): D2."
+      }
+    },
+    {
+      "method": "degree",
+      "retention": 0.6,
+      "n_edges_kept": 311400,
+      "n_edges_orig": 519000,
+      "fraction_kept": 0.6,
+      "sd_laplacian": 0.0,
+      "edge_label_homophily": 0.517890402609887,
+      "assignments_usage": {
+        "oracle": [
+          7603,
+          2075,
+          2080
+        ],
+        "label_free": [
+          652,
+          4551,
+          6555
+        ],
+        "random": [
+          3965,
+          3815,
+          3978
+        ],
+        "uniform": [
+          11758,
+          0,
+          0
+        ]
+      },
+      "comparisons": {
+        "oracle_vs_uniform": {
+          "mean_diff": 0.0010602710211487175,
+          "ci_low": 0.00018218868607688076,
+          "ci_high": 0.0019383533562205542,
+          "p_wilcoxon": 0.0390625,
+          "p_paired_t": 0.02316682807194044,
+          "effect_size_dz": 0.910506752141862,
+          "significant": false
+        },
+        "label_free_vs_random": {
+          "mean_diff": -0.0002664852299143816,
+          "ci_low": -0.0011616789571842396,
+          "ci_high": 0.0006287084973554763,
+          "p_wilcoxon": 0.5703125,
+          "p_paired_t": 0.5176048640877571,
+          "effect_size_dz": -0.22446965138452654,
+          "significant": false
+        },
+        "oracle_vs_random": {
+          "mean_diff": 0.0012927368600101463,
+          "ci_low": 0.00045541301417207107,
+          "ci_high": 0.0021300607058482215,
+          "p_wilcoxon": 0.009765625,
+          "p_paired_t": 0.006803066181358077,
+          "effect_size_dz": 1.1641747941345488,
+          "significant": true
+        }
+      },
+      "findings": {
+        "D1": true,
+        "D2": false,
+        "D3": true,
+        "D4": true,
+        "D1_p": 0.0390625,
+        "D2_p": 0.5703125,
+        "D3_p": 0.009765625,
+        "D4_p": 0.03125,
+        "verdict": "Not supported; failed rule(s): D2."
+      }
+    },
+    {
+      "method": "er",
+      "retention": 0.3,
+      "n_edges_kept": 155700,
+      "n_edges_orig": 519000,
+      "fraction_kept": 0.3,
+      "sd_laplacian": 0.0,
+      "edge_label_homophily": 0.6572329893599345,
+      "assignments_usage": {
+        "oracle": [
+          4934,
+          3382,
+          3442
+        ],
+        "label_free": [
+          5329,
+          4839,
+          1590
+        ],
+        "random": [
+          4011,
+          3778,
+          3969
+        ],
+        "uniform": [
+          11758,
+          0,
+          0
+        ]
+      },
+      "comparisons": {
+        "oracle_vs_uniform": {
+          "mean_diff": 0.03061178204910133,
+          "ci_low": 0.02709905460604263,
+          "ci_high": 0.03412450949216003,
+          "p_wilcoxon": 0.001953125,
+          "p_paired_t": 1.0310660807873868e-08,
+          "effect_size_dz": 6.571215022383956,
+          "significant": true
+        },
+        "label_free_vs_random": {
+          "mean_diff": 0.0008788342688665907,
+          "ci_low": -0.00013042290037188452,
+          "ci_high": 0.0018880914381050658,
+          "p_wilcoxon": 0.083984375,
+          "p_paired_t": 0.08036458395759531,
+          "effect_size_dz": 0.6566087405249,
+          "significant": false
+        },
+        "oracle_vs_random": {
+          "mean_diff": 0.031105063219368366,
+          "ci_low": 0.027848554893423624,
+          "ci_high": 0.03436157154531311,
+          "p_wilcoxon": 0.001953125,
+          "p_paired_t": 4.586997983774307e-09,
+          "effect_size_dz": 7.202452700860245,
+          "significant": true
+        }
+      },
+      "findings": {
+        "D1": true,
+        "D2": false,
+        "D3": true,
+        "D4": true,
+        "D1_p": 0.001953125,
+        "D2_p": 0.083984375,
+        "D3_p": 0.001953125,
+        "D4_p": 0.03125,
+        "verdict": "Not supported; failed rule(s): D2."
+      }
+    },
+    {
+      "method": "random",
+      "retention": 0.3,
+      "n_edges_kept": 155700,
+      "n_edges_orig": 519000,
+      "fraction_kept": 0.3,
+      "sd_laplacian": 0.0,
+      "edge_label_homophily": 0.637173329160217,
+      "assignments_usage": {
+        "oracle": [
+          4557,
+          3456,
+          3745
+        ],
+        "label_free": [
+          1839,
+          8570,
+          1349
+        ],
+        "random": [
+          3992,
+          3670,
+          4096
+        ],
+        "uniform": [
+          11758,
+          0,
+          0
+        ]
+      },
+      "comparisons": {
+        "oracle_vs_uniform": {
+          "mean_diff": 0.02239042921131712,
+          "ci_low": 0.020422959761847017,
+          "ci_high": 0.024357898660787223,
+          "p_wilcoxon": 0.001953125,
+          "p_paired_t": 9.70084951472988e-10,
+          "effect_size_dz": 8.58135642773689,
+          "significant": true
+        },
+        "label_free_vs_random": {
+          "mean_diff": -0.00034586380903779413,
+          "ci_low": -0.0006897346732398003,
+          "ci_high": -1.9929448357880355e-06,
+          "p_wilcoxon": 0.07421875,
+          "p_paired_t": 0.04893973844639631,
+          "effect_size_dz": -0.7584225886680824,
+          "significant": false
+        },
+        "oracle_vs_random": {
+          "mean_diff": 0.022067244996314572,
+          "ci_low": 0.020130927481483343,
+          "ci_high": 0.024003562511145802,
+          "p_wilcoxon": 0.001953125,
+          "p_paired_t": 9.579067642368035e-10,
+          "effect_size_dz": 8.593558985119973,
+          "significant": true
+        }
+      },
+      "findings": {
+        "D1": true,
+        "D2": false,
+        "D3": true,
+        "D4": true,
+        "D1_p": 0.001953125,
+        "D2_p": 0.07421875,
+        "D3_p": 0.001953125,
+        "D4_p": 0.03125,
+        "verdict": "Not supported; failed rule(s): D2."
+      }
+    },
+    {
+      "method": "degree",
+      "retention": 0.3,
+      "n_edges_kept": 155700,
+      "n_edges_orig": 519000,
+      "fraction_kept": 0.3,
+      "sd_laplacian": 0.0,
+      "edge_label_homophily": 0.45901644785172485,
+      "assignments_usage": {
+        "oracle": [
+          9498,
+          1071,
+          1189
+        ],
+        "label_free": [
+          323,
+          2457,
+          8978
+        ],
+        "random": [
+          3962,
+          3753,
+          4043
+        ],
+        "uniform": [
+          11758,
+          0,
+          0
+        ]
+      },
+      "comparisons": {
+        "oracle_vs_uniform": {
+          "mean_diff": -0.0008107954867607958,
+          "ci_low": -0.0015128079180616746,
+          "ci_high": -0.00010878305545991714,
+          "p_wilcoxon": 0.048828125,
+          "p_paired_t": 0.028145926513728492,
+          "effect_size_dz": -0.8708994960801033,
+          "significant": false
+        },
+        "label_free_vs_random": {
+          "mean_diff": 0.002993706412655217,
+          "ci_low": 0.0021975630080910496,
+          "ci_high": 0.0037898498172193843,
+          "p_wilcoxon": 0.001953125,
+          "p_paired_t": 1.3512811420292863e-05,
+          "effect_size_dz": 2.8354332339484207,
+          "significant": true
+        },
+        "oracle_vs_random": {
+          "mean_diff": -0.0005783296478993449,
+          "ci_low": -0.0012800165278274954,
+          "ci_high": 0.0001233572320288055,
+          "p_wilcoxon": 0.083984375,
+          "p_paired_t": 0.09513382438872937,
+          "effect_size_dz": -0.6214892486994357,
+          "significant": false
+        }
+      },
+      "findings": {
+        "D1": false,
+        "D2": true,
+        "D3": false,
+        "D4": true,
+        "D1_p": 0.048828125,
+        "D2_p": 0.001953125,
+        "D3_p": 0.083984375,
+        "D4_p": 0.03125,
+        "verdict": "Not supported; failed rule(s): D1, D3."
+      }
+    },
+    {
+      "method": "er",
+      "retention": 0.15,
+      "n_edges_kept": 77850,
+      "n_edges_orig": 519000,
+      "fraction_kept": 0.15,
+      "sd_laplacian": 0.0,
+      "edge_label_homophily": 0.6475510927690562,
+      "assignments_usage": {
+        "oracle": [
+          5816,
+          2766,
+          3176
+        ],
+        "label_free": [
+          3982,
+          4841,
+          2935
+        ],
+        "random": [
+          3978,
+          3613,
+          4167
+        ],
+        "uniform": [
+          11758,
+          0,
+          0
+        ]
+      },
+      "comparisons": {
+        "oracle_vs_uniform": {
+          "mean_diff": 0.0013437659465896034,
+          "ci_low": -0.00019014980445974114,
+          "ci_high": 0.002877681697638948,
+          "p_wilcoxon": 0.16015625,
+          "p_paired_t": 0.07883947595271376,
+          "effect_size_dz": 0.6605772968512277,
+          "significant": false
+        },
+        "label_free_vs_random": {
+          "mean_diff": 0.00025514543289677504,
+          "ci_low": -0.0005109151941779238,
+          "ci_high": 0.0010212060599714737,
+          "p_wilcoxon": 0.49609375,
+          "p_paired_t": 0.47043675404262153,
+          "effect_size_dz": 0.2511459485919899,
+          "significant": false
+        },
+        "oracle_vs_random": {
+          "mean_diff": 0.001797357827294932,
+          "ci_low": 0.00026594660540668635,
+          "ci_high": 0.003328769049183178,
+          "p_wilcoxon": 0.037109375,
+          "p_paired_t": 0.026259851584343793,
+          "effect_size_dz": 0.8850019783743014,
+          "significant": false
+        }
+      },
+      "findings": {
+        "D1": false,
+        "D2": false,
+        "D3": true,
+        "D4": true,
+        "D1_p": 0.16015625,
+        "D2_p": 0.49609375,
+        "D3_p": 0.037109375,
+        "D4_p": 0.03125,
+        "verdict": "Not supported; failed rule(s): D1, D2."
+      }
+    },
+    {
+      "method": "random",
+      "retention": 0.15,
+      "n_edges_kept": 77850,
+      "n_edges_orig": 519000,
+      "fraction_kept": 0.15,
+      "sd_laplacian": 0.0,
+      "edge_label_homophily": 0.6377520743943347,
+      "assignments_usage": {
+        "oracle": [
+          5127,
+          3011,
+          3620
+        ],
+        "label_free": [
+          1344,
+          8585,
+          1829
+        ],
+        "random": [
+          3962,
+          3530,
+          4266
+        ],
+        "uniform": [
+          11758,
+          0,
+          0
+        ]
+      },
+      "comparisons": {
+        "oracle_vs_uniform": {
+          "mean_diff": 0.006877586891194698,
+          "ci_low": 0.00573788186932895,
+          "ci_high": 0.008017291913060444,
+          "p_wilcoxon": 0.001953125,
+          "p_paired_t": 2.550044893742304e-07,
+          "effect_size_dz": 4.5503535711951475,
+          "significant": true
+        },
+        "label_free_vs_random": {
+          "mean_diff": 2.834949254406638e-05,
+          "ci_low": -0.0006565824789265676,
+          "ci_high": 0.0007132814640147004,
+          "p_wilcoxon": 1.0,
+          "p_paired_t": 0.9274534085393286,
+          "effect_size_dz": 0.031210402537807953,
+          "significant": false
+        },
+        "oracle_vs_random": {
+          "mean_diff": 0.006911606282247562,
+          "ci_low": 0.005702423545501162,
+          "ci_high": 0.008120789018993962,
+          "p_wilcoxon": 0.001953125,
+          "p_paired_t": 4.0662684510248953e-07,
+          "effect_size_dz": 4.310112161729958,
+          "significant": true
+        }
+      },
+      "findings": {
+        "D1": true,
+        "D2": false,
+        "D3": true,
+        "D4": true,
+        "D1_p": 0.001953125,
+        "D2_p": 1.0,
+        "D3_p": 0.001953125,
+        "D4_p": 0.03125,
+        "verdict": "Not supported; failed rule(s): D2."
+      }
+    },
+    {
+      "method": "degree",
+      "retention": 0.15,
+      "n_edges_kept": 77850,
+      "n_edges_orig": 519000,
+      "fraction_kept": 0.15,
+      "sd_laplacian": 0.0,
+      "edge_label_homophily": 0.43308121684244966,
+      "assignments_usage": {
+        "oracle": [
+          10388,
+          672,
+          698
+        ],
+        "label_free": [
+          180,
+          1498,
+          10080
+        ],
+        "random": [
+          3965,
+          3806,
+          3987
+        ],
+        "uniform": [
+          11758,
+          0,
+          0
+        ]
+      },
+      "comparisons": {
+        "oracle_vs_uniform": {
+          "mean_diff": -0.0020128139706299007,
+          "ci_low": -0.0028361477734634177,
+          "ci_high": -0.0011894801677963837,
+          "p_wilcoxon": 0.001953125,
+          "p_paired_t": 0.0003655811539940599,
+          "effect_size_dz": -1.8434408682857293,
+          "significant": false
+        },
+        "label_free_vs_random": {
+          "mean_diff": 0.004087996824856799,
+          "ci_low": 0.0033570533674142523,
+          "ci_high": 0.004818940282299346,
+          "p_wilcoxon": 0.001953125,
+          "p_paired_t": 4.901161796068704e-07,
+          "effect_size_dz": 4.217239698873017,
+          "significant": true
+        },
+        "oracle_vs_random": {
+          "mean_diff": -0.0017803481317684611,
+          "ci_low": -0.002698355374862336,
+          "ci_high": -0.000862340888674586,
+          "p_wilcoxon": 0.009765625,
+          "p_paired_t": 0.0017528219760019415,
+          "effect_size_dz": -1.462380356637373,
+          "significant": false
+        }
+      },
+      "findings": {
+        "D1": false,
+        "D2": true,
+        "D3": false,
+        "D4": true,
+        "D1_p": 0.001953125,
+        "D2_p": 0.001953125,
+        "D3_p": 0.009765625,
+        "D4_p": 0.03125,
+        "verdict": "Not supported; failed rule(s): D1, D3."
+      }
+    },
+    {
+      "method": "er",
+      "retention": 0.08,
+      "n_edges_kept": 41520,
+      "n_edges_orig": 519000,
+      "fraction_kept": 0.08,
+      "sd_laplacian": 0.0,
+      "edge_label_homophily": 0.6267054746208912,
+      "assignments_usage": {
+        "oracle": [
+          6682,
+          2040,
+          3036
+        ],
+        "label_free": [
+          2994,
+          4556,
+          4208
+        ],
+        "random": [
+          3965,
+          3318,
+          4475
+        ],
+        "uniform": [
+          11758,
+          0,
+          0
+        ]
+      },
+      "comparisons": {
+        "oracle_vs_uniform": {
+          "mean_diff": -0.0016556103645744668,
+          "ci_low": -0.002984675535269014,
+          "ci_high": -0.00032654519387991963,
+          "p_wilcoxon": 0.0546875,
+          "p_paired_t": 0.02011393325195427,
+          "effect_size_dz": -0.939319587857484,
+          "significant": false
+        },
+        "label_free_vs_random": {
+          "mean_diff": 6.803878210586145e-05,
+          "ci_low": -0.0007301683022663657,
+          "ci_high": 0.0008662458664780887,
+          "p_wilcoxon": 0.6953125,
+          "p_paired_t": 0.8513769760210745,
+          "effect_size_dz": 0.06427505731535578,
+          "significant": false
+        },
+        "oracle_vs_random": {
+          "mean_diff": -0.0011283098032544903,
+          "ci_low": -0.0022969027646657274,
+          "ci_high": 4.0283158156746495e-05,
+          "p_wilcoxon": 0.0546875,
+          "p_paired_t": 0.0567866294960741,
+          "effect_size_dz": -0.7280590669392855,
+          "significant": false
+        }
+      },
+      "findings": {
+        "D1": false,
+        "D2": false,
+        "D3": false,
+        "D4": true,
+        "D1_p": 0.0546875,
+        "D2_p": 0.6953125,
+        "D3_p": 0.0546875,
+        "D4_p": 0.03125,
+        "verdict": "Not supported; failed rule(s): D1, D2, D3."
+      }
+    },
+    {
+      "method": "random",
+      "retention": 0.08,
+      "n_edges_kept": 41520,
+      "n_edges_orig": 519000,
+      "fraction_kept": 0.08,
+      "sd_laplacian": 0.0,
+      "edge_label_homophily": 0.6405565216617497,
+      "assignments_usage": {
+        "oracle": [
+          5922,
+          2530,
+          3306
+        ],
+        "label_free": [
+          1027,
+          7799,
+          2932
+        ],
+        "random": [
+          3998,
+          3429,
+          4331
+        ],
+        "uniform": [
+          11758,
+          0,
+          0
+        ]
+      },
+      "comparisons": {
+        "oracle_vs_uniform": {
+          "mean_diff": -0.001196348585360274,
+          "ci_low": -0.0023222410332049584,
+          "ci_high": -7.045613751558962e-05,
+          "p_wilcoxon": 0.037109375,
+          "p_paired_t": 0.0396553717089871,
+          "effect_size_dz": -0.8012395046625412,
+          "significant": false
+        },
+        "label_free_vs_random": {
+          "mean_diff": -0.00010205817315870336,
+          "ci_low": -0.0008564695234072601,
+          "ci_high": 0.0006523531770898535,
+          "p_wilcoxon": 1.0,
+          "p_paired_t": 0.7665434431710265,
+          "effect_size_dz": -0.10200961202518989,
+          "significant": false
+        },
+        "oracle_vs_random": {
+          "mean_diff": -0.0007994556897431449,
+          "ci_low": -0.0020066716347895627,
+          "ci_high": 0.00040776025530327316,
+          "p_wilcoxon": 0.10546875,
+          "p_paired_t": 0.16834200229764482,
+          "effect_size_dz": -0.49935678377944276,
+          "significant": false
+        }
+      },
+      "findings": {
+        "D1": false,
+        "D2": false,
+        "D3": false,
+        "D4": true,
+        "D1_p": 0.037109375,
+        "D2_p": 1.0,
+        "D3_p": 0.10546875,
+        "D4_p": 0.03125,
+        "verdict": "Not supported; failed rule(s): D1, D2, D3."
+      }
+    },
+    {
+      "method": "degree",
+      "retention": 0.08,
+      "n_edges_kept": 41520,
+      "n_edges_orig": 519000,
+      "fraction_kept": 0.08,
+      "sd_laplacian": 0.0,
+      "edge_label_homophily": 0.42182507449001605,
+      "assignments_usage": {
+        "oracle": [
+          10850,
+          450,
+          458
+        ],
+        "label_free": [
+          130,
+          960,
+          10668
+        ],
+        "random": [
+          3961,
+          3815,
+          3982
+        ],
+        "uniform": [
+          11758,
+          0,
+          0
+        ]
+      },
+      "comparisons": {
+        "oracle_vs_uniform": {
+          "mean_diff": -0.0014628338152746889,
+          "ci_low": -0.002439236450449519,
+          "ci_high": -0.0004864311800998589,
+          "p_wilcoxon": 0.013671875,
+          "p_paired_t": 0.00801008544214336,
+          "effect_size_dz": -1.129711546608811,
+          "significant": false
+        },
+        "label_free_vs_random": {
+          "mean_diff": 0.005454442365481704,
+          "ci_low": 0.004866112456821273,
+          "ci_high": 0.006042772274142135,
+          "p_wilcoxon": 0.001953125,
+          "p_paired_t": 5.970485392380188e-09,
+          "effect_size_dz": 6.990865547157342,
+          "significant": true
+        },
+        "oracle_vs_random": {
+          "mean_diff": -0.0008278051822872446,
+          "ci_low": -0.0014691722613128099,
+          "ci_high": -0.0001864381032616793,
+          "p_wilcoxon": 0.0234375,
+          "p_paired_t": 0.01703901336909105,
+          "effect_size_dz": -0.9732468263488726,
+          "significant": false
+        }
+      },
+      "findings": {
+        "D1": false,
+        "D2": true,
+        "D3": false,
+        "D4": true,
+        "D1_p": 0.013671875,
+        "D2_p": 0.001953125,
+        "D3_p": 0.0234375,
+        "D4_p": 0.03125,
+        "verdict": "Not supported; failed rule(s): D1, D3."
+      }
+    },
+    {
+      "method": "er",
+      "retention": 0.04,
+      "n_edges_kept": 20760,
+      "n_edges_orig": 519000,
+      "fraction_kept": 0.04,
+      "sd_laplacian": 0.0,
+      "edge_label_homophily": 0.607404791580417,
+      "assignments_usage": {
+        "oracle": [
+          7484,
+          1415,
+          2859
+        ],
+        "label_free": [
+          99,
+          6391,
+          5268
+        ],
+        "random": [
+          4106,
+          3030,
+          4622
+        ],
+        "uniform": [
+          11758,
+          0,
+          0
+        ]
+      },
+      "comparisons": {
+        "oracle_vs_uniform": {
+          "mean_diff": -0.0017519986392242949,
+          "ci_low": -0.0028193855777754054,
+          "ci_high": -0.0006846117006731841,
+          "p_wilcoxon": 0.00390625,
+          "p_paired_t": 0.004821928755180758,
+          "effect_size_dz": -1.2376943255497452,
+          "significant": false
+        },
+        "label_free_vs_random": {
+          "mean_diff": 3.968928956173956e-05,
+          "ci_low": -0.0008854287444576247,
+          "ci_high": 0.0009648073235811039,
+          "p_wilcoxon": 0.5703125,
+          "p_paired_t": 0.9248129576608822,
+          "effect_size_dz": 0.03235025419066336,
+          "significant": false
+        },
+        "oracle_vs_random": {
+          "mean_diff": -0.0011056302092192216,
+          "ci_low": -0.001902106456866811,
+          "ci_high": -0.00030915396157163227,
+          "p_wilcoxon": 0.013671875,
+          "p_paired_t": 0.011923834349609275,
+          "effect_size_dz": -1.0467394370475458,
+          "significant": false
+        }
+      },
+      "findings": {
+        "D1": false,
+        "D2": false,
+        "D3": false,
+        "D4": true,
+        "D1_p": 0.00390625,
+        "D2_p": 0.5703125,
+        "D3_p": 0.013671875,
+        "D4_p": 0.03125,
+        "verdict": "Not supported; failed rule(s): D1, D2, D3."
+      }
+    },
+    {
+      "method": "random",
+      "retention": 0.04,
+      "n_edges_kept": 20760,
+      "n_edges_orig": 519000,
+      "fraction_kept": 0.04,
+      "sd_laplacian": 0.0,
+      "edge_label_homophily": 0.6394163594820631,
+      "assignments_usage": {
+        "oracle": [
+          7107,
+          1765,
+          2886
+        ],
+        "label_free": [
+          869,
+          6521,
+          4368
+        ],
+        "random": [
+          4210,
+          3132,
+          4416
+        ],
+        "uniform": [
+          11758,
+          0,
+          0
+        ]
+      },
+      "comparisons": {
+        "oracle_vs_uniform": {
+          "mean_diff": -0.0009979021375517206,
+          "ci_low": -0.002122616920034541,
+          "ci_high": 0.00012681264493109986,
+          "p_wilcoxon": 0.130859375,
+          "p_paired_t": 0.07568167792804487,
+          "effect_size_dz": -0.6690322748038633,
+          "significant": false
+        },
+        "label_free_vs_random": {
+          "mean_diff": -0.0016045812779951097,
+          "ci_low": -0.0021584230692508685,
+          "ci_high": -0.0010507394867393508,
+          "p_wilcoxon": 0.001953125,
+          "p_paired_t": 0.00010469965004129193,
+          "effect_size_dz": -2.1846281066223643,
+          "significant": false
+        },
+        "oracle_vs_random": {
+          "mean_diff": -0.0005556500538640097,
+          "ci_low": -0.0014522210109145063,
+          "ci_high": 0.00034092090318648695,
+          "p_wilcoxon": 0.083984375,
+          "p_paired_t": 0.19445776809854529,
+          "effect_size_dz": -0.46732413815256674,
+          "significant": false
+        }
+      },
+      "findings": {
+        "D1": false,
+        "D2": false,
+        "D3": false,
+        "D4": true,
+        "D1_p": 0.130859375,
+        "D2_p": 0.001953125,
+        "D3_p": 0.083984375,
+        "D4_p": 0.03125,
+        "verdict": "Not supported; failed rule(s): D1, D2, D3."
+      }
+    },
+    {
+      "method": "degree",
+      "retention": 0.04,
+      "n_edges_kept": 20760,
+      "n_edges_orig": 519000,
+      "fraction_kept": 0.04,
+      "sd_laplacian": 0.0,
+      "edge_label_homophily": 0.41922894034586233,
+      "assignments_usage": {
+        "oracle": [
+          11164,
+          278,
+          316
+        ],
+        "label_free": [
+          118,
+          623,
+          11017
+        ],
+        "random": [
+          3962,
+          3801,
+          3995
+        ],
+        "uniform": [
+          11758,
+          0,
+          0
+        ]
+      },
+      "comparisons": {
+        "oracle_vs_uniform": {
+          "mean_diff": -0.000725747009128519,
+          "ci_low": -0.0016482433119661222,
+          "ci_high": 0.00019674929370908415,
+          "p_wilcoxon": 0.10546875,
+          "p_paired_t": 0.10883014711209599,
+          "effect_size_dz": -0.593228681087023,
+          "significant": false
+        },
+        "label_free_vs_random": {
+          "mean_diff": 0.004779724442932431,
+          "ci_low": 0.00433621474549393,
+          "ci_high": 0.005223234140370932,
+          "p_wilcoxon": 0.001953125,
+          "p_paired_t": 1.5738523867755106e-09,
+          "effect_size_dz": 8.126457322501373,
+          "significant": true
+        },
+        "oracle_vs_random": {
+          "mean_diff": -0.00047060157623182166,
+          "ci_low": -0.0012961082355576628,
+          "ci_high": 0.0003549050830940195,
+          "p_wilcoxon": 0.193359375,
+          "p_paired_t": 0.22934143164461782,
+          "effect_size_dz": -0.4298672072060735,
+          "significant": false
+        }
+      },
+      "findings": {
+        "D1": false,
+        "D2": true,
+        "D3": false,
+        "D4": true,
+        "D1_p": 0.10546875,
+        "D2_p": 0.001953125,
+        "D3_p": 0.193359375,
+        "D4_p": 0.03125,
+        "verdict": "Not supported; failed rule(s): D1, D3."
+      }
+    }
+  ]
+}

@@ -21,7 +21,7 @@ Companion documents:
 | Phase 4 | Real ERP attention data + LLM attention export (Llama-3.1-8B) feeding the pipeline | Partially (real-attention + synthetic ERP-fraud runs done; **real DGL Amazon fraud graph run at `docs/real_fraud_results.md`**) |
 | Phase 5 | Publication materials from verified results | Partially drafted (`docs/*`) |
 
-**Tests:** 107 pass (`python -m pytest` on CPU, 2 cosmetic warnings).
+**Tests:** 113 pass (`python -m pytest` on CPU, 2 cosmetic warnings).
 
 **Lint:** `pyflakes` clean on `src/`, `experiments/`, and `tests/`. (`ruff`/`ty` are not installed locally; the Makefile targets remain for CI.)
 
@@ -57,11 +57,12 @@ Companion documents:
 | `compare_methods.py` | SD vs budget for threshold / random / degree / spectral | `logs/compare_methods/results.{csv,json}` + PNGs |
 | `run_protocol.py` | D1–D4 findings matrix + frozen-gate interventions (`--graph pc` default; `--graph erp_fraud` for the fraud-like graph) | `logs/protocol/protocol_results.json` (PC) / `logs/erp_fraud_protocol/protocol_results.json` (ERP-fraud) + PNG |
 | `run_real_fraud.py` | D1–D4 protocol on a **real public fraud graph** (DGL Amazon co-review, 8,639 labeled users) | `logs/amazon_fraud_protocol/protocol_results.json` |
+| `run_sparsify_ladder.py` | Retention-ladder on the same real graph: ER (effective-resistance) vs budget-matched random/degree distillation, D1–D3 vs retention | `logs/amazon_fraud_ladder/ladder_results.jsonl` + `ladder_summary.json` (see `docs/sparsify_ladder_results.md`) |
 | `dilution_curve.py` | Label-free vs oracle gain across the dilution ladder | `logs/dilution/dilution_curve.{csv,json}` + PNG |
 | `ablation.py` | Oracle-bucket δ-sweep + router-feature ablation (single / leave-one-out) | `logs/ablation/ablation.{csv,json}` + PNG |
 | `reproduce_figures.py` | Renders all Phase 3 figures from cached logs | PNGs under `logs/{protocol,dilution,ablation}/` |
 
-### 2.3 Tests (`spectral_distillation/tests/`, 107 tests)
+### 2.3 Tests (`spectral_distillation/tests/`, 113 tests)
 
 | File | Coverage |
 |------|----------|
@@ -73,6 +74,7 @@ Companion documents:
 | `test_baselines.py` | Uniform / random / usage-matched assignment floors |
 | `test_protocol.py` | Homophily, assignments, RouterGNN, dilution-ladder invariants, mixture router, statistics, decision rules, frozen intervention |
 | `test_real_fraud.py` | Real-fraud loader schema/seeding, single-component invariant, oracle bucket balance, condition shapes (7 tests) |
+| `test_sparsify_ladder.py` | Resistance-injection path, exact-budget ER sparsification, resistance-energy direction check, ladder registry + homophily/serialization (6 tests) |
 
 ---
 
@@ -295,8 +297,14 @@ Goal: move off the synthetic ERP generator onto real attention matrices.
   D1/D3/D4 hold, D2 does not (structural signal saturates on the strongly-homophilic
   co-review relations; see `docs/real_fraud_results.md`). Data lives under git-ignored
   `data/benchmarks/amazon/raw/Amazon.mat`; the loader is `src/real_fraud.py`.
+- **DONE (distillation ladder, real graph):** on the same Amazon graph, **effective-resistance
+  spectral distillation amplifies the oracle routing signal ~7×** (D1 +0.0028 → +0.021 at 6–8%
+  edge retention, p at the resolution floor) while budget-matched random (+0.001) and degree
+  (+0.000) pruning destroy it — the mechanism is ER's maximization of node-level homophily
+  contrast. The label-free router (D2) remains unfixed. See `docs/sparsify_ladder_results.md`.
 - **Outstanding:** a low-homophily *real* fraud network (transaction/ERP-style, e.g. a
-  financial network) remains the natural D2 resurrection candidate for real data.
+  financial network) remains the natural D2 resurrection candidate for real data; and the
+  ladder result needs ≥2–3 more real graphs for a generality claim.
 - Finish `configs/erp_fraud.yaml` runs on real ERP graphs; use homophily-bucket oracle on real
   labels (already implemented — same path used for benchmarks).
 

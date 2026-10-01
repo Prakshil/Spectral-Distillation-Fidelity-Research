@@ -212,6 +212,20 @@ def test_yelpchi_respects_max_nodes():
     assert n_comp == 1
 
 
+def test_yelpchi_cap_preserves_class_balance_not_degree():
+    """The node cap is a real trade: class balance survives, degree does not.
+
+    Measured on YelpChi.mat (see docs/yelpchi_third_graph.md), mean degree is
+    167.6 at full LCC versus 55.4 at the 15,000 default. Pinning only the
+    balance claim keeps the loader honest about which one holds.
+    """
+    _skip_if_missing_yelp()
+    g = load_yelpchi()
+    assert abs(g["positive_ratio"] - 0.1450) < 0.01, "cap should not skew labels"
+    deg = 2 * g["n_edges"] / g["n_nodes"]
+    assert deg < 0.75 * 167.6, f"expected cap to cost mean degree, got {deg:.1f}"
+
+
 def test_yelpchi_sampling_is_deterministic():
     _skip_if_missing_yelp()
     a = load_yelpchi(max_nodes=3000, seed=7)

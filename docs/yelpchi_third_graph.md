@@ -33,21 +33,23 @@ quietly truncating, the loader takes the largest connected component of a unifor
 random node sample (`DEFAULT_YELP_MAX_NODES = 15000`, seed 0) and records the
 sampling in `graph["source"]`. Pass `max_nodes=None` for the full graph.
 
-The cap preserves what the experiment measures. At every size tested, 98–99.6% of
-sampled nodes land in the resulting LCC, and the class balance is stable:
+The cap preserves what the experiment measures. Measured directly on `YelpChi.mat`
+(sampling the LCC, seed 0, then taking the induced LCC), 98–99% of sampled nodes
+survive and the class balance is stable:
 
-| target | LCC | retention of sample | positive ratio | mean degree |
+| target | LCC | share of sample kept | positive ratio | mean degree |
 |---|---|---|---|---|
 | 12,000 | 11,770 | 98.1% | 0.1511 | 44.9 |
-| 15,000 | 14,840 | 98.9% | 0.1497 | 55.8 |
-| 18,000 | 17,876 | 99.3% | 0.1433 | 66.4 |
-| 20,000 | 19,927 | 99.6% | 0.1441 | 73.4 |
+| **15,000 (default)** | **14,840** | **98.9%** | **0.1497** | **55.4** |
+| 18,000 | 17,854 | 99.2% | 0.1489 | 66.6 |
+| 20,000 | 19,863 | 99.3% | 0.1488 | 73.8 |
 | full LCC | 45,900 | — | 0.1450 | 167.6 |
 
-What it does **not** preserve is absolute degree: the cap costs ~3× mean degree.
-Since the retention ladder is indexed by *fraction of edges kept* rather than
-absolute degree, the ladder comparisons stay internally valid, but cross-graph
-degree statements must be read with this in mind.
+What it does **not** preserve is absolute degree: the 15,000-node cap costs ~3×
+mean degree relative to the full LCC. Since the retention ladder is indexed by
+*fraction of edges kept* rather than absolute degree, ladder comparisons stay
+internally valid, but cross-graph degree statements must be read with this in
+mind.
 
 ## D2 diagnostic screen
 
@@ -132,3 +134,13 @@ replicate to YelpChi or Amazon.
 - `eig_nb_sim`'s mode count (`--spectral-k 8`) is untuned across all three graphs.
 - Amazon still fails D2 and remains unresolved; its best candidate reaches only
   ~23% of its oracle ceiling.
+
+### Note: fixed router vs ladder
+
+The fixed router (proxy_quantile, order_feature=eig_nb_sim) passes D1–D4
+on the **unpruned** YelpChi graph with D2 +0.0048 (p 0.001953, dz 6.73). Under ER
+sparsification its D2 gain shifts with budget: significant at r=0.30 and 0.04,
+smaller at 0.15/0.60, and non-significant at 0.08 (+0.00060, p 0.193, dz 0.52)
+on the pruned topology. The unpruned full-protocol result is the canonical one
+for the rule verdict; ladder-wise D2 with the fixed router is budget-dependent
+(see logs/yelpchi_fraud_ladder_eig_nb_sim_pq/ladder_results.jsonl).

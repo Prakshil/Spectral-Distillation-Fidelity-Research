@@ -8,7 +8,7 @@ identical D1–D3 experts/training (10 splits × 3 seeds, p = exact Wilcoxon, re
 |---|---|---|---|
 | nodes / features | 8,639 / 25 | 11,758 / 10 | 14,840 / 32 † |
 | undirected edges | 3,298,534 | 519,000 | 411,194 † |
-| mean degree | 763.6 | 88.3 | 55.4 † |
+| mean degree | 763.6 | 88.3 | 55.4 † (vs 167.6 at full LCC) |
 | positive ratio | 9.50% | 21.82% | 14.97% † |
 | edge label homophily | 0.9488 | 0.5945 (random baseline 0.6588 → heterophilous) | 0.7627 |
 | **node-homophily sd** | **0.063** (saturated) | **0.241** | **0.257** |

@@ -170,9 +170,11 @@ def load_yelpchi(
     45900^2 * 8 B = 16.9 GB and an O(n^3) eigendecomposition. That does not fit
     in memory on commodity hardware. To stay honest about this we do **not**
     silently truncate -- we take the largest connected component of a uniformly
-    random node subsample, which preserves connectivity (>=98% of sampled nodes
-    land in the LCC at every tested size), the class balance (0.145 -> 0.145),
-    and mean degree closely tracks the target. Pass ``max_nodes=None`` for the
+    random node subsample. Measured on this file, 98-99% of sampled nodes land
+    in the resulting LCC and the class balance holds (0.1450 full-LCC versus
+    0.1488-0.1511 across caps of 12k-20k). Mean degree does **not** hold: 55.4
+    at the 15,000 default versus 167.6 at full scale, so read absolute-degree
+    claims about YelpChi with the cap in mind. Pass ``max_nodes=None`` for the
     full 45,900-node graph if your machine can afford it.
 
     Expects ``YelpChi.mat`` (keys ``homo``, ``features``, ``label``) from

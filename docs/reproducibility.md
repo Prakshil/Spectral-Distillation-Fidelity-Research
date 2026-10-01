@@ -21,7 +21,7 @@ Companion documents:
 | Phase 4 | Real ERP attention data + LLM attention export (Llama-3.1-8B) feeding the pipeline | Partially (real-attention + synthetic ERP-fraud runs done; **real DGL Amazon fraud graph run at `docs/real_fraud_results.md`**) |
 | Phase 5 | Publication materials from verified results | Partially drafted (`docs/*`) |
 
-**Tests:** 118 pass (`python -m pytest` on CPU, 2 cosmetic warnings).
+**Tests:** 133 pass (`python -m pytest` on CPU, 2 cosmetic warnings).
 
 **Lint:** `pyflakes` clean on `src/`, `experiments/`, and `tests/`. (`ruff`/`ty` are not installed locally; the Makefile targets remain for CI.)
 
@@ -41,7 +41,7 @@ Companion documents:
 | `attention_entropy.py` | Pre-construction entropy routing signal from LLM attention |
 | `spectral_position.py` | Node-level spectral footprint features (ratio, position, fragility) |
 | `synthetic.py` | ERP-style graph + label generators used by all experiments |
-| `real_fraud.py` | Loaders for real public fraud graphs (DGL Amazon co-review) into the protocol schema |
+| `real_fraud.py` | Loaders for real public fraud graphs (DGL Amazon co-review, Tolokers crowd-workers, YelpChi reviews) into the protocol schema |
 | `baselines.py` | Dummy / uniform / random routing baselines |
 | `mixture.py` | Mixture-of-experts classifier (`low_pass` / `high_pass` / `identity`) |
 | `gnn_router.py` | RouterGNN (label-free learned router, KL-divergence training) |
@@ -56,13 +56,13 @@ Companion documents:
 | `run_diagnostic.py` | Golden 4-node ERP verification + SD/fragility preview | `logs/diagnostic/diagnostic.json` |
 | `compare_methods.py` | SD vs budget for threshold / random / degree / spectral | `logs/compare_methods/results.{csv,json}` + PNGs |
 | `run_protocol.py` | D1–D4 findings matrix + frozen-gate interventions (`--graph pc` default; `--graph erp_fraud` for the fraud-like graph) | `logs/protocol/protocol_results.json` (PC) / `logs/erp_fraud_protocol/protocol_results.json` (ERP-fraud) + PNG |
-| `run_real_fraud.py` | D1–D4 protocol on a **real public fraud graph** (`--dataset amazon\|tolokers`) | `logs/{amazon,tolokers}_fraud_protocol/protocol_results.json` |
-| `run_sparsify_ladder.py` | Retention-ladder on either real graph: ER (effective-resistance) vs budget-matched random/degree distillation, D1–D3 vs retention | `logs/{amazon,tolokers}_fraud_ladder/ladder_results.jsonl` + `ladder_summary.json` (see `docs/sparsify_ladder_results.md`) |
+| `run_real_fraud.py` | D1–D4 protocol on a **real public fraud graph** (`--dataset amazon\|tolokers\|yelpchi`) | `logs/{dataset}_fraud_protocol*/protocol_results.json` |
+| `run_sparsify_ladder.py` | Retention-ladder on any real graph: ER (effective-resistance) vs budget-matched random/degree distillation, D1–D3 vs retention. `--resume` keeps completed points; `--label-free-strategy/--order-feature` pick the router | `logs/{dataset}_fraud_ladder*/ladder_results.jsonl` + `ladder_summary.json` (see `docs/sparsify_ladder_results.md`, `docs/yelpchi_third_graph.md`) |
 | `dilution_curve.py` | Label-free vs oracle gain across the dilution ladder | `logs/dilution/dilution_curve.{csv,json}` + PNG |
 | `ablation.py` | Oracle-bucket δ-sweep + router-feature ablation (single / leave-one-out) | `logs/ablation/ablation.{csv,json}` + PNG |
 | `reproduce_figures.py` | Renders all Phase 3 figures from cached logs | PNGs under `logs/{protocol,dilution,ablation}/` |
 
-### 2.3 Tests (`spectral_distillation/tests/`, 118 tests)
+### 2.3 Tests (`spectral_distillation/tests/`, 133 tests)
 
 | File | Coverage |
 |------|----------|
@@ -73,7 +73,7 @@ Companion documents:
 | `test_spectral_position.py` | Node spectral footprint features |
 | `test_baselines.py` | Uniform / random / usage-matched assignment floors |
 | `test_protocol.py` | Homophily, assignments, RouterGNN, dilution-ladder invariants, mixture router, statistics, decision rules, frozen intervention |
-| `test_real_fraud.py` | Amazon + Tolokers loader schema/labels, adjacency contract, single-component invariant, regime-divergence test (density + homophily spread), registry dispatch, oracle buckets, condition shapes (12 tests) |
+| `test_real_fraud.py` | Amazon + Tolokers + YelpChi loader schema/labels, adjacency contract, single-component invariant, node-cap and sampling-determinism checks, `--max-nodes` rejection on uncapped datasets, regime-divergence test (density + homophily spread), registry dispatch, oracle buckets, condition shapes |
 | `test_sparsify_ladder.py` | Resistance-injection path, exact-budget ER sparsification, resistance-energy direction check, ladder registry + homophily/serialization (6 tests) |
 
 ---
@@ -305,12 +305,20 @@ Goal: move off the synthetic ERP generator onto real attention matrices.
   oracle signal ~7x at 6-8% retention; **this does not replicate on Tolokers**, where ER only
   *preserves* it (~84% of full-graph gain at r=0.30). Replication across both datasets: degree
   pruning destroys the oracle channel, and ER >= random > degree at matched budget.
-- **NEW lead (D2):** on Tolokers, degree pruning *significantly improves* D2 (+0.0055 at r=0.08,
-  p at floor) — the first real-data evidence the label-free structural router is recoverable
-  once node-local structure is sharpened. Open problem, now with a concrete lever.
-- **Outstanding:** D2 on dense/homophilic real graphs (no method unlocks it on Amazon); a third
-  real graph for a 3-dataset generality claim; a scale-appropriate spectral-similarity metric
-  (SD saturates on both graphs).
+- ~~**NEW lead (D2):** on Tolokers, degree pruning *significantly improves* D2 (+0.0055 at
+  r=0.08, p at floor)~~ — **superseded.** The lead does not replicate: degree pruning leaves D2
+  near zero on YelpChi (+0.0001..+0.0013) and Amazon. Do not treat "degree pruning unlocks D2"
+  as a general mechanism. What did replicate was the D2 *router* fix
+  (`--label-free-strategy proxy_quantile --order-feature eig_nb_sim`, `docs/d2_router_fix.md`),
+  which passes D2 on Tolokers and YelpChi.
+- **DONE (third real graph): YelpChi review fraud** — 14,840 nodes (capped sample, see
+  `docs/yelpchi_third_graph.md`), 411k edges, 15.0% spam, 32 features. Full protocol **passes
+  D1-D4** (D2 +0.0048, p 0.001953, dz 6.73). Establishes the 3-dataset generality claim and
+  shows `eig_nb_sim` works regardless of the sign of its homophily correlation (-0.26 here,
+  +0.42 on Tolokers): proxy `|rho|` is not the delivery objective.
+- **Outstanding:** D2 on dense/homophilic real graphs (no method unlocks it on Amazon, whose
+  best candidate reaches ~23% of its oracle ceiling); a scale-appropriate spectral-similarity
+  metric (SD saturates on all three graphs); tuning `--spectral-k`, untuned at 8 across all three.
 - Finish `configs/erp_fraud.yaml` runs on real ERP graphs; use homophily-bucket oracle on real
   labels (already implemented — same path used for benchmarks).
 

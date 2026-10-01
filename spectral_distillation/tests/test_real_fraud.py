@@ -1,4 +1,4 @@
-"""Tests for the real-world fraud graph loaders (DGL Amazon, Tolokers)."""
+"""Tests for the real-world fraud graph loaders (DGL Amazon, Tolokers, YelpChi)."""
 
 import numpy as np
 import pytest
@@ -6,9 +6,11 @@ import pytest
 from spectral_distillation.src.real_fraud import (
     DEFAULT_AMAZON_MAT,
     DEFAULT_TOLOKERS_DIR,
+    DEFAULT_YELP_MAT,
     load_amazon_fraud,
     load_real_fraud,
     load_tolokers,
+    load_yelpchi,
 )
 from spectral_distillation.src.router_protocol import (
     label_free_assignment,
@@ -23,6 +25,7 @@ AMAZON_AVAILABLE = pathlib.Path(DEFAULT_AMAZON_MAT).exists()
 TOLOKERS_AVAILABLE = (
     pathlib.Path(DEFAULT_TOLOKERS_DIR) / "nodes.parquet"
 ).exists() and (pathlib.Path(DEFAULT_TOLOKERS_DIR) / "edges.parquet").exists()
+YELP_AVAILABLE = pathlib.Path(DEFAULT_YELP_MAT).exists()
 
 
 def _skip_if_missing():
@@ -165,3 +168,103 @@ def test_tolokers_is_sparser_than_amazon():
 def test_tolokers_missing_dir_raises():
     with pytest.raises(FileNotFoundError):
         load_tolokers("data/benchmarks/tolokers/nope")
+
+
+def _skip_if_missing_yelp():
+    if not YELP_AVAILABLE:
+        pytest.skip("YelpChi.mat not downloaded (data/benchmarks/yelp/raw)")
+
+
+def test_yelpchi_schema_and_labels():
+    _skip_if_missing_yelp()
+    g = load_yelpchi()
+    assert g["W"].shape == (g["n_nodes"], g["n_nodes"])
+    assert g["d_features"] == 32
+    assert g["features"].shape == (g["n_nodes"], 32)
+    assert set(np.unique(g["y"]).tolist()) == {0, 1}
+    assert set(np.unique(g["y"])) == {0, 1}
+    # published positive ratio is 14.53%; the node-capped LCC is close
+    assert 0.13 < g["positive_ratio"] < 0.16
+
+
+def test_yelpchi_adjacency_contract_and_connectivity():
+    _skip_if_missing_yelp()
+    import scipy.sparse as sp
+    from scipy.sparse.csgraph import connected_components
+
+    W = load_yelpchi()["W"]
+    assert np.allclose(W, W.T)
+    assert np.count_nonzero(np.diag(W)) == 0
+    assert np.all((W == 0) | (W == 1))
+    n_comp, _ = connected_components(sp.csr_matrix(W > 0), directed=False)
+    assert n_comp == 1, "loader must return a single connected component"
+
+
+def test_yelpchi_respects_max_nodes():
+    _skip_if_missing_yelp()
+    g = load_yelpchi(max_nodes=3000)
+    assert g["n_nodes"] <= 3000
+    # connectivity still holds after the induced-sample + LCC filter
+    import scipy.sparse as sp
+    from scipy.sparse.csgraph import connected_components
+
+    n_comp, _ = connected_components(sp.csr_matrix(g["W"] > 0), directed=False)
+    assert n_comp == 1
+
+
+def test_yelpchi_sampling_is_deterministic():
+    _skip_if_missing_yelp()
+    a = load_yelpchi(max_nodes=3000, seed=7)
+    b = load_yelpchi(max_nodes=3000, seed=7)
+    c = load_yelpchi(max_nodes=3000, seed=8)
+    assert np.array_equal(a["y"], b["y"])
+    assert not np.array_equal(a["y"], c["y"])
+
+
+def test_yelpchi_missing_file_raises():
+    with pytest.raises(FileNotFoundError):
+        load_yelpchi("data/benchmarks/yelp/raw/not_here.mat")
+
+
+def test_max_nodes_rejected_for_uncapped_datasets():
+    """A silently ignored --max-nodes would make a capped run look uncapped."""
+    _skip_if_missing()
+    _skip_if_missing_tolokers()
+    with pytest.raises(ValueError):
+        load_real_fraud("amazon", max_nodes=5000)
+    with pytest.raises(ValueError):
+        load_real_fraud("tolokers", max_nodes=5000)
+
+
+def test_max_nodes_dispatches_to_yelpchi():
+    _skip_if_missing_yelp()
+    g = load_real_fraud("yelpchi", max_nodes=3000)
+    assert g["n_nodes"] <= 3000
+
+
+def test_registry_dispatch_includes_yelpchi():
+    _skip_if_missing_yelp()
+    assert load_real_fraud("yelpchi")["n_nodes"] == load_yelpchi()["n_nodes"]
+    assert load_real_fraud("YELPCHI")["n_nodes"] == load_yelpchi()["n_nodes"]
+
+
+def test_three_graphs_span_three_density_regimes():
+    """Amazon/Tolokers/YelpChi differ in density and node-level homophily spread.
+    This spread is what the D2 proxy argument depends on, so pin it down."""
+    _skip_if_missing()
+    _skip_if_missing_tolokers()
+    _skip_if_missing_yelp()
+
+    def node_hom_sd(g):
+        W, y = g["W"], g["y"]
+        deg = W.sum(1)
+        h = np.divide(W @ y, deg, out=np.zeros_like(deg), where=deg > 0)
+        return float(h.std())
+
+    a, t, yp = load_amazon_fraud(), load_tolokers(), load_yelpchi()
+    densities = [g["n_edges"] / g["n_nodes"] for g in (a, t, yp)]
+    assert densities[0] > densities[1] > densities[2], densities
+    sds = [node_hom_sd(g) for g in (a, t, yp)]
+    assert sds[1] > sds[0]
+    # the three graphs must not collapse onto one another
+    assert len({round(d, 1) for d in densities}) == 3

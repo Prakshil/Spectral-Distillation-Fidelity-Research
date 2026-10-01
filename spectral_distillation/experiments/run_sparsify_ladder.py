@@ -102,6 +102,9 @@ def _point_conditions(graph: dict, W: np.ndarray, args) -> dict[str, np.ndarray]
         epochs=args.router_epochs,
         seed=args.router_seed,
         device=args.device,
+        strategy=args.label_free_strategy,
+        order_feature=args.order_feature,
+        spectral_k=args.spectral_k,
     )
     return {"oracle": oracle, "label_free": label_free, "random": random, "uniform": uniform}
 
@@ -205,7 +208,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", default="configs/default.yaml")
     parser.add_argument("--dataset", default="amazon",
-                        choices=["amazon", "tolokers"],
+                        choices=["amazon", "tolokers", "yelpchi"],
                         help="real fraud graph to run on")
     parser.add_argument("--amazon-mat", default=None,
                         help="explicit path override for the amazon .mat")
@@ -225,7 +228,23 @@ def main() -> None:
     parser.add_argument("--random-seed", type=int, default=1)
     parser.add_argument("--adaptive-oracle", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--budget-oracle", action="store_true")
+    parser.add_argument("--label-free-strategy", default="kmeans",
+                        choices=["kmeans", "proxy_quantile"],
+                        help="label-free router bucketing strategy (see docs/d2_router_fix.md)")
+    parser.add_argument("--order-feature", default="hx",
+                        choices=["hx", "eig_nb_sim"],
+                        help="per-node scalar the router orders nodes by")
+    parser.add_argument("--spectral-k", type=int, default=8,
+                        help="number of eigenmodes used by spectral scores")
+    parser.add_argument("--out-suffix", default="",
+                        help="suffix for the output directory, e.g. _eig_nb_sim_pq")
+    parser.add_argument("--max-nodes", type=int, default=None,
+                        help="yelpchi only: cap the sampled node count "
+                             "(default loader cap 15000; use 0 for the full graph)")
     parser.add_argument("--skip-sd", action="store_true", help="skip spectral-distortion eigendecompositions")
+    parser.add_argument("--resume", action="store_true",
+                        help="keep (method, retention) points already present in ladder_results.jsonl "
+                             "and only compute the missing ones")
     parser.add_argument("--no-progress", action="store_true")
     parser.add_argument("--out", default="logs")
     parser.add_argument("--device", default="cuda")
@@ -254,7 +273,8 @@ def main() -> None:
     set_seed(args.router_seed)
 
     t0 = time.perf_counter()
-    graph = load_real_fraud(args.dataset, args.data_path or args.amazon_mat)
+    graph = load_real_fraud(args.dataset, args.data_path or args.amazon_mat,
+                             max_nodes=args.max_nodes or None)
     log.info("loaded %s fraud graph n=%d d=%d edges=%d pos=%.4f in %.1fs",
              args.dataset,
              graph["n_nodes"], graph["d_features"], graph["n_edges"],
@@ -270,7 +290,7 @@ def main() -> None:
 
     args._pc_control = _positive_control(args, log)
 
-    out_dir = ensure_dir(Path(args.out) / f"{args.dataset}_fraud_ladder")
+    out_dir = ensure_dir(Path(args.out) / f"{args.dataset}_fraud_ladder{args.out_suffix}")
     out_path = out_dir / "ladder_results.jsonl"
     summary = {
         "config": args.__dict__,
@@ -285,10 +305,30 @@ def main() -> None:
         "points": [],
     }
 
+    # Resume support: a full 15-point ladder on a large graph can exceed a
+    # single command timeout, and each point costs ~6 min. Reuse already-written
+    # (method, retention) rows instead of recomputing them.
     write_lines = []
+    done: set[tuple[str, float]] = set()
+    if args.resume and out_path.exists():
+        for line in out_path.read_text(encoding="utf-8").splitlines():
+            if not line.strip():
+                continue
+            row = json.loads(line)
+            write_lines.append(line)
+            done.add((str(row["method"]), float(row["retention"])))
+            summary["points"].append(row)
+        log.info(
+            "resuming: %d/%d points already present in %s",
+            len(done), len(budgets) * len(methods), out_path,
+        )
+
     for b in budgets:
         run_methods = ["-"] if b >= 1.0 else methods
         for m in run_methods:
+            if (m, float(b)) in done:
+                print(f"{m:<7} r={b:<5.2f} skipped (already in artifact)")
+                continue
             record = _run_point(graph, graph["W"], m, b, args, log)
             summary["points"].append(record)
             line = json.dumps(record, default=str)

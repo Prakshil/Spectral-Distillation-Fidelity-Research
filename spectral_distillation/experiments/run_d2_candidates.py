@@ -147,8 +147,11 @@ def bucket_from_score(score: np.ndarray, n_experts: int = 3) -> np.ndarray:
 
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--dataset", default="tolokers", choices=["amazon", "tolokers"])
+    p.add_argument("--dataset", default="tolokers", choices=["amazon", "tolokers", "yelpchi"])
     p.add_argument("--data-path", default=None)
+    p.add_argument("--max-nodes", type=int, default=None,
+                   help="yelpchi only: cap the sampled node count "
+                        "(default loader cap 15000; use 0 for the full graph)")
     p.add_argument("--splits", type=int, default=10)
     p.add_argument("--seeds", type=int, default=3)
     p.add_argument("--with-resistance", action="store_true",
@@ -167,7 +170,7 @@ def main() -> None:
     out_dir = ensure_dir(Path(args.out) / f"{args.dataset}_d2_candidates")
 
     t0 = time.perf_counter()
-    graph = load_real_fraud(args.dataset, args.data_path)
+    graph = load_real_fraud(args.dataset, args.data_path, max_nodes=args.max_nodes or None)
     log.info("loaded %s n=%d d=%d edges=%d pos=%.4f in %.1fs", args.dataset,
              graph["n_nodes"], graph["d_features"], graph["n_edges"],
              graph["positive_ratio"], time.perf_counter() - t0)

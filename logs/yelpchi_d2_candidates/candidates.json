@@ -1,0 +1,152 @@
+{
+  "dataset": "yelpchi",
+  "screen": [
+    {
+      "candidate": "eig_nb_sim",
+      "spearman_rho": -0.2605627058030455,
+      "p": 7.357658514542745e-229
+    },
+    {
+      "candidate": "neigh_feat_sim",
+      "spearman_rho": 0.154871491613774,
+      "p": 2.524735775736168e-80
+    },
+    {
+      "candidate": "neigh_degree",
+      "spearman_rho": -0.04480820480729491,
+      "p": 4.739999949907101e-08
+    },
+    {
+      "candidate": "degree",
+      "spearman_rho": -0.024813738577245975,
+      "p": 0.002502748168191588
+    },
+    {
+      "candidate": "eig_centrality",
+      "spearman_rho": 0.015695604430240734,
+      "p": 0.05587773384681165
+    },
+    {
+      "candidate": "local_clust",
+      "spearman_rho": 0.01503330184964409,
+      "p": 0.06705591074022461
+    }
+  ],
+  "evaluated": [
+    {
+      "name": "eig_nb_sim_vs_random",
+      "mean_diff": 0.004164420485175157,
+      "ci_low": 0.003397615093714387,
+      "ci_high": 0.004931225876635927,
+      "p_wilcoxon": 0.001953125,
+      "effect_size_dz": 4.095160577718014,
+      "significant": true
+    },
+    {
+      "name": "eig_nb_sim_vs_uniform",
+      "mean_diff": 0.0031671159029649345,
+      "ci_low": 0.002562994726614869,
+      "ci_high": 0.003771237079315,
+      "p_wilcoxon": 0.001953125,
+      "effect_size_dz": 3.9531329176746097,
+      "significant": true
+    },
+    {
+      "name": "neigh_feat_sim_vs_random",
+      "mean_diff": 0.0023989218328841046,
+      "ci_low": 0.0018176560424087809,
+      "ci_high": 0.0029801876233594283,
+      "p_wilcoxon": 0.001953125,
+      "effect_size_dz": 3.112023390050306,
+      "significant": true
+    },
+    {
+      "name": "neigh_feat_sim_vs_uniform",
+      "mean_diff": 0.0014016172506738811,
+      "ci_low": 0.0008324001406094585,
+      "ci_high": 0.0019708343607383037,
+      "p_wilcoxon": 0.001953125,
+      "effect_size_dz": 1.8567481822140708,
+      "significant": true
+    },
+    {
+      "name": "neigh_degree_vs_random",
+      "mean_diff": 0.0014330637915543453,
+      "ci_low": 0.0003667400416843573,
+      "ci_high": 0.0024993875414243334,
+      "p_wilcoxon": 0.013671875,
+      "effect_size_dz": 1.0133931404625083,
+      "significant": true
+    },
+    {
+      "name": "neigh_degree_vs_uniform",
+      "mean_diff": 0.00043575920934412203,
+      "ci_low": -0.00034952927904824334,
+      "ci_high": 0.0012210476977364874,
+      "p_wilcoxon": 0.275390625,
+      "effect_size_dz": 0.41842619252595686,
+      "significant": false
+    },
+    {
+      "name": "degree_vs_random",
+      "mean_diff": 0.0004132973944294682,
+      "ci_low": -0.0005440829646877008,
+      "ci_high": 0.0013706777535466372,
+      "p_wilcoxon": 0.4921875,
+      "effect_size_dz": 0.3255214963394831,
+      "significant": false
+    },
+    {
+      "name": "degree_vs_uniform",
+      "mean_diff": -0.0005840071877807551,
+      "ci_low": -0.0014020671110039063,
+      "ci_high": 0.000234052735442396,
+      "p_wilcoxon": 0.130859375,
+      "effect_size_dz": -0.5383126612499342,
+      "significant": false
+    },
+    {
+      "name": "oracle_vs_random",
+      "mean_diff": 0.04362084456424078,
+      "ci_low": 0.04258171148263504,
+      "ci_high": 0.04465997764584652,
+      "p_wilcoxon": 0.001953125,
+      "effect_size_dz": 31.653695350313683,
+      "significant": true
+    }
+  ],
+  "d2_family": [
+    {
+      "candidate": "eig_nb_sim",
+      "mean_diff": 0.004164420485175157,
+      "p_wilcoxon": 0.001953125,
+      "alpha_corrected": 0.0125,
+      "effect_size_dz": 4.095160577718014,
+      "d2_supported": true
+    },
+    {
+      "candidate": "neigh_feat_sim",
+      "mean_diff": 0.0023989218328841046,
+      "p_wilcoxon": 0.001953125,
+      "alpha_corrected": 0.016666666666666666,
+      "effect_size_dz": 3.112023390050306,
+      "d2_supported": true
+    },
+    {
+      "candidate": "neigh_degree",
+      "mean_diff": 0.0014330637915543453,
+      "p_wilcoxon": 0.013671875,
+      "alpha_corrected": 0.025,
+      "effect_size_dz": 1.0133931404625083,
+      "d2_supported": true
+    },
+    {
+      "candidate": "degree",
+      "mean_diff": 0.0004132973944294682,
+      "p_wilcoxon": 0.4921875,
+      "alpha_corrected": 0.05,
+      "effect_size_dz": 0.3255214963394831,
+      "d2_supported": false
+    }
+  ]
+}

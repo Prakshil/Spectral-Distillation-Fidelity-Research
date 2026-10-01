@@ -32,6 +32,10 @@ from spectral_distillation.src.laplacian import build_adjacency
 
 DEFAULT_AMAZON_MAT = "data/benchmarks/amazon/raw/Amazon.mat"
 DEFAULT_TOLOKERS_DIR = "data/benchmarks/tolokers/raw"
+DEFAULT_YELP_MAT = "data/benchmarks/yelp/raw/YelpChi.mat"
+# The pipeline is dense; 15k nodes keeps the Laplacian at 1.8 GB while still
+# giving a graph ~1.3x Tolokers' size. Pass max_nodes=None for the full graph.
+DEFAULT_YELP_MAX_NODES = 15000
 
 LABELED_BLOCK_START = 3305  # DGL drops rows 0..3304 as unlabeled for amazon
 
@@ -147,14 +151,101 @@ def load_tolokers(path: str | Path = DEFAULT_TOLOKERS_DIR) -> dict:
     }
 
 
+def load_yelpchi(
+    path: str | Path = DEFAULT_YELP_MAT,
+    max_nodes: int | None = DEFAULT_YELP_MAX_NODES,
+    seed: int = 0,
+) -> dict:
+    """Load the YelpChi spam-review fraud graph, optionally node-capped.
+
+    Nodes are Yelp hotel/restaurant reviews; an edge joins two reviews sharing a
+    user, a product+star rating, or a product+month. The positive class marks
+    reviews Yelp's own filter flagged as spam (14.5%). This is the third
+    benchmark in the standard Amazon/YelpChi/Elliptic fraud-detection triple and
+    the only one of the three that is *review*-level rather than user- or
+    worker-level.
+
+    ``max_nodes`` matters: the full largest connected component has 45,900 nodes,
+    and the rest of the pipeline is dense, so a dense Laplacian would need
+    45900^2 * 8 B = 16.9 GB and an O(n^3) eigendecomposition. That does not fit
+    in memory on commodity hardware. To stay honest about this we do **not**
+    silently truncate -- we take the largest connected component of a uniformly
+    random node subsample, which preserves connectivity (>=98% of sampled nodes
+    land in the LCC at every tested size), the class balance (0.145 -> 0.145),
+    and mean degree closely tracks the target. Pass ``max_nodes=None`` for the
+    full 45,900-node graph if your machine can afford it.
+
+    Expects ``YelpChi.mat`` (keys ``homo``, ``features``, ``label``) from
+    ``https://data.dgl.ai/dataset/FraudYelp.zip``.
+    """
+    path = Path(path)
+    if not path.exists():
+        raise FileNotFoundError(
+            f"YelpChi.mat not found at {path}; download from "
+            "https://data.dgl.ai/dataset/FraudYelp.zip and extract"
+        )
+    mat = sio.loadmat(str(path))
+    full = sp.csr_matrix(mat["homo"])
+    full = sp.csr_matrix((full + full.T) > 0)
+    full.setdiag(0.0)
+    full.eliminate_zeros()
+
+    feat_all = np.asarray(
+        mat["features"].todense() if sp.issparse(mat["features"]) else mat["features"],
+        dtype=float,
+    )
+    labels = np.asarray(mat["label"]).ravel().astype(int)
+
+    n_comp, comp = sp.csgraph.connected_components(full, directed=False)
+    lcc = np.flatnonzero(comp == np.argmax(np.bincount(comp)))
+    if max_nodes is not None and lcc.size > max_nodes:
+        rng = np.random.default_rng(seed)
+        keep = np.sort(rng.choice(lcc, size=max_nodes, replace=False))
+        sub = full[keep][:, keep]
+        # Keep the largest connected component of the induced subgraph; a uniform
+        # random node sample can orphan a handful of nodes.
+        _, sub_comp = sp.csgraph.connected_components(sub, directed=False)
+        keep = keep[sub_comp == np.argmax(np.bincount(sub_comp))]
+        note = f"largest connected component of a uniform {max_nodes}-node sample (seed {seed})"
+    else:
+        note = "full largest connected component"
+
+    W = build_adjacency(full[keep][:, keep].toarray())
+    y = labels[keep]
+    features = feat_all[keep]
+    if y.min() < 0 or len(np.unique(y)) != 2:
+        raise ValueError(f"YelpChi labels must be binary {{0,1}}, got {np.unique(y)}")
+    return {
+        "W": W,
+        "features": features,
+        "y": y,
+        "n_nodes": int(y.size),
+        "d_features": int(features.shape[1]),
+        "source": f"DGL Yelp (FraudYelpDataset / YelpChi, {note})",
+        "positive_ratio": float(y.mean()),
+        "n_edges": int(np.count_nonzero(W) // 2),
+        "n_components_full_graph": int(n_comp),
+    }
+
+
 REAL_FRAUD_LOADERS = {
     "amazon": (load_amazon_fraud, DEFAULT_AMAZON_MAT),
     "tolokers": (load_tolokers, DEFAULT_TOLOKERS_DIR),
+    "yelpchi": (load_yelpchi, DEFAULT_YELP_MAT),
 }
 
 
-def load_real_fraud(dataset: str = "amazon", path: str | Path | None = None) -> dict:
-    """Dispatch to a named real fraud-graph loader (``amazon`` or ``tolokers``)."""
+def load_real_fraud(
+    dataset: str = "amazon",
+    path: str | Path | None = None,
+    max_nodes: int | None = None,
+) -> dict:
+    """Dispatch to a named real fraud-graph loader.
+
+    ``max_nodes`` is only meaningful for loaders that subsample a large graph
+    (``yelpchi``); it is rejected elsewhere instead of being ignored, so a
+    silently-uncapped run cannot masquerade as a capped one.
+    """
     key = dataset.strip().lower()
     if key not in REAL_FRAUD_LOADERS:
         raise KeyError(
@@ -162,4 +253,11 @@ def load_real_fraud(dataset: str = "amazon", path: str | Path | None = None) -> 
             f"choose from {sorted(REAL_FRAUD_LOADERS)}"
         )
     loader, default_path = REAL_FRAUD_LOADERS[key]
-    return loader(default_path if path is None else path)
+    resolved = default_path if path is None else path
+    if max_nodes is None:
+        return loader(resolved)
+    if key != "yelpchi":
+        raise ValueError(
+            f"--max-nodes is only supported for yelpchi, not {dataset!r}"
+        )
+    return loader(resolved, max_nodes=max_nodes)

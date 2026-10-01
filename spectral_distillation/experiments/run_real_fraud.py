@@ -196,7 +196,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", default="configs/default.yaml")
     parser.add_argument("--dataset", default="amazon",
-                        choices=["amazon", "tolokers"],
+                        choices=["amazon", "tolokers", "yelpchi"],
                         help="real fraud graph to run on")
     parser.add_argument("--amazon-mat", default=None,
                         help="explicit path override for the amazon .mat")
@@ -220,6 +220,9 @@ def main() -> None:
                         help="score used to order/bucket routing channels: feature homophily (legacy) or spectral neighborhood similarity")
     parser.add_argument("--spectral-k", type=int, default=8,
                         help="number of nontrivial Laplacian modes used by eig_nb_sim")
+    parser.add_argument("--max-nodes", type=int, default=None,
+                        help="yelpchi only: cap the sampled node count "
+                             "(default loader cap 15000; use 0 for the full graph)")
     parser.add_argument("--no-progress", action="store_true", help="disable tqdm progress bars")
     parser.add_argument("--out", default="logs")
     parser.add_argument("--device", default="cuda")
@@ -239,7 +242,8 @@ def main() -> None:
     set_seed(args.router_seed)
 
     t0 = time.perf_counter()
-    graph = load_real_fraud(args.dataset, args.data_path or args.amazon_mat)
+    graph = load_real_fraud(args.dataset, args.data_path or args.amazon_mat,
+                             max_nodes=args.max_nodes or None)
     log.info(
         "loaded %s fraud graph n=%d d=%d edges=%d pos=%.4f in %.1fs",
              args.dataset,

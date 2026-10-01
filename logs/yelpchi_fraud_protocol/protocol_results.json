@@ -1,0 +1,119 @@
+{
+  "config": {
+    "config": "configs/default.yaml",
+    "dataset": "yelpchi",
+    "amazon_mat": null,
+    "data_path": null,
+    "top_k": 32,
+    "splits": 10,
+    "seeds": 3,
+    "router_epochs": 200,
+    "hidden_dim": 64,
+    "n_layers": 3,
+    "frozen_perms": 20,
+    "router_seed": 0,
+    "random_seed": 1,
+    "adaptive_oracle": true,
+    "budget_oracle": false,
+    "label_free_strategy": "kmeans",
+    "order_feature": "hx",
+    "spectral_k": 8,
+    "max_nodes": null,
+    "no_progress": true,
+    "out": "logs",
+    "device": "cuda"
+  },
+  "graph": {
+    "n_nodes": 14840,
+    "d_features": 32,
+    "n_edges": 411194,
+    "positive_ratio": 0.14973045822102427,
+    "n_labels": 2,
+    "source": "DGL Yelp (FraudYelpDataset / YelpChi, largest connected component of a uniform 15000-node sample (seed 0))"
+  },
+  "assignments_usage": {
+    "oracle": [
+      4978,
+      4914,
+      4948
+    ],
+    "label_free": [
+      958,
+      5630,
+      8252
+    ],
+    "random": [
+      4995,
+      4839,
+      5006
+    ],
+    "uniform": [
+      14840,
+      0,
+      0
+    ]
+  },
+  "findings": {
+    "D1": true,
+    "D2": true,
+    "D3": true,
+    "D4": true,
+    "D1_p": 0.001953125,
+    "D2_p": 0.001953125,
+    "D3_p": 0.001953125,
+    "D4_p": 0.03125,
+    "verdict": "Supported: signal exists, router finds it, not capacity, instrument valid."
+  },
+  "comparisons": {
+    "oracle_vs_uniform": {
+      "mean_diff": 0.042623539982030556,
+      "ci_low": 0.041377906132110634,
+      "ci_high": 0.04386917383195048,
+      "p_wilcoxon": 0.001953125,
+      "p_paired_t": 5.071859475538337e-14,
+      "effect_size_dz": 25.802431504449686,
+      "significant": true
+    },
+    "label_free_vs_random": {
+      "mean_diff": 0.005745732255166236,
+      "ci_low": 0.004744568016946337,
+      "ci_high": 0.006746896493386135,
+      "p_wilcoxon": 0.001953125,
+      "p_paired_t": 3.927800145136168e-07,
+      "effect_size_dz": 4.3275448325296875,
+      "significant": true
+    },
+    "oracle_vs_random": {
+      "mean_diff": 0.044267744833782596,
+      "ci_low": 0.042986740933266036,
+      "ci_high": 0.045548748734299156,
+      "p_wilcoxon": 0.001953125,
+      "p_paired_t": 4.64214509432158e-14,
+      "effect_size_dz": 26.057843128283338,
+      "significant": true
+    }
+  },
+  "frozen": {
+    "learned": 0.8641509433962264,
+    "oracle_onehot": 0.9016172506738545,
+    "equal": 0.8599730458221024,
+    "global_mean": 0.8599730458221024,
+    "node_shuffled_mean": 0.8593396226415093,
+    "node_shuffled_std": 0.0010282409466421886
+  },
+  "control": {
+    "pc_n_nodes": 2000,
+    "oracle_vs_uniform": {
+      "mean_diff": 0.25341325341325344,
+      "p_wilcoxon": 0.03125
+    },
+    "label_free_vs_random": {
+      "mean_diff": 0.026473526473526483,
+      "p_wilcoxon": 0.03125
+    },
+    "oracle_vs_random": {
+      "mean_diff": 0.2798867798867799,
+      "p_wilcoxon": 0.03125
+    }
+  }
+}

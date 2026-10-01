@@ -25,14 +25,20 @@ Method: `experiments/run_sparsify_ladder.py --dataset {amazon,tolokers,yelpchi}`
 | | Amazon | Tolokers | YelpChi |
 |---|---|---|---|
 | D1 oracle > uniform | +0.0028 (dz 2.68) ✅ | **+0.0365 (dz 14.94)** ✅ | **+0.0426 (dz 25.74)** ✅ |
-| D2 label-free > random | −0.00015 ❌ | −0.0003 ❌ | **+0.0048 (dz 6.73)** ✅ |
+| D2 label-free > random (legacy) | −0.00015 ❌ | −0.0003 ❌ | **+0.0058 (dz 4.33)** ✅ |
+| D2 label-free > random (fixed) | +0.0004 (p 0.23) ❌ | **+0.0040 (dz 4.24)** ✅ | +0.0048 (dz 6.73) ✅ |
 | D3 oracle > random | +0.0038 ✅ | **+0.0368** ✅ | **+0.0443 (dz 26.06)** ✅ |
 | D4 positive control | ✅ | ✅ | ✅ |
 
-The D2 column above is the **legacy** router, which is what every ladder in this file uses. The
-D2 *fix* (`--label-free-strategy proxy_quantile --order-feature eig_nb_sim`, see
-`docs/d2_router_fix.md`) changes the verdict on Tolokers and YelpChi; legacy-vs-fixed ladder
-comparisons live in `logs/yelpchi_fraud_ladder_eig_nb_sim_pq/`.
+The D2 column above is the **legacy** router, which is what every ladder in this file uses. On
+YelpChi the legacy router **already passes** D2 (+0.00575, CI [+0.00474, +0.00675], dz 4.33 on
+the unpruned graph), so YelpChi is a graph where a label-free signal exists — not a graph where
+the D2 fix was required. The fix (`--label-free-strategy proxy_quantile --order-feature
+eig_nb_sim`, see `docs/d2_router_fix.md`) changes the verdict on **Tolokers only**
+(−0.0003 p=0.70 → +0.0040 dz 4.24); on YelpChi it gives a lower mean (+0.00481) with a higher
+effect size (dz 6.73) and overlapping CIs, and under ER pruning it is non-significant at
+r=0.08 where legacy is not. Full-router comparison:
+`logs/{yelpchi_fraud_protocol,yelpchi_fraud_protocol_eig_nb_sim_pq}/protocol_results.json`.
 
 **Oracle-signal magnitude tracks node-level homophily spread.** Node-homophily sd is 0.063 on
 Amazon, 0.241 on Tolokers (3.8×), 0.257 on YelpChi (4.1×); D1 is +0.0028 vs +0.0365 vs +0.0426
@@ -112,8 +118,14 @@ oracle ceiling (`docs/d2_router_fix.md`).
 - **Supported (three datasets):** ER *can* amplify D1, but only where full-graph oracle signal is
   strong enough to survive pruning (Amazon ~7× at 6–8%, YelpChi 2.3× at 15%). Not universal, not
   a single-dataset artifact.
-- **Supported (two of three, with the fix):** label-free D2 routing works with the
-  `proxy_quantile` + `eig_nb_sim` router. Amazon still fails.
+- **Supported (two of three):** a recoverable label-free routing signal exists on Tolokers and
+  YelpChi. Amazon has none.
+- **Supported on one graph only:** the `proxy_quantile` + `eig_nb_sim` fix changes a D2 failure
+  into a pass on Tolokers. YelpChi passes under the legacy router anyway (overlapping CIs, higher
+  legacy mean), and Amazon fails under both.
+- **Not supported:** "the fix unlocks D2 on two of three graphs." An earlier draft of this file
+  claimed that on the strength of a 3×1 pilot whose p=0.25 is the n=3 resolution floor. The full
+  legacy run refutes it.
 - **Refuted:** degree pruning as a general D2 lever.
 - **Open:** D2 on dense/saturated graphs; a scale-appropriate spectral-similarity metric (SD
   saturates on all three); `--spectral-k` tuning (fixed at 8 everywhere).

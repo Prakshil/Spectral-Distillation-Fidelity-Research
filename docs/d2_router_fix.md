@@ -70,6 +70,15 @@ The honest conclusion is that a single universal label-free proxy does not exist
 across these graphs. The router now works where a good proxy exists, and the
 failure mode is measurable in advance via the stage-1 screen.
 
+**Third-graph update (YelpChi).** YelpChi passes D1–D4, but **under the legacy
+router as well** (D2 +0.00575, CI [+0.00474, +0.00675], dz 4.33) — the fix gives
++0.00481 (CI [+0.00427, +0.00535], dz 6.73). The CIs overlap, the legacy mean is
+higher, and under ER pruning the fix is non-significant at r=0.08 where legacy is
+not. So the fix is a **Tolokers-only** improvement, not a two-of-three one. The
+result that generalizes is weaker and more believable: *two of three real fraud
+graphs have a recoverable label-free routing signal, and it does not matter much
+which bucketing rule you use to find it.* See `docs/yelpchi_third_graph.md`.
+
 ## Reproduction
 
 ```bash

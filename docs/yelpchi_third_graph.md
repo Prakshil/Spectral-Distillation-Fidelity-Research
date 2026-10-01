@@ -77,30 +77,51 @@ Full protocol, 10 splits × 3 seeds, 20-permutation frozen gate, with the D2 fix
 | D3 oracle vs random | +0.0443 (p 0.001953, dz 26.06) |
 | verdict | **Supported** |
 
-YelpChi is the **second real fraud graph to pass D1–D4 end to end**, and the
-strongest yet: D2 recovers ~11% of the oracle gain at `dz = 6.73`.
+YelpChi is the **second real fraud graph to pass D1–D4 end to end**. Note this
+result holds for the legacy router too (see the cross-graph table below), so it is
+evidence that *YelpChi has a recoverable label-free signal*, not evidence that the
+D2 fix is what unlocked it.
 
 ## The cross-graph pattern
 
-| graph | D2 (fixed router) | D2 (legacy router) | verdict | best proxy rho |
+Full 10×3 runs of both routers on every graph (no pilots):
+
+| graph | D2 legacy (kmeans+hx) | D2 fixed (pq+eig_nb_sim) | which wins | verdict |
 |---|---|---|---|---|
-| Tolokers | +0.0040 (dz 4.24) | −0.0003 (p 0.70) | Supported | `eig_nb_sim` +0.42 |
-| YelpChi | +0.0048 (dz 6.73) | +0.0043 (p 0.25)† | Supported | `eig_nb_sim` −0.26 |
-| Amazon | +0.0004 (p 0.23) | −0.00015 | Not supported | `eig_centrality` −0.51 |
+| Tolokers | −0.0003 (p 0.70) | **+0.0040 (dz 4.24)** | fixed, decisively | Supported |
+| YelpChi | **+0.0058 (dz 4.33)** | +0.0048 (dz 6.73) | legacy on mean, fixed on dz | Supported |
+| Amazon | −0.00015 | +0.0004 (p 0.23) | neither | Not supported |
 
-† YelpChi's legacy number is from a 3×1 pilot, not a full run.
+**YelpChi is not a win for the fix — the legacy router already passes D2 there.**
+The full legacy run gives +0.00575 (CI [+0.00474, +0.00675], dz 4.33) versus the
+fix's +0.00481 (CI [+0.00427, +0.00535], dz 6.73). The CIs overlap, so on mean
+difference the two routers are not separated, but the legacy router's mean is
+higher while the fix's effect size is higher — the fix produces a more
+*consistent* signal across splits rather than a larger one. An earlier draft of
+this document claimed the fix was required to unlock YelpChi; that came from a
+3×1 pilot whose p=0.25 is the *resolution floor* for n=3, not evidence of failure.
+The full run refutes it. Artifact:
+`logs/yelpchi_fraud_protocol/protocol_results.json`.
 
-The consistent finding across all three: **`eig_nb_sim` works as a routing proxy
-regardless of the sign of its correlation with label homophily.** On Tolokers it
-correlates +0.42 with homophily and delivers +0.0040; on YelpChi it correlates
-−0.26 and delivers the *largest* gain of the three. What matters is not the sign
-but that the proxy captures neighborhood smoothness, and that structure is what
-routing exploits. Amazon's `eig_centrality` is the mirror image: strongest
-correlation (−0.51), weakest delivery (+0.0009 against a +0.0040 oracle).
+The honest reading across the three graphs:
 
-The practical rule the three graphs support: **run the stage-1 screen first, then
-pick by delivered D2 gain, not by |rho|.** Correlation with the oracle's score is
-not the same objective as the gain the oracle's score actually produces.
+- **The fix matters on one graph, not two.** Tolokers is the only case where the
+  legacy router genuinely fails (p=0.70) and the fix succeeds. Reporting YelpChi
+  as a second fix success would have been wrong.
+- **D2 is router-agnostic where the graph supports it.** Two of three graphs have
+  a recoverable label-free signal; *how* you bucket it barely matters. That is a
+  weaker and more believable claim than "our router is what unlocks D2."
+- **`eig_nb_sim` correlates with homophily in the wrong direction on YelpChi**
+  (−0.26) yet both routers still deliver. So the routing signal is *not* the
+  homophily proxy being correlated — it is neighborhood structure that both
+  orderings recover. This weakens the "spectral-smoothness proxy" mechanism
+  story and should be described as an open question, not a settled mechanism.
+- **Amazon still fails under both.** Its best candidate reaches ~23% of its
+  oracle ceiling.
+
+The practical rule the three graphs support: **screen candidates for correlation,
+but decide by delivered D2 gain, and run both routers before claiming a fix
+helps.** The p-value on a small-n pilot is not a failure signal.
 
 ## Retention ladder
 
@@ -135,12 +156,13 @@ replicate to YelpChi or Amazon.
 - Amazon still fails D2 and remains unresolved; its best candidate reaches only
   ~23% of its oracle ceiling.
 
-### Note: fixed router vs ladder
+### Note: fixed router under the ladder
 
-The fixed router (proxy_quantile, order_feature=eig_nb_sim) passes D1–D4
-on the **unpruned** YelpChi graph with D2 +0.0048 (p 0.001953, dz 6.73). Under ER
-sparsification its D2 gain shifts with budget: significant at r=0.30 and 0.04,
-smaller at 0.15/0.60, and non-significant at 0.08 (+0.00060, p 0.193, dz 0.52)
-on the pruned topology. The unpruned full-protocol result is the canonical one
-for the rule verdict; ladder-wise D2 with the fixed router is budget-dependent
-(see logs/yelpchi_fraud_ladder_eig_nb_sim_pq/ladder_results.jsonl).
+The D2 fix was re-run under ER sparsification
+(`logs/yelpchi_fraud_ladder_eig_nb_sim_pq/`). D1 is bit-identical to the legacy
+ladder at every point, confirming D1 is router-independent. Fixed-router D2 under
+ER is budget-sensitive: significant at r=0.30 (+0.0027, dz 3.20) and r=0.04
+(+0.0031, dz 4.28), smaller at 0.15/0.60, and **non-significant at r=0.08**
+(+0.00060, p 0.193, dz 0.52) where the legacy router is significant (+0.0055,
+dz 7.21). Under ER pruning the fix is therefore not uniformly better and loses
+at r=0.08.

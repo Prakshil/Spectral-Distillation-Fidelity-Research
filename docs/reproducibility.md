@@ -308,14 +308,16 @@ Goal: move off the synthetic ERP generator onto real attention matrices.
 - ~~**NEW lead (D2):** on Tolokers, degree pruning *significantly improves* D2 (+0.0055 at
   r=0.08, p at floor)~~ — **superseded.** The lead does not replicate: degree pruning leaves D2
   near zero on YelpChi (+0.0001..+0.0013) and Amazon. Do not treat "degree pruning unlocks D2"
-  as a general mechanism. What did replicate was the D2 *router* fix
-  (`--label-free-strategy proxy_quantile --order-feature eig_nb_sim`, `docs/d2_router_fix.md`),
-  which passes D2 on Tolokers and YelpChi.
+   as a general mechanism. What *is* supported is the D2 **router** fix
+   (`--label-free-strategy proxy_quantile --order-feature eig_nb_sim`, `docs/d2_router_fix.md`),
+   which converts D2 from fail to pass on **Tolokers only**.
 - **DONE (third real graph): YelpChi review fraud** — 14,840 nodes (capped sample, see
   `docs/yelpchi_third_graph.md`), 411k edges, 15.0% spam, 32 features. Full protocol **passes
-  D1-D4** (D2 +0.0048, p 0.001953, dz 6.73). Establishes the 3-dataset generality claim and
-  shows `eig_nb_sim` works regardless of the sign of its homophily correlation (-0.26 here,
-  +0.42 on Tolokers): proxy `|rho|` is not the delivery objective.
+  D1-D4** under the legacy router (D2 +0.00575, dz 4.33) and under the fix (+0.00481, dz 6.73,
+  overlapping CIs). Establishes the 3-dataset generality claim. It does **not** add a second
+  fix success: the label-free signal is present either way, and `eig_nb_sim` correlates
+  -0.26 with label homophily here while still delivering — so the homophily-proxy mechanism is
+  an open question, not a settled one.
 - **Outstanding:** D2 on dense/homophilic real graphs (no method unlocks it on Amazon, whose
   best candidate reaches ~23% of its oracle ceiling); a scale-appropriate spectral-similarity
   metric (SD saturates on all three graphs); tuning `--spectral-k`, untuned at 8 across all three.

@@ -552,6 +552,46 @@ def test_frozen_intervention_learned_within_permutation_range():
 
 
 # --------------------------------------------------------------------------- #
+# channel-permutation invariance of hard-routed mixture accuracy
+# --------------------------------------------------------------------------- #
+
+def test_mixture_accuracy_invariant_to_channel_permutation():
+    """Hard routing makes accuracy depend only on the induced partition.
+
+    ``fit_experts`` trains expert ``k`` on exactly the nodes routed to ``k`` and
+    ``mixture_accuracy`` scores expert ``k`` on exactly those nodes, so the
+    total is ``sum_k acc(group_k trained on group_k)``. Permuting channel
+    labels therefore cannot change the score.
+
+    Consequence for the candidate search: negating a score only swaps which
+    quantile bucket is labelled 0 vs 2, so D2 is provably invariant to score
+    sign. Orientation-by-sign is a no-op, and a candidate cannot be rescued or
+    broken by flipping it. This test pins that property so a future change to
+    routing does not silently alter previously reported D2 values.
+    """
+    from spectral_distillation.src.mixture import fit_experts, mixture_accuracy
+
+    rng = np.random.default_rng(0)
+    n, d, k = 300, 6, 3
+    X = rng.normal(size=(n, d))
+    y = (X[:, 0] + 0.5 * rng.normal(size=n) > 0).astype(int)
+    score = rng.normal(size=n)
+
+    onehot = np.zeros((n, k))
+    onehot[np.arange(n), np.argsort(np.argsort(score)) % k] = 1.0
+    permuted = onehot[:, [2, 1, 0]]
+
+    train = np.zeros(n, dtype=bool)
+    train[:200] = True
+    test = ~train
+
+    acc_a, _ = mixture_accuracy(X, y, onehot, fit_experts(X, y, onehot, train), test)
+    acc_b, _ = mixture_accuracy(X, y, permuted, fit_experts(X, y, permuted, train), test)
+
+    assert acc_a == pytest.approx(acc_b, abs=1e-12)
+
+
+# --------------------------------------------------------------------------- #
 # fixtures
 # --------------------------------------------------------------------------- #
 

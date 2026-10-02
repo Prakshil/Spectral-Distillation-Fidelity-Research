@@ -41,9 +41,20 @@ by the router). Artifacts: `logs/{amazon,tolokers}_d2_candidates/candidates.json
 | `degree` | -0.0656 | +0.3124 |
 
 Candidate scores are oriented by the sign of `rho` so that higher always means
-more label-homophilic. Without this, a strongly anti-correlated candidate is fed
-to the router reversed and can never work — this silently invalidated `neigh_degree`
-on Amazon in an earlier run.
+more label-homophilic.
+
+> **Correction (2026-10-02).** This orientation step is a **no-op for the D2
+> metric**, and the earlier claim that a reversed candidate "can never work" was
+> wrong. `fit_experts` trains expert `k` on exactly the nodes routed to `k`, and
+> `mixture_accuracy` scores expert `k` on exactly those nodes, so accuracy equals
+> `sum_k acc(group_k trained on group_k)` — the channel *index* is irrelevant.
+> Negating a score merely swaps which quantile bucket is labelled 0 vs 2. D2 is
+> therefore provably invariant to score sign, and `rho` cannot tell you whether a
+> candidate works. See `tests/test_protocol.py::
+> test_mixture_accuracy_invariant_to_channel_permutation` and
+> `docs/amazon_candidate_search.md`. The measured `rho` values below remain
+> correct as descriptions of the scores; only the causal reading of the sign
+> flip was wrong.
 
 ## Result
 
@@ -102,8 +113,10 @@ every previously committed artifact still reproduces exactly; the fix is opt-in.
 - `sd_laplacian` is `0.0` in the ladder artifacts; that is a `--skip-sd` placeholder,
   not a measured distortion.
 - The Amazon `eig_centrality` gain (`+0.00093`, dz 1.67) is Holm-significant but
-  its `rho = -0.51` means the sign-flip orientation is doing real work. Treat it as
-  suggestive rather than established.
+  only over the 6-candidate family screened at the time. Its `rho = -0.51` does
+  **not** mean a label-derived sign flip is doing the work: D2 is invariant to
+  score sign. Re-tested against a predeclared 28-candidate family it does not
+  survive Holm correction. Treat it as a screening artifact, not a fix.
 - `eig_nb_sim` uses 8 nontrivial Laplacian modes (`--spectral-k`); the value is
   untuned and may be sensitive.
 - Only two real fraud graphs have been tested. A third is required before claiming

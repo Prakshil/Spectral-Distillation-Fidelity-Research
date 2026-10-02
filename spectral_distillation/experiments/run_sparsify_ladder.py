@@ -34,13 +34,14 @@ from pathlib import Path
 import numpy as np
 
 from spectral_distillation.src.baselines import degree_sparsify, random_sparsify
-from spectral_distillation.src.distortion import compute_spectral_distortion
+from spectral_distillation.src.distortion import spectral_distortion_profile
 from spectral_distillation.src.effective_resistance import effective_resistance_exact
 from spectral_distillation.src.evaluation import (
     combine_comparisons,
     run_protocol,
 )
 from spectral_distillation.src.laplacian import compute_laplacian
+from scipy.linalg import eigvalsh
 from spectral_distillation.src.mixture import fit_experts, mixture_accuracy, train_test_split
 from spectral_distillation.src.planted_control import generate_pc_graph
 from spectral_distillation.src.real_fraud import load_real_fraud
@@ -152,11 +153,16 @@ def _run_point(graph: dict, W: np.ndarray, method: str, retention: float, args, 
     comparisons = {name: _comparison_dict(c) for name, c in combine_comparisons(results).items()}
 
     sd = 0.0
+    sd_profile = {}
     if retention < 1.0 and not args.skip_sd:
-        sd = compute_spectral_distortion(
-            compute_laplacian(graph["W"]), compute_laplacian(W_pt)
+        sd_profile = spectral_distortion_profile(
+            None, compute_laplacian(W_pt), ref_eigenvalues=args._ref_eigenvalues
         )
-        log.info("  SD vs original = %.4f", sd)
+        sd = sd_profile["SD"]
+        log.info("  SD vs original = %.4f (median %.2e, p99 %.2e, argmax mode %d/%d)",
+                 sd, sd_profile["median_relative_error"],
+                 sd_profile["p99_relative_error"], sd_profile["argmax_index"],
+                 args._ref_eigenvalues.size - 1)
 
     decisions = evaluate_decision_rules(
         comparisons=comparisons, control_comparisons=args._pc_control
@@ -169,6 +175,7 @@ def _run_point(graph: dict, W: np.ndarray, method: str, retention: float, args, 
         "n_edges_orig": n_orig,
         "fraction_kept": n_kept / n_orig,
         "sd_laplacian": float(sd),
+        "sd_profile": sd_profile,
         "edge_label_homophily": _homophily_mean(W_pt, graph["y"]),
         "assignments_usage": {
             name: np.bincount(np.argmax(a, axis=1), minlength=3).tolist()
@@ -288,12 +295,28 @@ def main() -> None:
     else:
         args._er_resistance = None
 
+    # The reference Laplacian is identical at every retention point, so its
+    # spectrum is computed once up front and the O(n^2) buffer is released.
+    # This keeps a 1.9 GB dense matrix from sitting next to the ER matrix for
+    # the whole run and halves the per-point SD cost.
+    args._ref_laplacian = None
+    args._ref_eigenvalues = None
+    if not args.skip_sd:
+        t0 = time.perf_counter()
+        args._ref_eigenvalues = np.sort(eigvalsh(compute_laplacian(graph["W"])))
+        log.info("cached reference spectrum (%d eigenvalues) in %.1fs; SD will now "
+                 "cost one eigvalsh per point instead of two",
+                 args._ref_eigenvalues.size, time.perf_counter() - t0)
+
     args._pc_control = _positive_control(args, log)
 
     out_dir = ensure_dir(Path(args.out) / f"{args.dataset}_fraud_ladder{args.out_suffix}")
     out_path = out_dir / "ladder_results.jsonl"
     summary = {
-        "config": args.__dict__,
+        # Private ``_``-prefixed args are runtime caches, not configuration:
+        # _er_resistance is a dense O(n^2) matrix and json.dumps(default=str)
+        # would serialize it as a multi-megabyte ellipsis-truncated blob.
+        "config": {k: v for k, v in args.__dict__.items() if not k.startswith("_")},
         "graph": {
             "n_nodes": graph["W"].shape[0],
             "d_features": graph["d_features"],

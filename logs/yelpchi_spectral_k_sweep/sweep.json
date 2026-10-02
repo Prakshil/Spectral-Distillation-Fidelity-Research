@@ -1,0 +1,142 @@
+{
+  "config": {
+    "dataset": "yelpchi",
+    "data_path": null,
+    "max_nodes": null,
+    "spectral_ks": [
+      2,
+      4,
+      8,
+      16,
+      32,
+      64,
+      128
+    ],
+    "splits": 10,
+    "seeds": 3,
+    "top_k": 32,
+    "seed": 0,
+    "no_adaptive_oracle": false,
+    "no_progress": true,
+    "out": "logs",
+    "device": "cpu"
+  },
+  "graph": {
+    "n_nodes": 14840,
+    "d_features": 32,
+    "n_edges": 411194,
+    "positive_ratio": 0.14973045822102427,
+    "source": "DGL Yelp (FraudYelpDataset / YelpChi, largest connected component of a uniform 15000-node sample (seed 0))"
+  },
+  "rows": [
+    {
+      "spectral_k": 2,
+      "d2_mean_diff": 0.004317160826594779,
+      "d2_p_wilcoxon": 0.001953125,
+      "d2_effect_size_dz": 5.359689779660813,
+      "d2_significant": true,
+      "d1_mean_diff": 0.042623539982030556,
+      "spearman_score_vs_label_homophily": -0.24868857762642393,
+      "usage": [
+        4947,
+        4945,
+        4948
+      ],
+      "seconds": 0.570205900000019
+    },
+    {
+      "spectral_k": 4,
+      "d2_mean_diff": 0.004191374663072811,
+      "d2_p_wilcoxon": 0.001953125,
+      "d2_effect_size_dz": 5.512994447897561,
+      "d2_significant": true,
+      "d1_mean_diff": 0.042623539982030556,
+      "spearman_score_vs_label_homophily": -0.23335985989912542,
+      "usage": [
+        4947,
+        4946,
+        4947
+      ],
+      "seconds": 0.5314550999999028
+    },
+    {
+      "spectral_k": 8,
+      "d2_mean_diff": 0.004811320754716975,
+      "d2_p_wilcoxon": 0.001953125,
+      "d2_effect_size_dz": 6.766970363443116,
+      "d2_significant": true,
+      "d1_mean_diff": 0.042623539982030556,
+      "spearman_score_vs_label_homophily": -0.26023269641894803,
+      "usage": [
+        4947,
+        4946,
+        4947
+      ],
+      "seconds": 0.5536831000001712
+    },
+    {
+      "spectral_k": 16,
+      "d2_mean_diff": 0.003526504941599273,
+      "d2_p_wilcoxon": 0.001953125,
+      "d2_effect_size_dz": 3.783626866983061,
+      "d2_significant": true,
+      "d1_mean_diff": 0.042623539982030556,
+      "spearman_score_vs_label_homophily": -0.2083372548305956,
+      "usage": [
+        4947,
+        4946,
+        4947
+      ],
+      "seconds": 0.5367848000000777
+    },
+    {
+      "spectral_k": 32,
+      "d2_mean_diff": 0.004070080862533698,
+      "d2_p_wilcoxon": 0.001953125,
+      "d2_effect_size_dz": 3.5372278661078407,
+      "d2_significant": true,
+      "d1_mean_diff": 0.042623539982030556,
+      "spearman_score_vs_label_homophily": -0.2274906927345605,
+      "usage": [
+        4947,
+        4946,
+        4947
+      ],
+      "seconds": 0.54680529999996
+    },
+    {
+      "spectral_k": 64,
+      "d2_mean_diff": 0.004968553459119484,
+      "d2_p_wilcoxon": 0.001953125,
+      "d2_effect_size_dz": 4.747874436156253,
+      "d2_significant": true,
+      "d1_mean_diff": 0.042623539982030556,
+      "spearman_score_vs_label_homophily": -0.22533200915007517,
+      "usage": [
+        4947,
+        4946,
+        4947
+      ],
+      "seconds": 0.5587623999999778
+    },
+    {
+      "spectral_k": 128,
+      "d2_mean_diff": 0.006491464510332445,
+      "d2_p_wilcoxon": 0.001953125,
+      "d2_effect_size_dz": 6.638155240052119,
+      "d2_significant": true,
+      "d1_mean_diff": 0.042623539982030556,
+      "spearman_score_vs_label_homophily": -0.2883484829464718,
+      "usage": [
+        4947,
+        4946,
+        4947
+      ],
+      "seconds": 0.5902880999999525
+    }
+  ],
+  "best_k_by_d2": 128,
+  "best_d2_mean_diff": 0.006491464510332445,
+  "default_k8_d2_mean_diff": 0.004811320754716975,
+  "default_k8_is_best": false
+}

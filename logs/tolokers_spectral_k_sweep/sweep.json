@@ -1,0 +1,142 @@
+{
+  "config": {
+    "dataset": "tolokers",
+    "data_path": null,
+    "max_nodes": null,
+    "spectral_ks": [
+      2,
+      4,
+      8,
+      16,
+      32,
+      64,
+      128
+    ],
+    "splits": 10,
+    "seeds": 3,
+    "top_k": 32,
+    "seed": 0,
+    "no_adaptive_oracle": false,
+    "no_progress": true,
+    "out": "logs",
+    "device": "cpu"
+  },
+  "graph": {
+    "n_nodes": 11758,
+    "d_features": 10,
+    "n_edges": 519000,
+    "positive_ratio": 0.21823439360435448,
+    "source": "Tolokers (GADBench/NEExT crowd-worker exclusion graph)"
+  },
+  "rows": [
+    {
+      "spectral_k": 2,
+      "d2_mean_diff": 0.002630832908090919,
+      "d2_p_wilcoxon": 0.001953125,
+      "d2_effect_size_dz": 2.377643305958395,
+      "d2_significant": true,
+      "d1_mean_diff": 0.03654816578783242,
+      "spearman_score_vs_label_homophily": 0.3819714192460365,
+      "usage": [
+        3920,
+        3918,
+        3920
+      ],
+      "seconds": 0.35688470000013695
+    },
+    {
+      "spectral_k": 4,
+      "d2_mean_diff": 0.004836423428020609,
+      "d2_p_wilcoxon": 0.001953125,
+      "d2_effect_size_dz": 6.648457910563986,
+      "d2_significant": true,
+      "d1_mean_diff": 0.03654816578783242,
+      "spearman_score_vs_label_homophily": 0.4100212146364735,
+      "usage": [
+        3920,
+        3918,
+        3920
+      ],
+      "seconds": 0.35308099999997467
+    },
+    {
+      "spectral_k": 8,
+      "d2_mean_diff": 0.004042637636786273,
+      "d2_p_wilcoxon": 0.001953125,
+      "d2_effect_size_dz": 4.242770049724533,
+      "d2_significant": true,
+      "d1_mean_diff": 0.03654816578783242,
+      "spearman_score_vs_label_homophily": 0.4180063121528543,
+      "usage": [
+        3920,
+        3918,
+        3920
+      ],
+      "seconds": 0.3642594000000372
+    },
+    {
+      "spectral_k": 16,
+      "d2_mean_diff": 0.0052616658161818595,
+      "d2_p_wilcoxon": 0.001953125,
+      "d2_effect_size_dz": 4.142031724518164,
+      "d2_significant": true,
+      "d1_mean_diff": 0.03654816578783242,
+      "spearman_score_vs_label_homophily": 0.4192898828989323,
+      "usage": [
+        3920,
+        3918,
+        3920
+      ],
+      "seconds": 0.3531308000001445
+    },
+    {
+      "spectral_k": 32,
+      "d2_mean_diff": 0.004320462663718305,
+      "d2_p_wilcoxon": 0.001953125,
+      "d2_effect_size_dz": 5.677090072157234,
+      "d2_significant": true,
+      "d1_mean_diff": 0.03654816578783242,
+      "spearman_score_vs_label_homophily": 0.3761201255182004,
+      "usage": [
+        3920,
+        3918,
+        3920
+      ],
+      "seconds": 0.3642061000000467
+    },
+    {
+      "spectral_k": 64,
+      "d2_mean_diff": 0.002313318591597213,
+      "d2_p_wilcoxon": 0.00390625,
+      "d2_effect_size_dz": 2.163733227140515,
+      "d2_significant": true,
+      "d1_mean_diff": 0.03654816578783242,
+      "spearman_score_vs_label_homophily": 0.343404689500732,
+      "usage": [
+        3920,
+        3918,
+        3920
+      ],
+      "seconds": 0.376448499999924
+    },
+    {
+      "spectral_k": 128,
+      "d2_mean_diff": 0.008629585530418971,
+      "d2_p_wilcoxon": 0.001953125,
+      "d2_effect_size_dz": 7.818401454827369,
+      "d2_significant": true,
+      "d1_mean_diff": 0.03654816578783242,
+      "spearman_score_vs_label_homophily": 0.36236849677396765,
+      "usage": [
+        3920,
+        3918,
+        3920
+      ],
+      "seconds": 0.4171476999999868
+    }
+  ],
+  "best_k_by_d2": 128,
+  "best_d2_mean_diff": 0.008629585530418971,
+  "default_k8_d2_mean_diff": 0.004042637636786273,
+  "default_k8_is_best": false
+}

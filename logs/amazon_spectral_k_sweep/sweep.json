@@ -1,0 +1,142 @@
+{
+  "config": {
+    "dataset": "amazon",
+    "data_path": null,
+    "max_nodes": null,
+    "spectral_ks": [
+      2,
+      4,
+      8,
+      16,
+      32,
+      64,
+      128
+    ],
+    "splits": 10,
+    "seeds": 3,
+    "top_k": 32,
+    "seed": 0,
+    "no_adaptive_oracle": false,
+    "no_progress": true,
+    "out": "logs",
+    "device": "cpu"
+  },
+  "graph": {
+    "n_nodes": 8639,
+    "d_features": 25,
+    "n_edges": 3298534,
+    "positive_ratio": 0.09503414747077207,
+    "source": "DGL Amazon (FraudAmazonDataset, homo block 3305+)"
+  },
+  "rows": [
+    {
+      "spectral_k": 2,
+      "d2_mean_diff": 0.0006327160493827422,
+      "d2_p_wilcoxon": 0.048828125,
+      "d2_effect_size_dz": 0.7614821878783923,
+      "d2_significant": true,
+      "d1_mean_diff": 0.0026929012345678904,
+      "spearman_score_vs_label_homophily": -0.03814983046088058,
+      "usage": [
+        2880,
+        2879,
+        2880
+      ],
+      "seconds": 0.3626483000000462
+    },
+    {
+      "spectral_k": 4,
+      "d2_mean_diff": 0.00017746913580246604,
+      "d2_p_wilcoxon": 0.6953125,
+      "d2_effect_size_dz": 0.22151253795402032,
+      "d2_significant": false,
+      "d1_mean_diff": 0.0026929012345678904,
+      "spearman_score_vs_label_homophily": -0.06049226502400551,
+      "usage": [
+        2880,
+        2879,
+        2880
+      ],
+      "seconds": 0.3498164000000088
+    },
+    {
+      "spectral_k": 8,
+      "d2_mean_diff": 0.0004783950617284094,
+      "d2_p_wilcoxon": 0.193359375,
+      "d2_effect_size_dz": 0.45563607646438775,
+      "d2_significant": false,
+      "d1_mean_diff": 0.0026929012345678904,
+      "spearman_score_vs_label_homophily": -0.031668650535689784,
+      "usage": [
+        2880,
+        2879,
+        2880
+      ],
+      "seconds": 0.37125120000018796
+    },
+    {
+      "spectral_k": 16,
+      "d2_mean_diff": 0.0002160493827160881,
+      "d2_p_wilcoxon": 0.375,
+      "d2_effect_size_dz": 0.24733283866819988,
+      "d2_significant": false,
+      "d1_mean_diff": 0.0026929012345678904,
+      "spearman_score_vs_label_homophily": 0.1404926624961288,
+      "usage": [
+        2880,
+        2879,
+        2880
+      ],
+      "seconds": 0.38935689999993883
+    },
+    {
+      "spectral_k": 32,
+      "d2_mean_diff": 0.00030864197530867666,
+      "d2_p_wilcoxon": 0.232421875,
+      "d2_effect_size_dz": 0.38561494363989796,
+      "d2_significant": false,
+      "d1_mean_diff": 0.0026929012345678904,
+      "spearman_score_vs_label_homophily": 0.17996285902763262,
+      "usage": [
+        2880,
+        2879,
+        2880
+      ],
+      "seconds": 0.43452609999985725
+    },
+    {
+      "spectral_k": 64,
+      "d2_mean_diff": -0.0002006172839506326,
+      "d2_p_wilcoxon": 0.845703125,
+      "d2_effect_size_dz": -0.1932351272560482,
+      "d2_significant": false,
+      "d1_mean_diff": 0.0026929012345678904,
+      "spearman_score_vs_label_homophily": 0.286495627933949,
+      "usage": [
+        2880,
+        2879,
+        2880
+      ],
+      "seconds": 0.48343279999994593
+    },
+    {
+      "spectral_k": 128,
+      "d2_mean_diff": 5.401234567901092e-05,
+      "d2_p_wilcoxon": 1.0,
+      "d2_effect_size_dz": 0.05640577615513496,
+      "d2_significant": false,
+      "d1_mean_diff": 0.0026929012345678904,
+      "spearman_score_vs_label_homophily": 0.34622767593923987,
+      "usage": [
+        2880,
+        2879,
+        2880
+      ],
+      "seconds": 0.6260729999999057
+    }
+  ],
+  "best_k_by_d2": 2,
+  "best_d2_mean_diff": 0.0006327160493827422,
+  "default_k8_d2_mean_diff": 0.0004783950617284094,
+  "default_k8_is_best": false
+}

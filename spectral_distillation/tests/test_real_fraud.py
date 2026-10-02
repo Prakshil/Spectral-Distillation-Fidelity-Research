@@ -282,3 +282,44 @@ def test_three_graphs_span_three_density_regimes():
     assert sds[1] > sds[0]
     # the three graphs must not collapse onto one another
     assert len({round(d, 1) for d in densities}) == 3
+
+# --- regression: pyarrow/torch DLL load order (Windows 0xC0000005) -----------
+
+
+def test_pyarrow_dataset_is_preloaded_before_torch():
+    """pyarrow.dataset must load before torch or the process segfaults.
+
+    On Windows, importing ``pyarrow.dataset`` after torch has loaded its
+    OpenMP/MKL DLLs kills the process with an access violation
+    (0xC0000005, exit code -1073741819) and no traceback. ``read_parquet``
+    imports it lazily, so the guard lives in ``spectral_distillation.src.__init__``
+    which runs before any submodule. Regression guard: this crashed silently for
+    the Tolokers loader across every entry point.
+    """
+    import spectral_distillation.src as src_pkg
+
+    assert src_pkg.PYARROW_DATASET_READY, (
+        "pyarrow.dataset could not be preloaded; the Tolokers parquet loader "
+        "will crash with an access violation if torch loads first"
+    )
+    import pyarrow.dataset
+
+    assert pyarrow.dataset is not None
+
+
+def test_tolokers_loads_with_torch_already_imported(tmp_path):
+    """The exact failure mode: torch imported first, then load Tolokers.
+
+    Skipped when the Tolokers parquet files are absent (fresh clone).
+    """
+    if not TOLOKERS_AVAILABLE:
+        pytest.skip("tolokers parquet data not present")
+    # Force torch to load before the parquet read happens.
+    import torch
+
+    from spectral_distillation.src.laplacian import compute_laplacian
+
+    assert torch.is_tensor  # the import itself is the point of the test
+    g = load_tolokers()
+    assert g["W"].shape[0] == 11758
+    assert compute_laplacian(g["W"]).shape[0] == 11758

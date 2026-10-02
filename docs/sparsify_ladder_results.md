@@ -162,3 +162,56 @@ mirror `JaySuryavanshi/graph-anomaly-tolokers` (`nodes.parquet`, `edges.parquet`
 git-ignored `data/benchmarks/`. Exact effective-resistance `pinvh` on the 11,758² Tolokers
 Laplacian costs ~20 min once per run; `--skip-sd` avoids a dense `eigvalsh` per ladder point.
 `--skip-sd` points report `sd_laplacian = 0.0` as a placeholder — that is **not** a measured zero.
+
+## 6. Real spectral distortion (measured, not placeholder)
+
+`--skip-sd` was used for every ladder above, so all `sd_laplacian` fields there are `0.0`
+placeholders. `experiments/run_sd_measurement.py` measures the spectra directly (no protocol
+cells), reusing one cached reference spectrum so each point costs a single `eigvalsh`.
+Artifacts: `logs/{amazon,tolokers,yelpchi}_sd_measurement/sd_results.json`.
+
+### The legacy SD metric is unusable here
+
+`compute_spectral_distortion` pairs eigenvalue *i* of the reference with eigenvalue *i* of the
+sparsified graph. That is only valid when the component count is unchanged, and sparsification
+changes it at every interesting point. Degree pruning of YelpChi at r=0.04 leaves **14,460 of
+14,840 nodes isolated (97.4%)**, i.e. 14,462 zero eigenvalues against 1 in the reference, so index
+*i* refers to unrelated modes in the two graphs.
+
+It saturates at **exactly 1.0000 at 43 of 45 measured points** (13/15 Amazon, 15/15 Tolokers,
+15/15 YelpChi). The only 2 non-saturated points are precisely the 2 Amazon points with
+`n_components == 1` � the diagnosis confirming itself. `rank_matched_distortion`
+(`src/distortion.py`) compares the largest eigenvalues instead, which are the modes a low-pass
+filter retains and stay ordered under fragmentation.
+
+### Spectral distortion does not predict routing utility
+
+`rank_matched` top-32 relative error, against the D1 accuracy gain measured on the ladders above:
+
+| graph | method @ r=0.04 | isolated | top-32 distortion | D1 gain |
+| --- | --- | --- | --- | --- |
+| YelpChi | ER | 45.0% | 0.4853 | +0.0225 |
+| YelpChi | random | 20.1% | 1.3275 | +0.0175 |
+| YelpChi | **degree** | **97.4%** | **0.0528** | **+0.0001** |
+| Amazon | ER | 12.9% | 0.8632 | amplification |
+| Amazon | random | 2.7% | 0.0925 | ~none |
+| Amazon | **degree** | **83.2%** | **0.7823** | ~none |
+
+(YelpChi random r=0.04 pushes lambda_max from 176 to 410, hence a >1.0 relative error; the
+metric is unbounded above by construction.)
+
+Two results follow, and both undercut using SD as the distillation budget:
+
+1. **SD is minimised by destroying the graph.** Degree pruning reaches the *lowest* distortion on
+   YelpChi (0.0528) precisely because it has discarded 97.4% of its nodes — the surviving spectrum
+   is easy to match because there is almost nothing left. Yet its D1 gain is +0.0001. A distortion
+   budget that rewards this is not measuring the quantity of interest.
+2. **On Amazon the ordering inverts.** Random preserves the spectrum ~9x better than ER at r=0.04
+   (0.0925 vs 0.8632) but delivers no gain, while the far more distorting ER is the method that
+   amplifies D1. YelpChi shows no such inversion — ER there beats random on both distortion
+   (0.4853 vs 1.3275) and accuracy — so the relationship is not a consistent anti-correlation,
+   it is simply absent. Spectral fidelity does not rank the methods the same way accuracy does.
+
+Conclusion carried forward: low-pass preservation alone does not predict whether distillation
+helps routing. Report `rank_matched_*` for spectrum fidelity, but decide retention on measured D1,
+not on SD.

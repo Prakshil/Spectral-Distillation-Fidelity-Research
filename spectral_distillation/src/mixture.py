@@ -17,7 +17,7 @@ from sklearn.linear_model import LogisticRegression
 
 def expert_head() -> LogisticRegression:
     """Build a single expert head (identical for every expert/condition)."""
-    return LogisticRegression(C=1.0, max_iter=2000)
+    return LogisticRegression(C=1.0, max_iter=5000, solver="lbfgs", n_jobs=1)
 
 
 def fit_experts(

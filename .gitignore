@@ -34,6 +34,9 @@ wandb/
 !logs/
 !logs/**/
 !logs/**/*.json
+# ...but not the raw stdout/stderr captures (noise, not results)
+logs/**/*.out
+logs/**/*.err
 
 # IDE / OS
 .vscode/

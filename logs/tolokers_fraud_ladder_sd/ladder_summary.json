@@ -1,0 +1,801 @@
+{
+  "config": {
+    "config": "configs/default.yaml",
+    "dataset": "tolokers",
+    "amazon_mat": null,
+    "data_path": null,
+    "budgets": "0.15,0.08,0.04",
+    "methods": "er,random,degree",
+    "top_k": 32,
+    "splits": 10,
+    "seeds": 3,
+    "router_epochs": 200,
+    "hidden_dim": 64,
+    "n_layers": 3,
+    "router_seed": 0,
+    "random_seed": 1,
+    "adaptive_oracle": true,
+    "budget_oracle": false,
+    "label_free_strategy": "kmeans",
+    "order_feature": "hx",
+    "spectral_k": 8,
+    "out_suffix": "_sd",
+    "max_nodes": null,
+    "skip_sd": false,
+    "resume": false,
+    "no_progress": true,
+    "out": "logs",
+    "device": "cpu"
+  },
+  "graph": {
+    "n_nodes": 11758,
+    "d_features": 10,
+    "n_edges": 519000,
+    "positive_ratio": 0.21823439360435448,
+    "source": "Tolokers (GADBench/NEExT crowd-worker exclusion graph)"
+  },
+  "control": {
+    "pc_n_nodes": 2000,
+    "oracle_vs_uniform": {
+      "mean_diff": 0.25341325341325344,
+      "p_wilcoxon": 0.03125
+    },
+    "label_free_vs_random": {
+      "mean_diff": 0.026473526473526483,
+      "p_wilcoxon": 0.03125
+    },
+    "oracle_vs_random": {
+      "mean_diff": 0.2798867798867799,
+      "p_wilcoxon": 0.03125
+    }
+  },
+  "points": [
+    {
+      "method": "er",
+      "retention": 0.15,
+      "n_edges_kept": 77850,
+      "n_edges_orig": 519000,
+      "fraction_kept": 0.15,
+      "sd_laplacian": 0.999999998853642,
+      "sd_profile": {
+        "SD": 0.999999998853642,
+        "argmax_index": 2825,
+        "median_relative_error": 0.9107484811038279,
+        "p90_relative_error": 0.9999999977540789,
+        "p99_relative_error": 0.9999999987430632,
+        "low_mode_mean_error": 0.9999999583054551,
+        "min_eigengap": 0.0,
+        "fragility_score": 99999999.88536419,
+        "lambda_max_ref": 2139.052445541439,
+        "lambda_max_perturbed": 1319.0220286824242
+      },
+      "edge_label_homophily": 0.6475510927690562,
+      "assignments_usage": {
+        "oracle": [
+          5816,
+          2766,
+          3176
+        ],
+        "label_free": [
+          3982,
+          4964,
+          2812
+        ],
+        "random": [
+          3978,
+          3613,
+          4167
+        ],
+        "uniform": [
+          11758,
+          0,
+          0
+        ]
+      },
+      "comparisons": {
+        "oracle_vs_uniform": {
+          "mean_diff": 0.0013437659465896034,
+          "ci_low": -0.00019014980445974114,
+          "ci_high": 0.002877681697638948,
+          "p_wilcoxon": 0.16015625,
+          "p_paired_t": 0.07883947595271376,
+          "effect_size_dz": 0.6605772968512277,
+          "significant": false
+        },
+        "label_free_vs_random": {
+          "mean_diff": 0.00033452401202020975,
+          "ci_low": -0.0005011937648230667,
+          "ci_high": 0.001170241788863486,
+          "p_wilcoxon": 0.375,
+          "p_paired_t": 0.3887960917990624,
+          "effect_size_dz": 0.3018347066065909,
+          "significant": false
+        },
+        "oracle_vs_random": {
+          "mean_diff": 0.001797357827294932,
+          "ci_low": 0.00026594660540668635,
+          "ci_high": 0.003328769049183178,
+          "p_wilcoxon": 0.037109375,
+          "p_paired_t": 0.026259851584343793,
+          "effect_size_dz": 0.8850019783743014,
+          "significant": false
+        }
+      },
+      "findings": {
+        "D1": false,
+        "D2": false,
+        "D3": true,
+        "D4": true,
+        "D1_p": 0.16015625,
+        "D2_p": 0.375,
+        "D3_p": 0.037109375,
+        "D4_p": 0.03125,
+        "verdict": "Not supported; failed rule(s): D1, D2."
+      }
+    },
+    {
+      "method": "random",
+      "retention": 0.15,
+      "n_edges_kept": 77850,
+      "n_edges_orig": 519000,
+      "fraction_kept": 0.15,
+      "sd_laplacian": 0.9999999979884557,
+      "sd_profile": {
+        "SD": 0.9999999979884557,
+        "argmax_index": 1850,
+        "median_relative_error": 0.031073790769377475,
+        "p90_relative_error": 0.9999999949854481,
+        "p99_relative_error": 0.9999999979627843,
+        "low_mode_mean_error": 0.9999999583063839,
+        "min_eigengap": 0.0,
+        "fragility_score": 99999999.79884557,
+        "lambda_max_ref": 2139.052445541439,
+        "lambda_max_perturbed": 2107.687265489548
+      },
+      "edge_label_homophily": 0.6377520743943347,
+      "assignments_usage": {
+        "oracle": [
+          5127,
+          3011,
+          3620
+        ],
+        "label_free": [
+          9845,
+          83,
+          1830
+        ],
+        "random": [
+          3962,
+          3530,
+          4266
+        ],
+        "uniform": [
+          11758,
+          0,
+          0
+        ]
+      },
+      "comparisons": {
+        "oracle_vs_uniform": {
+          "mean_diff": 0.006877586891194698,
+          "ci_low": 0.00573788186932895,
+          "ci_high": 0.008017291913060444,
+          "p_wilcoxon": 0.001953125,
+          "p_paired_t": 2.550044893742304e-07,
+          "effect_size_dz": 4.5503535711951475,
+          "significant": true
+        },
+        "label_free_vs_random": {
+          "mean_diff": 0.00032318421500252546,
+          "ci_low": -0.00048169328716930087,
+          "ci_high": 0.0011280617171743517,
+          "p_wilcoxon": 0.4921875,
+          "p_paired_t": 0.3873803417710162,
+          "effect_size_dz": 0.30277629615132307,
+          "significant": false
+        },
+        "oracle_vs_random": {
+          "mean_diff": 0.006911606282247562,
+          "ci_low": 0.005702423545501162,
+          "ci_high": 0.008120789018993962,
+          "p_wilcoxon": 0.001953125,
+          "p_paired_t": 4.0662684510248953e-07,
+          "effect_size_dz": 4.310112161729958,
+          "significant": true
+        }
+      },
+      "findings": {
+        "D1": true,
+        "D2": false,
+        "D3": true,
+        "D4": true,
+        "D1_p": 0.001953125,
+        "D2_p": 0.4921875,
+        "D3_p": 0.001953125,
+        "D4_p": 0.03125,
+        "verdict": "Not supported; failed rule(s): D2."
+      }
+    },
+    {
+      "method": "degree",
+      "retention": 0.15,
+      "n_edges_kept": 77850,
+      "n_edges_orig": 519000,
+      "fraction_kept": 0.15,
+      "sd_laplacian": 0.9999999999273675,
+      "sd_profile": {
+        "SD": 0.9999999999273675,
+        "argmax_index": 9697,
+        "median_relative_error": 0.9999999992556504,
+        "p90_relative_error": 0.9999999998745572,
+        "p99_relative_error": 0.9999999999232934,
+        "low_mode_mean_error": 0.9999999583063275,
+        "min_eigengap": 0.0,
+        "fragility_score": 99999999.99273676,
+        "lambda_max_ref": 2139.052445541439,
+        "lambda_max_perturbed": 1306.0075334374906
+      },
+      "edge_label_homophily": 0.43308121684244966,
+      "assignments_usage": {
+        "oracle": [
+          10388,
+          672,
+          698
+        ],
+        "label_free": [
+          238,
+          1657,
+          9863
+        ],
+        "random": [
+          3965,
+          3806,
+          3987
+        ],
+        "uniform": [
+          11758,
+          0,
+          0
+        ]
+      },
+      "comparisons": {
+        "oracle_vs_uniform": {
+          "mean_diff": -0.0020128139706299007,
+          "ci_low": -0.0028361477734634177,
+          "ci_high": -0.0011894801677963837,
+          "p_wilcoxon": 0.001953125,
+          "p_paired_t": 0.0003655811539940599,
+          "effect_size_dz": -1.8434408682857293,
+          "significant": false
+        },
+        "label_free_vs_random": {
+          "mean_diff": 0.004575608096615047,
+          "ci_low": 0.0035084609356277104,
+          "ci_high": 0.005642755257602383,
+          "p_wilcoxon": 0.001953125,
+          "p_paired_t": 4.610245048724134e-06,
+          "effect_size_dz": 3.2331512805270193,
+          "significant": true
+        },
+        "oracle_vs_random": {
+          "mean_diff": -0.0017803481317684611,
+          "ci_low": -0.002698355374862336,
+          "ci_high": -0.000862340888674586,
+          "p_wilcoxon": 0.009765625,
+          "p_paired_t": 0.0017528219760019415,
+          "effect_size_dz": -1.462380356637373,
+          "significant": false
+        }
+      },
+      "findings": {
+        "D1": false,
+        "D2": true,
+        "D3": false,
+        "D4": true,
+        "D1_p": 0.001953125,
+        "D2_p": 0.001953125,
+        "D3_p": 0.009765625,
+        "D4_p": 0.03125,
+        "verdict": "Not supported; failed rule(s): D1, D3."
+      }
+    },
+    {
+      "method": "er",
+      "retention": 0.08,
+      "n_edges_kept": 41520,
+      "n_edges_orig": 519000,
+      "fraction_kept": 0.08,
+      "sd_laplacian": 0.9999999993411998,
+      "sd_profile": {
+        "SD": 0.9999999993411998,
+        "argmax_index": 4144,
+        "median_relative_error": 0.9549886417004277,
+        "p90_relative_error": 0.999999998884952,
+        "p99_relative_error": 0.999999999324114,
+        "low_mode_mean_error": 0.9999999583054432,
+        "min_eigengap": 0.0,
+        "fragility_score": 99999999.93411997,
+        "lambda_max_ref": 2139.052445541439,
+        "lambda_max_perturbed": 1041.0168408089849
+      },
+      "edge_label_homophily": 0.6267054746208912,
+      "assignments_usage": {
+        "oracle": [
+          6682,
+          2040,
+          3036
+        ],
+        "label_free": [
+          2994,
+          4629,
+          4135
+        ],
+        "random": [
+          3965,
+          3318,
+          4475
+        ],
+        "uniform": [
+          11758,
+          0,
+          0
+        ]
+      },
+      "comparisons": {
+        "oracle_vs_uniform": {
+          "mean_diff": -0.0016556103645744668,
+          "ci_low": -0.002984675535269014,
+          "ci_high": -0.00032654519387991963,
+          "p_wilcoxon": 0.0546875,
+          "p_paired_t": 0.02011393325195427,
+          "effect_size_dz": -0.939319587857484,
+          "significant": false
+        },
+        "label_free_vs_random": {
+          "mean_diff": 7.937857912346802e-05,
+          "ci_low": -0.0007439441230042317,
+          "ci_high": 0.0009027012812511676,
+          "p_wilcoxon": 0.556640625,
+          "p_paired_t": 0.8322159711937445,
+          "effect_size_dz": 0.07270005668384234,
+          "significant": false
+        },
+        "oracle_vs_random": {
+          "mean_diff": -0.0011283098032544903,
+          "ci_low": -0.0022969027646657274,
+          "ci_high": 4.0283158156746495e-05,
+          "p_wilcoxon": 0.0546875,
+          "p_paired_t": 0.0567866294960741,
+          "effect_size_dz": -0.7280590669392855,
+          "significant": false
+        }
+      },
+      "findings": {
+        "D1": false,
+        "D2": false,
+        "D3": false,
+        "D4": true,
+        "D1_p": 0.0546875,
+        "D2_p": 0.556640625,
+        "D3_p": 0.0546875,
+        "D4_p": 0.03125,
+        "verdict": "Not supported; failed rule(s): D1, D2, D3."
+      }
+    },
+    {
+      "method": "random",
+      "retention": 0.08,
+      "n_edges_kept": 41520,
+      "n_edges_orig": 519000,
+      "fraction_kept": 0.08,
+      "sd_laplacian": 0.9999999988861893,
+      "sd_profile": {
+        "SD": 0.9999999988861893,
+        "argmax_index": 2982,
+        "median_relative_error": 0.06650177161942107,
+        "p90_relative_error": 0.9999999979821105,
+        "p99_relative_error": 0.9999999988735866,
+        "low_mode_mean_error": 0.9999999583066513,
+        "min_eigengap": 0.0,
+        "fragility_score": 99999999.88861893,
+        "lambda_max_ref": 2139.052445541439,
+        "lambda_max_perturbed": 2126.7401311313615
+      },
+      "edge_label_homophily": 0.6405565216617497,
+      "assignments_usage": {
+        "oracle": [
+          5922,
+          2530,
+          3306
+        ],
+        "label_free": [
+          1027,
+          7799,
+          2932
+        ],
+        "random": [
+          3998,
+          3429,
+          4331
+        ],
+        "uniform": [
+          11758,
+          0,
+          0
+        ]
+      },
+      "comparisons": {
+        "oracle_vs_uniform": {
+          "mean_diff": -0.001196348585360274,
+          "ci_low": -0.0023222410332049584,
+          "ci_high": -7.045613751558962e-05,
+          "p_wilcoxon": 0.037109375,
+          "p_paired_t": 0.0396553717089871,
+          "effect_size_dz": -0.8012395046625412,
+          "significant": false
+        },
+        "label_free_vs_random": {
+          "mean_diff": -0.00010205817315870336,
+          "ci_low": -0.0008564695234072601,
+          "ci_high": 0.0006523531770898535,
+          "p_wilcoxon": 1.0,
+          "p_paired_t": 0.7665434431710265,
+          "effect_size_dz": -0.10200961202518989,
+          "significant": false
+        },
+        "oracle_vs_random": {
+          "mean_diff": -0.0007994556897431449,
+          "ci_low": -0.0020066716347895627,
+          "ci_high": 0.00040776025530327316,
+          "p_wilcoxon": 0.10546875,
+          "p_paired_t": 0.16834200229764482,
+          "effect_size_dz": -0.49935678377944276,
+          "significant": false
+        }
+      },
+      "findings": {
+        "D1": false,
+        "D2": false,
+        "D3": false,
+        "D4": true,
+        "D1_p": 0.037109375,
+        "D2_p": 1.0,
+        "D3_p": 0.10546875,
+        "D4_p": 0.03125,
+        "verdict": "Not supported; failed rule(s): D1, D2, D3."
+      }
+    },
+    {
+      "method": "degree",
+      "retention": 0.08,
+      "n_edges_kept": 41520,
+      "n_edges_orig": 519000,
+      "fraction_kept": 0.08,
+      "sd_laplacian": 0.9999999999515664,
+      "sd_profile": {
+        "SD": 0.9999999999515664,
+        "argmax_index": 10396,
+        "median_relative_error": 0.9999999994411981,
+        "p90_relative_error": 0.9999999999074969,
+        "p99_relative_error": 0.9999999999480258,
+        "low_mode_mean_error": 0.9999999583059874,
+        "min_eigengap": 0.0,
+        "fragility_score": 99999999.99515665,
+        "lambda_max_ref": 2139.052445541439,
+        "lambda_max_perturbed": 987.0049590332007
+      },
+      "edge_label_homophily": 0.42182507449001605,
+      "assignments_usage": {
+        "oracle": [
+          10850,
+          450,
+          458
+        ],
+        "label_free": [
+          159,
+          1091,
+          10508
+        ],
+        "random": [
+          3961,
+          3815,
+          3982
+        ],
+        "uniform": [
+          11758,
+          0,
+          0
+        ]
+      },
+      "comparisons": {
+        "oracle_vs_uniform": {
+          "mean_diff": -0.0014628338152746889,
+          "ci_low": -0.002439236450449519,
+          "ci_high": -0.0004864311800998589,
+          "p_wilcoxon": 0.013671875,
+          "p_paired_t": 0.00801008544214336,
+          "effect_size_dz": -1.129711546608811,
+          "significant": false
+        },
+        "label_free_vs_random": {
+          "mean_diff": 0.004966831093723434,
+          "ci_low": 0.0045661277485279424,
+          "ci_high": 0.005367534438918926,
+          "p_wilcoxon": 0.001953125,
+          "p_paired_t": 4.535601559681192e-10,
+          "effect_size_dz": 9.346692235100871,
+          "significant": true
+        },
+        "oracle_vs_random": {
+          "mean_diff": -0.0008278051822872446,
+          "ci_low": -0.0014691722613128099,
+          "ci_high": -0.0001864381032616793,
+          "p_wilcoxon": 0.0234375,
+          "p_paired_t": 0.01703901336909105,
+          "effect_size_dz": -0.9732468263488726,
+          "significant": false
+        }
+      },
+      "findings": {
+        "D1": false,
+        "D2": true,
+        "D3": false,
+        "D4": true,
+        "D1_p": 0.013671875,
+        "D2_p": 0.001953125,
+        "D3_p": 0.0234375,
+        "D4_p": 0.03125,
+        "verdict": "Not supported; failed rule(s): D1, D3."
+      }
+    },
+    {
+      "method": "er",
+      "retention": 0.04,
+      "n_edges_kept": 20760,
+      "n_edges_orig": 519000,
+      "fraction_kept": 0.04,
+      "sd_laplacian": 0.9999999995612797,
+      "sd_profile": {
+        "SD": 0.9999999995612797,
+        "argmax_index": 5134,
+        "median_relative_error": 0.9782136256676256,
+        "p90_relative_error": 0.9999999992915678,
+        "p99_relative_error": 0.9999999995423208,
+        "low_mode_mean_error": 0.9999999583054289,
+        "min_eigengap": 0.0,
+        "fragility_score": 99999999.95612797,
+        "lambda_max_ref": 2139.052445541439,
+        "lambda_max_perturbed": 523.0144662475115
+      },
+      "edge_label_homophily": 0.607404791580417,
+      "assignments_usage": {
+        "oracle": [
+          7484,
+          1415,
+          2859
+        ],
+        "label_free": [
+          99,
+          6520,
+          5139
+        ],
+        "random": [
+          4106,
+          3030,
+          4622
+        ],
+        "uniform": [
+          11758,
+          0,
+          0
+        ]
+      },
+      "comparisons": {
+        "oracle_vs_uniform": {
+          "mean_diff": -0.0017519986392242949,
+          "ci_low": -0.0028193855777754054,
+          "ci_high": -0.0006846117006731841,
+          "p_wilcoxon": 0.00390625,
+          "p_paired_t": 0.004821928755180758,
+          "effect_size_dz": -1.2376943255497452,
+          "significant": false
+        },
+        "label_free_vs_random": {
+          "mean_diff": -6.803878210580594e-05,
+          "ci_low": -0.0009541509931329873,
+          "ci_high": 0.0008180734289213753,
+          "p_wilcoxon": 0.556640625,
+          "p_paired_t": 0.8659481650361395,
+          "effect_size_dz": -0.05789876886814768,
+          "significant": false
+        },
+        "oracle_vs_random": {
+          "mean_diff": -0.0011056302092192216,
+          "ci_low": -0.001902106456866811,
+          "ci_high": -0.00030915396157163227,
+          "p_wilcoxon": 0.013671875,
+          "p_paired_t": 0.011923834349609275,
+          "effect_size_dz": -1.0467394370475458,
+          "significant": false
+        }
+      },
+      "findings": {
+        "D1": false,
+        "D2": false,
+        "D3": false,
+        "D4": true,
+        "D1_p": 0.00390625,
+        "D2_p": 0.556640625,
+        "D3_p": 0.013671875,
+        "D4_p": 0.03125,
+        "verdict": "Not supported; failed rule(s): D1, D2, D3."
+      }
+    },
+    {
+      "method": "random",
+      "retention": 0.04,
+      "n_edges_kept": 20760,
+      "n_edges_orig": 519000,
+      "fraction_kept": 0.04,
+      "sd_laplacian": 0.9999999994291446,
+      "sd_profile": {
+        "SD": 0.9999999994291446,
+        "argmax_index": 4454,
+        "median_relative_error": 0.16567329601705238,
+        "p90_relative_error": 0.9999999990768847,
+        "p99_relative_error": 0.9999999993984134,
+        "low_mode_mean_error": 0.9999999583071044,
+        "min_eigengap": 0.0,
+        "fragility_score": 99999999.94291446,
+        "lambda_max_ref": 2139.052445541439,
+        "lambda_max_perturbed": 2178.539057594802
+      },
+      "edge_label_homophily": 0.6394163594820631,
+      "assignments_usage": {
+        "oracle": [
+          7107,
+          1765,
+          2886
+        ],
+        "label_free": [
+          7234,
+          156,
+          4368
+        ],
+        "random": [
+          4210,
+          3132,
+          4416
+        ],
+        "uniform": [
+          11758,
+          0,
+          0
+        ]
+      },
+      "comparisons": {
+        "oracle_vs_uniform": {
+          "mean_diff": -0.0009979021375517206,
+          "ci_low": -0.002122616920034541,
+          "ci_high": 0.00012681264493109986,
+          "p_wilcoxon": 0.130859375,
+          "p_paired_t": 0.07568167792804487,
+          "effect_size_dz": -0.6690322748038633,
+          "significant": false
+        },
+        "label_free_vs_random": {
+          "mean_diff": -0.0008221352837784023,
+          "ci_low": -0.001454909002736727,
+          "ci_high": -0.00018936156482007762,
+          "p_wilcoxon": 0.013671875,
+          "p_paired_t": 0.016510283057435744,
+          "effect_size_dz": -0.9797073663215191,
+          "significant": false
+        },
+        "oracle_vs_random": {
+          "mean_diff": -0.0005556500538640097,
+          "ci_low": -0.0014522210109145063,
+          "ci_high": 0.00034092090318648695,
+          "p_wilcoxon": 0.083984375,
+          "p_paired_t": 0.19445776809854529,
+          "effect_size_dz": -0.46732413815256674,
+          "significant": false
+        }
+      },
+      "findings": {
+        "D1": false,
+        "D2": false,
+        "D3": false,
+        "D4": true,
+        "D1_p": 0.130859375,
+        "D2_p": 0.013671875,
+        "D3_p": 0.083984375,
+        "D4_p": 0.03125,
+        "verdict": "Not supported; failed rule(s): D1, D2, D3."
+      }
+    },
+    {
+      "method": "degree",
+      "retention": 0.04,
+      "n_edges_kept": 20760,
+      "n_edges_orig": 519000,
+      "fraction_kept": 0.04,
+      "sd_laplacian": 0.9999999999656516,
+      "sd_profile": {
+        "SD": 0.9999999999656516,
+        "argmax_index": 10866,
+        "median_relative_error": 0.9999999995397171,
+        "p90_relative_error": 0.9999999999271143,
+        "p99_relative_error": 0.9999999999624593,
+        "low_mode_mean_error": 0.9999999583057698,
+        "min_eigengap": 0.0,
+        "fragility_score": 99999999.99656516,
+        "lambda_max_ref": 2139.052445541439,
+        "lambda_max_perturbed": 714.0036070304054
+      },
+      "edge_label_homophily": 0.41922894034586233,
+      "assignments_usage": {
+        "oracle": [
+          11164,
+          278,
+          316
+        ],
+        "label_free": [
+          179,
+          688,
+          10891
+        ],
+        "random": [
+          3962,
+          3801,
+          3995
+        ],
+        "uniform": [
+          11758,
+          0,
+          0
+        ]
+      },
+      "comparisons": {
+        "oracle_vs_uniform": {
+          "mean_diff": -0.000725747009128519,
+          "ci_low": -0.0016482433119661222,
+          "ci_high": 0.00019674929370908415,
+          "p_wilcoxon": 0.10546875,
+          "p_paired_t": 0.10883014711209599,
+          "effect_size_dz": -0.593228681087023,
+          "significant": false
+        },
+        "label_free_vs_random": {
+          "mean_diff": 0.004706015762317828,
+          "ci_low": 0.00432987769834698,
+          "ci_high": 0.005082153826288675,
+          "p_wilcoxon": 0.001953125,
+          "p_paired_t": 4.1740675764924136e-10,
+          "effect_size_dz": 9.434255029341802,
+          "significant": true
+        },
+        "oracle_vs_random": {
+          "mean_diff": -0.00047060157623182166,
+          "ci_low": -0.0012961082355576628,
+          "ci_high": 0.0003549050830940195,
+          "p_wilcoxon": 0.193359375,
+          "p_paired_t": 0.22934143164461782,
+          "effect_size_dz": -0.4298672072060735,
+          "significant": false
+        }
+      },
+      "findings": {
+        "D1": false,
+        "D2": true,
+        "D3": false,
+        "D4": true,
+        "D1_p": 0.10546875,
+        "D2_p": 0.001953125,
+        "D3_p": 0.193359375,
+        "D4_p": 0.03125,
+        "verdict": "Not supported; failed rule(s): D1, D3."
+      }
+    }
+  ]
+}

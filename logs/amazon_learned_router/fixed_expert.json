@@ -1,0 +1,89 @@
+{
+  "config": {
+    "dataset": "amazon",
+    "data_path": null,
+    "max_nodes": null,
+    "splits": 3,
+    "seeds": 1,
+    "epochs": 200,
+    "router_frac": 0.35,
+    "expert": "logistic",
+    "out": "logs",
+    "device": "cpu"
+  },
+  "graph": {
+    "n_nodes": 8639,
+    "d_features": 25,
+    "n_edges": 3298534.0,
+    "positive_ratio": 0.09503414747077207
+  },
+  "results": {
+    "mean_accuracy": {
+      "single_global": 0.9733796296296297,
+      "learned_router": 0.9726080246913581,
+      "feature_kmeans": 0.9726851851851851,
+      "oracle": 0.9284722222222221,
+      "random": 0.9319444444444445
+    },
+    "learned_minus_no_routing": -0.0007716049382715529,
+    "learned_minus_random": 0.04066358024691363,
+    "router_vs_kmeans_agreement": 0.6845699733765481,
+    "n_runs": 3,
+    "n_runs_learned_beats_no_routing": 1,
+    "n_runs_learned_beats_kmeans": 1,
+    "per_run": [
+      {
+        "accuracy": {
+          "single_global": 0.9743055555555555,
+          "learned_router": 0.9736111111111111,
+          "feature_kmeans": 0.9731481481481481,
+          "oracle": 0.9180555555555555,
+          "random": 0.9171296296296296
+        },
+        "learned_minus_no_routing": -0.000694444444444442,
+        "learned_minus_random": 0.056481481481481466,
+        "router_vs_kmeans_agreement": 0.6854960064822317,
+        "final_train_loss": 1.071783185005188,
+        "n_fit_nodes": 2807,
+        "n_router_nodes": 1512,
+        "split": 0,
+        "seed": 0
+      },
+      {
+        "accuracy": {
+          "single_global": 0.9731481481481481,
+          "learned_router": 0.9712962962962963,
+          "feature_kmeans": 0.9724537037037037,
+          "oracle": 0.9460648148148149,
+          "random": 0.9534722222222223
+        },
+        "learned_minus_no_routing": -0.0018518518518517713,
+        "learned_minus_random": 0.017824074074074048,
+        "router_vs_kmeans_agreement": 0.6676698691978238,
+        "final_train_loss": 1.098371982574463,
+        "n_fit_nodes": 2807,
+        "n_router_nodes": 1512,
+        "split": 1,
+        "seed": 0
+      },
+      {
+        "accuracy": {
+          "single_global": 0.9726851851851852,
+          "learned_router": 0.9729166666666667,
+          "feature_kmeans": 0.9724537037037037,
+          "oracle": 0.9212962962962963,
+          "random": 0.9252314814814815
+        },
+        "learned_minus_no_routing": 0.00023148148148144365,
+        "learned_minus_random": 0.047685185185185164,
+        "router_vs_kmeans_agreement": 0.7005440444495891,
+        "final_train_loss": 1.080907940864563,
+        "n_fit_nodes": 2807,
+        "n_router_nodes": 1512,
+        "split": 2,
+        "seed": 0
+      }
+    ]
+  },
+  "interpretation": "Learned routing is scored on the same frozen routing-blind pool as every baseline, trained on training nodes only. Compare learned_minus_no_routing against the 0/234 fixed-router result."
+}

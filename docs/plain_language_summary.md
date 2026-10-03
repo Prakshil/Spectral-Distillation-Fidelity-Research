@@ -91,14 +91,14 @@ score *no better than a coin flip* (0.52), while the graph expert reaches 0.93 �
 essentially as good as knowing the answer in advance (0.94). So the graph expert
 genuinely does understand the structure it is given.
 
-Then we re-ran everything. Across **all 182 combinations** of router, expert type,
+Then we re-ran everything. Across **all 234 combinations** of router, expert type,
 and graph:
 
 **Not a single router beat simply training one model on everything.**
 
 The graph expert is the interesting case, because it made *more* routers look
-good than before (17 of 26 beat random splitting, up from 11) — and still not one
-of them beat the single model. So:
+good than before (17 of 26 on Amazon beat random splitting, up from 11) — and still
+not one of them beat the single model. So:
 
 - Beating *random* routing is easy and does not mean much.
 - The real question is whether routing beats *no routing*, and it never does.
@@ -115,17 +115,42 @@ We measured the size of the mistake (under 0.5%, and in the direction that made
 us look worse, not better), fixed it, regenerated every result, and added a test
 so it cannot come back. The conclusion did not change.
 
+### Two more checks, so the negative result is not just us being wrong
+
+A negative result is only worth something if the machine could have produced a
+positive one. So we added two controls.
+
+**A test problem where routing must win.** We built a synthetic graph whose answer
+is three different linear rules in three different regions — a shape no single
+straight line can fit, but three local experts can. On that problem, knowing which
+expert to send a node to raises accuracy from 0.785 to 0.981. Splitting the work is
+worth +0.20 there. Random splitting does *not* help (0.747), so this is not a
+harness that flatters every option. It also shows why routing looked unpromising:
+with a flexible neural expert the gain shrinks to +0.01, because one big model can
+already do the job. Routing only pays when the global model is too simple.
+
+**A router that learns from the labels.** Every router above was a fixed formula.
+We also trained a small graph neural network to pick the expert per node, using
+only training labels, against the same frozen pool. It found +0.18 of the available
++0.19 on the synthetic problem — so the trained router works. On the three real
+fraud graphs it landed within 0.002 of just training one model, and the sign
+flipped from graph to graph: noise, not signal.
+
+Taken together: the check that could have produced a win did produce one, and the
+three real graphs still produced none.
+
 ### What this does *not* mean
 
 It does **not** mean routing is useless in general. It means that *on these fraud
 graphs*, splitting the work up does not pay for the cost of giving each expert
 less training data — and this holds even when the experts are neural networks that
-can see structure, not just straight lines.
+can see structure, not just straight lines, and even when the router is trained on
+the labels.
 
-Two limits are worth being explicit about. The graph expert was only tested on
-Amazon, and we have not yet re-implemented the published routing methods
-themselves, so this is a result about *structural-score* routers rather than a
-direct head-to-head with prior work.
+Two limits are worth being explicit about. We have not re-implemented the
+published routing methods themselves (Ada-Routing and similar), so this is a result
+about *structural-score* and *our own* trained router rather than a direct
+head-to-head with prior work.
 
 ## Why this is worth a serious paper
 
@@ -146,11 +171,20 @@ honestly.
 
 ## Honest status and what is left
 
-- The Amazon result is solid and reproducible.
-- We are re-checking the two other graphs (Tolokers, YelpChi) under the fair test,
-  because their earlier "wins" were measured with the unfair test.
-- We are testing stronger experts to see whether the negative result is about
-  expert strength rather than about routing itself.
-- We must also strengthen the work before it is submission-ready: more real
-  datasets, a fair comparison against existing published router methods, and
-  removing a place where we chose a setting ("k") using the same data we report.
+Done and reproducible:
+
+- The fair protocol, with the weak-baseline bug found and fixed, and a test that
+  stops it returning.
+- All three graphs (Amazon, Tolokers, YelpChi) × three expert families × 26
+  routers = 234 comparisons. None beat one model.
+- A positive control where routing wins by +0.20, so the null result is not a
+  broken harness.
+- A label-trained router that recovers +0.18 of +0.19 on the positive control and
+  nothing on the real graphs.
+
+Still to do before submission:
+
+- A fair head-to-head against the published learned routers (Ada-Routing and
+  similar), which we have still not implemented.
+- More real datasets.
+- Removing a place where we chose a setting ("k") using the same data we report.

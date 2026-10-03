@@ -592,6 +592,164 @@ def test_mixture_accuracy_invariant_to_channel_permutation():
     assert acc_a == pytest.approx(acc_b, abs=1e-12)
 
 
+def test_positive_control_oracle_beats_global_where_routing_is_useful():
+    """The harness must report a win on a task where routing provably helps.
+
+    All three real datasets give 0 wins, which only means something if the
+    protocol is capable of detecting a win at all. The positive control's label
+    function is a non-separable mixture of linear rules: three latent groups,
+    each with its own linear boundary, no single hyperplane fitting all three.
+    A global logistic model is therefore structurally wrong, while an expert
+    trained on one group is structurally right -- so oracle routing must win by
+    a wide margin. Random routing must not, which rules out "everything beats
+    the baseline".
+    """
+    from spectral_distillation.experiments.run_fixed_expert_protocol import (
+        evaluate_all, feature_kmeans_routing, single_global_condition,
+    )
+    from spectral_distillation.src.positive_control import (
+        generate_positive_control, oracle_from_groups,
+    )
+
+    graph = generate_positive_control(n=900, seed=0)
+    X, y, groups = graph["features"], graph["y"], graph["group"]
+
+    pool = feature_kmeans_routing(X, n_experts=3)
+    # The fixed pool has to line up with the latent groups, otherwise the
+    # positive control would fail for an unrelated reason.
+    pool_labels = pool.argmax(axis=1)
+    for g in range(3):
+        idx = groups == g
+        purity = np.bincount(pool_labels[idx], minlength=3).max() / idx.sum()
+        assert purity > 0.95
+
+    oracle = oracle_from_groups(groups, pool)
+    conditions = {
+        "single_global": single_global_condition(X.shape[0]),
+        "oracle": oracle,
+        "random": random_assignment(oracle, rng=0),
+    }
+
+    class _NullLog:
+        def info(self, *a, **k):
+            pass
+
+    res = evaluate_all(
+        conditions, X, y, 2, 2, log=_NullLog(),
+        expert_assignment=pool,
+        expert_factory=EXPERT_FACTORIES["logistic"],
+    )
+    mean = lambda k: float(np.mean(list(res[k].values())))  # noqa: E731
+    global_acc, oracle_acc, random_acc = (
+        mean("single_global"), mean("oracle"), mean("random")
+    )
+
+    assert oracle_acc > global_acc + 0.10, (
+        f"positive control failed: oracle {oracle_acc:.4f} vs global {global_acc:.4f}"
+    )
+    # Guards against a degenerate 'every routing wins' harness.
+    assert random_acc < oracle_acc - 0.05
+
+
+def test_learned_router_recovers_routing_gain_on_positive_control():
+    """RouterGNN-lite must find real structure when structure exists.
+
+    Same positive control as above, where oracle routing beats the global model by
+    >0.10. A learned router that only ever imitated the fixed pool would land at
+    k-means accuracy; one that learns per-node expert suitability from training
+    labels should land at or above it. This is the "can a learned router help at
+    all" check -- the complement of the 0/234 real-data result.
+    """
+    from spectral_distillation.experiments.run_fixed_expert_protocol import (
+        feature_kmeans_routing,
+    )
+    from spectral_distillation.src.laplacian import normalize_adjacency
+    from spectral_distillation.src.learned_router import evaluate_learned_routing
+    from spectral_distillation.src.mixture import train_test_split
+    from spectral_distillation.src.positive_control import (
+        generate_positive_control, oracle_from_groups,
+    )
+
+    graph = generate_positive_control(n=900, seed=0)
+    X, y = graph["features"], graph["y"]
+    W_norm = normalize_adjacency(graph["W"])
+    pool = feature_kmeans_routing(X, n_experts=3)
+    oracle = oracle_from_groups(graph["group"], pool)
+
+    train, test = train_test_split(y, 0, 0)
+    res = evaluate_learned_routing(
+        X, y, W_norm, pool, train, test, oracle,
+        expert_factory=EXPERT_FACTORIES["logistic"], seed=0, epochs=60,
+    )
+    acc = res["accuracy"]
+    assert acc["single_global"] < 0.90
+    # Trained router should be materially better than no routing on a task where
+    # routing is provably useful.
+    assert acc["learned_router"] > acc["single_global"] + 0.05, acc
+    # And it should not be a strictly worse imitation of the fixed pool.
+    assert acc["learned_router"] > acc["random"] + 0.05, acc
+
+
+def test_learned_router_never_sees_test_labels():
+    """Corrupting test labels must not change the router's learned assignment.
+
+    Pins the leakage contract: the router is supervised by ``train`` nodes only,
+    and every label outside ``train`` is invisible to it.
+    """
+    from spectral_distillation.experiments.run_fixed_expert_protocol import (
+        feature_kmeans_routing,
+    )
+    from spectral_distillation.src.laplacian import normalize_adjacency
+    from spectral_distillation.src.learned_router import (
+        build_router_targets, evaluate_learned_routing, split_fit_router,
+        train_router,
+    )
+    from spectral_distillation.src.mixture import fit_experts, train_test_split
+    from spectral_distillation.src.positive_control import (
+        generate_positive_control, oracle_from_groups,
+    )
+
+    graph = generate_positive_control(n=600, seed=1)
+    X, y = graph["features"], graph["y"]
+    train, test = train_test_split(y, 0, 0)
+    fit_mask, router_mask = split_fit_router(train, y, seed=0)
+    # Nothing outside `train` may enter supervision.
+    assert not (router_mask & test).any()
+    assert not (fit_mask & test).any()
+
+    pool = feature_kmeans_routing(X, n_experts=3)
+    experts = fit_experts(X, y, pool, fit_mask, expert_factory=EXPERT_FACTORIES["logistic"])
+    router_idx = np.flatnonzero(router_mask)
+    targets = build_router_targets(y, experts, X, router_idx)
+
+    W_norm = normalize_adjacency(graph["W"])
+    m1, _ = train_router(X, W_norm, targets, router_idx, 3, epochs=30, seed=0)
+
+    # Flip every test label; the router's parameters must be untouched.
+    y_flip = y.copy()
+    y_flip[test] = 1 - y_flip[test]
+    experts_flip = fit_experts(X, y_flip, pool, fit_mask,
+                               expert_factory=EXPERT_FACTORIES["logistic"])
+    targets_flip = build_router_targets(y_flip, experts_flip, X, router_idx)
+    m2, _ = train_router(X, W_norm, targets_flip, router_idx, 3, epochs=30, seed=0)
+
+    assert np.allclose(targets, targets_flip)
+    import torch  # local: top-level torch breaks the pyarrow import order on Windows
+
+    for p1, p2 in zip(m1.parameters(), m2.parameters()):
+        assert torch.allclose(p1, p2)
+
+
+def test_positive_control_generator_is_deterministic():
+    from spectral_distillation.src.positive_control import generate_positive_control
+
+    a = generate_positive_control(n=300, seed=3)
+    b = generate_positive_control(n=300, seed=3)
+    assert np.array_equal(a["features"], b["features"])
+    assert np.array_equal(a["y"], b["y"])
+    assert np.array_equal(a["W"], b["W"])
+
+
 def test_shared_pool_single_global_is_trained_on_all_train_nodes():
     """The no-routing reference must not inherit the shared pool's blind spot.
 

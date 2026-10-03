@@ -116,11 +116,14 @@ for itself. Across **all three expert families on all three graphs**:
 | Amazon | GNN | **17/26** | **0/26** |
 | Tolokers | logistic | 0/26 | **0/26** |
 | Tolokers | MLP | 1/26 | **0/26** |
+| Tolokers | GNN | 3/26 | **0/26** |
 | YelpChi | logistic | 0/26 | **0/26** |
 | YelpChi | MLP | 0/26 | **0/26** |
+| YelpChi | GNN | 1/26 | **0/26** |
 
-**0 of 182 candidate/expert/graph combinations beat training one model on
-everything.** The best gap in each row is negative throughout.
+**0 of 234 candidate/expert/graph combinations beat training one model on
+everything** (44 beat a random routing). The best gap in each row is negative
+throughout.
 
 ### The GNN expert is a real graph model, not a proxy
 
@@ -177,10 +180,95 @@ Caveats kept honest:
   it.
 - Feature-k-means routing wins because it matches the pool it is scored against;
   that is expected and is why it is a reference, not a win.
-- GNN experts were run on Amazon only. Tolokers and YelpChi have no `mean_accuracy`
-  entry in their tables above because their GNN runs were not performed.
+- GNN experts were run on all three graphs (Amazon, Tolokers, capped YelpChi), so
+  the message-passing result is not an Amazon-only artifact. It still fails to beat
+  no-routing anywhere.
 - `eig_nb_sim_k128` was selected on reported results and still does not survive
   fixed-expert scoring, but remains reporting-selected.
 - Real routing baselines (RouterGNN, Ada-Routing) are not implemented here, so
   this is a negative result against *structural-score* routers, not against the
   published methods.
+
+## Positive control: can the protocol detect a win at all?
+
+A 0/234 result is only meaningful if the harness would have reported a win when one
+existed. `spectral_distillation/src/positive_control.py` supplies a task where
+routing is provably useful.
+
+The label is a **non-separable mixture of linear rules**: three latent groups, each
+with its own linearly separable boundary over its own feature pair, no single
+hyperplane satisfying all three. A marker feature offsets the groups in feature
+space (so feature k-means recovers them at purity 1.000) and the graph is
+block-diagonal over the same groups, so the task is graph-native.
+
+Run: `python -m spectral_distillation.experiments.run_positive_control`
+→ `logs/positive_control/fixed_expert.json` (5 splits × 3 seeds)
+
+| expert | no-routing | oracle | k-means | random | oracle − no-routing |
+|---|---|---|---|---|---|
+| logistic | 0.7853 | 0.9806 | 0.9806 | 0.7470 | **+0.1953** |
+| MLP | 0.9758 | 0.9874 | 0.9874 | 0.6774 | +0.0116 |
+
+Random routing does **not** win, which rules out a degenerate "everything beats the
+baseline" harness. The MLP contrast is the informative one: an MLP expressive
+enough to represent the mixture globally never needed routing, so the gain
+collapses to +0.01. The size of the gap is the value of routing on this task.
+
+Pinned by `test_positive_control_oracle_beats_global_where_routing_is_useful`
+(requires > +0.10) and `test_positive_control_generator_is_deterministic`.
+
+## RouterGNN-lite: a router trained on labels
+
+Every routing scored above is fixed and label-free. That leaves the obvious
+objection open: maybe a router that *learns* which expert suits which node wins
+where none of the hand-designed scores did.
+
+`spectral_distillation/src/learned_router.py` adds that condition without weakening
+the protocol:
+
+- the pool is the same routing-blind feature k-means partition, **frozen** before
+  routing is learned;
+- supervision is training labels only — never test labels, never the oracle's
+  label-homophily buckets;
+- every baseline is scored against that same frozen pool on the same split.
+
+The one design point that matters: **experts are fitted on `fit_mask`, and the
+router's supervision targets are computed on a disjoint `router_mask`.** Without
+that split the target is degenerate — each expert classifies its own training nodes
+almost perfectly, so "which expert owns this node" collapses to "which k-means
+cluster is this node" and the learned number is just k-means routing wearing a
+disguise. Holding the experts out makes the target mean "which expert *generalizes*
+to this node", which is what a router must guess at deployment.
+
+"Lite" refers to the router: a small MLP over cached `[X, AX]` propagated features,
+the same caching trick `gnn_expert.py` uses. Re-propagating every step cost ~1s per
+epoch on Amazon; caching makes 3 splits × 200 epochs run in ~20s.
+
+Run: `python -m spectral_distillation.experiments.run_learned_router --dataset amazon`
+
+| graph | no-routing | learned router | k-means | random | oracle | learned − no-routing | runs won |
+|---|---|---|---|---|---|---|---|
+| Amazon | 0.9734 | 0.9726 | 0.9727 | 0.9319 | 0.9285 | −0.0008 | 1/3 |
+| Tolokers | 0.7826 | 0.7822 | 0.7820 | 0.7817 | 0.7815 | −0.0004 | 1/3 |
+| YelpChi (capped) | 0.8564 | 0.8571 | 0.8578 | 0.8530 | 0.8473 | +0.0006 | 2/3 |
+
+**Every gap is ±0.002 — indistinguishable from noise**, and the sign flips across
+datasets. The router tracks the frozen k-means partition closely (agreement
+0.685/0.317/0.371), i.e. it mostly rediscovers the pool it was handed rather than
+finding new structure.
+
+The control matters: on the positive control the same router reaches 0.9596 against
+a global 0.7838, recovering **+0.176 of the oracle's +0.191**. So the router is not
+broken and the harness is not blind — on these three fraud graphs there is simply
+no per-node expert-selection signal to exploit.
+
+Pinned by `test_learned_router_recovers_routing_gain_on_positive_control` and
+`test_learned_router_never_sees_test_labels` (flipping every test label must leave
+router parameters bit-identical).
+
+### Revised scope
+
+The claim is now narrower and better supported: **neither fixed structural routers
+nor a label-trained router beat a single global model on these fraud graphs**, and
+the harness provably would have detected a win had one existed. Ada-Routing and
+other published learned baselines remain unimplemented.

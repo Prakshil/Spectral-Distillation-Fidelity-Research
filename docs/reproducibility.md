@@ -45,6 +45,9 @@ Companion documents:
 | `baselines.py` | Dummy / uniform / random routing baselines |
 | `mixture.py` | Mixture-of-experts classifier (`low_pass` / `high_pass` / `identity`) |
 | `gnn_router.py` | RouterGNN (label-free learned router, KL-divergence training) |
+| `gnn_expert.py` | Message-passing expert head over cached `[X, AX]`; `gnn_head_factory` |
+| `learned_router.py` | RouterGNN-lite: MLP router over cached `[X, AX]`, supervised by training labels on a held-out router split; frozen routing-blind expert pool |
+| `positive_control.py` | Positive control: non-separable mixture of linear rules, oracle routing from the latent partition |
 | `planted_control.py` | PC-1c-R positive control: 3 orthogonal feature bases, dilution ladder |
 | `router_protocol.py` | The oracle / label-free / random / uniform protocol, D1â€“D4 decision rules, frozen-model intervention, statistics |
 | `evaluation.py` | Splits, seeds, paired statistical tests (Wilcoxon exact, paired-t, Holm, CI, effect size) |
@@ -63,8 +66,11 @@ Companion documents:
 | `run_sd_measurement.py` | Real spectral distortion across the retention ladder, spectra only (no protocol cells). Reports both the legacy index-wise metric and `rank_matched_distortion` | `logs/{dataset}_sd_measurement/sd_results.json` |
 | `ablation.py` | Oracle-bucket Î´-sweep + router-feature ablation (single / leave-one-out) | `logs/ablation/ablation.{csv,json}` + PNG |
 | `reproduce_figures.py` | Renders all Phase 3 figures from cached logs | PNGs under `logs/{protocol,dilution,ablation}/` |
+| `run_fixed_expert_protocol.py` | Protocol B: one frozen routing-blind expert pool, 26 routings, logistic/MLP/GNN heads (`--expert`) | `logs/{dataset}_fixed_expert*/fixed_expert.json` |
+| `run_positive_control.py` | Positive control: same protocol on a non-separable mixture of linear rules, where routing provably helps; also scores RouterGNN-lite | `logs/positive_control/fixed_expert.json` |
+| `run_learned_router.py` | RouterGNN-lite vs no-routing / k-means / random / oracle on a frozen pool, real graphs (`--dataset amazon\|tolokers\|yelpchi`) | `logs/{dataset}_learned_router*/fixed_expert.json` |
 
-### 2.3 Tests (`spectral_distillation/tests/`, 142 tests)
+### 2.3 Tests (`spectral_distillation/tests/`, 151 tests)
 
 | File | Coverage |
 |------|----------|

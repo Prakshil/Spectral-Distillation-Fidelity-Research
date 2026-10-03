@@ -10,9 +10,12 @@ basis to predict it well.
 
 from __future__ import annotations
 
+from typing import Callable
+
 import numpy as np
 from sklearn.dummy import DummyClassifier
 from sklearn.linear_model import LogisticRegression
+from sklearn.neural_network import MLPClassifier
 
 
 def expert_head() -> LogisticRegression:
@@ -20,21 +23,43 @@ def expert_head() -> LogisticRegression:
     return LogisticRegression(C=1.0, max_iter=5000, solver="lbfgs", n_jobs=1)
 
 
+def mlp_head() -> MLPClassifier:
+    """A small non-linear expert head.
+
+    The linear head may simply be too weak to specialise, so a router can never
+    win. This gives each expert genuine non-linear capacity. Deterministic
+    (fixed ``random_state``) so protocol cells reproduce.
+    """
+    return MLPClassifier(
+        hidden_layer_sizes=(64,),
+        activation="relu",
+        alpha=1e-3,
+        max_iter=400,
+        random_state=0,
+        early_stopping=False,
+    )
+
+
+EXPERT_FACTORIES = {"logistic": expert_head, "mlp": mlp_head}
+
+
 def fit_experts(
     X: np.ndarray,
     y: np.ndarray,
     assignment: np.ndarray,
     train_mask: np.ndarray,
-) -> list[LogisticRegression | DummyClassifier | None]:
+    expert_factory: Callable[[], object] = expert_head,
+) -> list[object | None]:
     """Fit K expert heads, each on its own routed train subset.
 
     A shortage of routes yields a majority-class dummy head (never ``None``
     unless the masked set is empty) so the mixture stays well defined even
-    under heavy dilution.
+    under heavy dilution. ``expert_factory`` builds each head; it defaults to
+    the linear ``expert_head`` so existing callers reproduce exactly.
     """
     assignment = np.asarray(assignment, dtype=float)
     K = assignment.shape[1]
-    experts: list[LogisticRegression | DummyClassifier | None] = []
+    experts: list[object | None] = []
     for k in range(K):
         masked = train_mask & (assignment[:, k] >= 0.01)
         if masked.sum() < 10:
@@ -46,7 +71,7 @@ def fit_experts(
             dummy.fit(X[masked], y[masked])
             experts.append(dummy)
             continue
-        head = expert_head()
+        head = expert_factory()
         head.fit(X[masked], y[masked])
         experts.append(head)
     return experts
@@ -56,7 +81,7 @@ def mixture_accuracy(
     X: np.ndarray,
     y: np.ndarray,
     assignment: np.ndarray,
-    experts: list[LogisticRegression | None],
+    experts: list[object | None],
     test_mask: np.ndarray,
 ) -> tuple[float, int]:
     """Accuracy over test nodes using hard routing (argmax assignment).

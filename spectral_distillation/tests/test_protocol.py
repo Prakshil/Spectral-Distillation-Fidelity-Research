@@ -28,6 +28,7 @@ from spectral_distillation.src.gnn_router import (
 )
 from spectral_distillation.src.laplacian import compute_laplacian, normalize_adjacency
 from spectral_distillation.src.mixture import (
+    EXPERT_FACTORIES,
     fit_experts,
     mixture_accuracy,
     train_test_split,
@@ -589,6 +590,44 @@ def test_mixture_accuracy_invariant_to_channel_permutation():
     acc_b, _ = mixture_accuracy(X, y, permuted, fit_experts(X, y, permuted, train), test)
 
     assert acc_a == pytest.approx(acc_b, abs=1e-12)
+
+
+def test_expert_factory_swaps_head_and_stays_deterministic():
+    """``expert_factory`` lets the protocol use non-linear heads reproducibly.
+
+    The fixed-expert re-analysis must be repeatable, so an MLP head has to give
+    identical predictions across two fits. Also checks the dummy-head path is
+    still reachable through the factory.
+    """
+    rng = np.random.default_rng(0)
+    n, d, k = 200, 5, 2
+    X = rng.normal(size=(n, d))
+    y = (X[:, 0] > 0).astype(int)
+    assignment = np.zeros((n, k))
+    assignment[np.arange(n), np.arange(n) % k] = 1.0
+    train = np.zeros(n, dtype=bool)
+    train[:120] = True
+    test = ~train
+
+    assert set(EXPERT_FACTORIES) == {"logistic", "mlp"}
+
+    accs = []
+    for _ in range(2):
+        heads = fit_experts(X, y, assignment, train, expert_factory=EXPERT_FACTORIES["mlp"])
+        acc, n_eval = mixture_accuracy(X, y, assignment, heads, test)
+        # Only test nodes routed to a *trained* expert are scored. Each expert
+        # needs >=10 train nodes; here both have many, so all test nodes routed
+        # to channel 0/1 count.
+        assert n_eval == int(test.sum())
+        accs.append(acc)
+    assert accs[0] == pytest.approx(accs[1], abs=1e-12)
+
+    # single-class routed subset still yields a usable dummy head
+    one_class = np.zeros((n, 1))
+    one_class[:50] = 1.0
+    heads = fit_experts(X, np.zeros(n, dtype=int), one_class, train,
+                        expert_factory=EXPERT_FACTORIES["mlp"])
+    assert len(heads) == 1
 
 
 # --------------------------------------------------------------------------- #

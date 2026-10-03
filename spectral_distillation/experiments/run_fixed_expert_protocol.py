@@ -55,7 +55,12 @@ from spectral_distillation.experiments.run_candidate_search import (
     candidate_scores,
 )
 from spectral_distillation.src.evaluation import evaluate_comparison, holm_bonferroni
-from spectral_distillation.src.mixture import fit_experts, mixture_accuracy, train_test_split
+from spectral_distillation.src.mixture import (
+    EXPERT_FACTORIES,
+    fit_experts,
+    mixture_accuracy,
+    train_test_split,
+)
 from spectral_distillation.src.real_fraud import load_real_fraud
 from spectral_distillation.src.router_protocol import (
     label_homophily,
@@ -84,6 +89,7 @@ def evaluate_all(
     seeds: int,
     log,
     expert_assignment: np.ndarray | None = None,
+    expert_factory=None,
 ):
     """Mean accuracy per split, averaged over seeds, for every routing.
 
@@ -101,7 +107,7 @@ def evaluate_all(
             for seed in range(seeds):
                 train, te = train_test_split(y, split, seed)
                 fit_a = a if expert_assignment is None else expert_assignment
-                experts = fit_experts(X, y, fit_a, train)
+                experts = fit_experts(X, y, fit_a, train, expert_factory=expert_factory)
                 acc, _ = mixture_accuracy(X, y, a, experts, te)
                 accs.append(acc)
             out[cond][split] = float(np.mean(accs))
@@ -128,11 +134,18 @@ def main() -> None:
     p.add_argument("--seeds", type=int, default=3)
     p.add_argument("--out", default="logs")
     p.add_argument("--device", default="cpu")
+    p.add_argument("--expert", default="logistic", choices=sorted(EXPERT_FACTORIES),
+                   help="expert head family; 'mlp' gives non-linear capacity")
+    p.add_argument("--skip-self-routing", action="store_true",
+                   help="run only the honest fixed-expert protocol (much faster with mlp)")
     args = p.parse_args()
 
     log = get_logger("fixed_expert")
     set_seed(0)
-    out_dir = ensure_dir(Path(args.out) / f"{args.dataset}_fixed_expert")
+    # Expert family is part of the artifact identity: a logistic run and an mlp
+    # run are different experiments and must not overwrite each other.
+    suffix = "" if args.expert == "logistic" else f"_{args.expert}"
+    out_dir = ensure_dir(Path(args.out) / f"{args.dataset}_fixed_expert{suffix}")
 
     t0 = time.perf_counter()
     graph = load_real_fraud(args.dataset, args.data_path, max_nodes=args.max_nodes or None)
@@ -160,29 +173,48 @@ def main() -> None:
         base_cond[f"{name}::fwd"] = bucket_from_score(s)
         base_cond[f"{name}::neg"] = bucket_from_score(-s)
 
-    # ------------------------------------------------------------------ #
-    # Protocol A: self-routing -- each expert fitted to its own routing
-    # ------------------------------------------------------------------ #
-    log.info("protocol A (self-routing): %d conditions", len(base_cond))
-    a_self = evaluate_all(base_cond, X, y, args.splits, args.seeds, log)
+    factory = EXPERT_FACTORIES[args.expert]
+    log.info("expert head: %s", args.expert)
 
     # ------------------------------------------------------------------ #
-    # Protocol B: fixed routing-blind expert pool (k-means), routing varies
+    # Protocol B: fixed routing-blind expert pool (k-means), routing varies.
+    # This is the honest protocol and the one that matters.
     # ------------------------------------------------------------------ #
     log.info("protocol B (fixed k-means expert pool): %d conditions", len(base_cond))
-    a_fixed = evaluate_all(base_cond, X, y, args.splits, args.seeds, log, expert_assignment=km)
+    a_fixed = evaluate_all(
+        base_cond, X, y, args.splits, args.seeds, log,
+        expert_assignment=km, expert_factory=factory,
+    )
+
+    # ------------------------------------------------------------------ #
+    # Protocol A: self-routing -- each expert fitted to its own routing.
+    # Optional: with MLP experts this refits per condition and is very slow.
+    # ------------------------------------------------------------------ #
+    if args.skip_self_routing:
+        log.info("protocol A skipped (--skip-self-routing)")
+        a_self = None
+    else:
+        log.info("protocol A (self-routing): %d conditions", len(base_cond))
+        a_self = evaluate_all(
+            base_cond, X, y, args.splits, args.seeds, log, expert_factory=factory
+        )
 
     # ------------------------------------------------------------------ #
     # Mechanism 1: permutation invariance
     # ------------------------------------------------------------------ #
     inv_rows = []
     for name in scores:
-        d_self = max(
-            abs(a_self[f"{name}::fwd"][s] - a_self[f"{name}::neg"][s]) for s in range(args.splits)
-        )
         d_fixed = max(
             abs(a_fixed[f"{name}::fwd"][s] - a_fixed[f"{name}::neg"][s])
             for s in range(args.splits)
+        )
+        d_self = (
+            max(
+                abs(a_self[f"{name}::fwd"][s] - a_self[f"{name}::neg"][s])
+                for s in range(args.splits)
+            )
+            if a_self is not None
+            else None
         )
         inv_rows.append({
             "candidate": name,
@@ -190,9 +222,13 @@ def main() -> None:
             "max_abs_delta_self_routing": d_self,
             "max_abs_delta_fixed_expert": d_fixed,
         })
-    n_inv_self = sum(1 for r in inv_rows if r["max_abs_delta_self_routing"] < 1e-12)
     n_inv_fixed = sum(1 for r in inv_rows if r["max_abs_delta_fixed_expert"] < 1e-12)
-    log.info("sign-invariant candidates: self-routing %d/%d, fixed-expert %d/%d",
+    n_inv_self = (
+        sum(1 for r in inv_rows if r["max_abs_delta_self_routing"] < 1e-12)
+        if a_self is not None
+        else None
+    )
+    log.info("sign-invariant candidates: self-routing %s/%d, fixed-expert %d/%d",
              n_inv_self, len(inv_rows), n_inv_fixed, len(inv_rows))
 
     # ------------------------------------------------------------------ #
@@ -236,42 +272,48 @@ def main() -> None:
         }
         return rows, refs
 
-    rows_self, ref_self = d2_table(a_self)
     rows_fixed, ref_fixed = d2_table(a_fixed)
+    rows_self, ref_self = (d2_table(a_self) if a_self is not None else (None, None))
 
     print("\n=== permutation invariance: max |acc(s) - acc(-s)| per candidate ===")
     print(f"self-routing sign-invariant: {n_inv_self}/{len(inv_rows)}   "
           f"fixed-expert: {n_inv_fixed}/{len(inv_rows)}")
 
     hdr = "{:<26s}{:>9s}{:>11s}{:>11s}{:>9s}{:>8s}{:>13s}"
-    for title, rows, ref in (("SELF-ROUTING (existing)", rows_self, ref_self),
-                                 ("FIXED EXPERTS (k-means pool)", rows_fixed, ref_fixed)):
-            print(f"\n=== {title}: D2 vs random, Holm over {ref['n_candidates']} ===")
-            print(f"single-global (no routing) D2={ref['single_global_d2']:+.5f} "
-                  f"(dz {ref['single_global_dz']:.2f}, p={ref['single_global_p']:.4f})")
-            print(f"oracle D2={ref['oracle_d2']:+.5f} (dz {ref['oracle_dz']:.2f})   "
-                  f"feature-kmeans D2={ref['feature_kmeans_d2']:+.5f} "
-                  f"(dz {ref['feature_kmeans_dz']:.2f}, p={ref['feature_kmeans_p']:.4f})")
-            print(hdr.format("candidate", "rho", "D2", "p", "dz", "sig", "vs-no-route"))
-            for r in rows[:10]:
-                print(hdr.format(
-                    r["candidate"], f"{r['rho']:+.3f}", f"{r['d2']:+.5f}", f"{r['p']:.5f}",
-                    f"{r['dz']:+.2f}", "YES" if r["holm_significant"] else "",
-                    f"{r['d2_vs_no_routing']:+.5f}",
-                ))
-            print(f"Holm-significant: {ref['n_holm_significant']}/{ref['n_candidates']}"
-                  f"   beats no-routing: {sum(1 for r in rows if r['beats_no_routing'])}"
-                  f"/{len(rows)}")
 
-    # rank agreement between the two protocols
-    rs = {r["candidate"]: i for i, r in enumerate(rows_self)}
-    rf = {r["candidate"]: i for i, r in enumerate(rows_fixed)}
-    common = sorted(set(rs) & set(rf), key=lambda c: rs[c])
+    def report(title, rows, ref):
+        print(f"\n=== {title}: D2 vs random, Holm over {ref['n_candidates']} ===")
+        print(f"single-global (no routing) D2={ref['single_global_d2']:+.5f} "
+              f"(dz {ref['single_global_dz']:.2f}, p={ref['single_global_p']:.4f})")
+        print(f"oracle D2={ref['oracle_d2']:+.5f} (dz {ref['oracle_dz']:.2f})   "
+              f"feature-kmeans D2={ref['feature_kmeans_d2']:+.5f} "
+              f"(dz {ref['feature_kmeans_dz']:.2f}, p={ref['feature_kmeans_p']:.4f})")
+        print(hdr.format("candidate", "rho", "D2", "p", "dz", "sig", "vs-no-route"))
+        for r in rows[:10]:
+            print(hdr.format(
+                r["candidate"], f"{r['rho']:+.3f}", f"{r['d2']:+.5f}", f"{r['p']:.5f}",
+                f"{r['dz']:+.2f}", "YES" if r["holm_significant"] else "",
+                f"{r['d2_vs_no_routing']:+.5f}",
+            ))
+        print(f"Holm-significant: {ref['n_holm_significant']}/{ref['n_candidates']}"
+              f"   beats no-routing: {sum(1 for r in rows if r['beats_no_routing'])}"
+              f"/{len(rows)}")
+
+    if rows_self is not None:
+        report("SELF-ROUTING (existing)", rows_self, ref_self)
+    report("FIXED EXPERTS (k-means pool)", rows_fixed, ref_fixed)
+
     from scipy.stats import spearmanr as _sp
 
-    rank_rho = float(_sp([rs[c] for c in common], [rf[c] for c in common]).statistic)
-    print(f"\nrank correlation of D2 between protocols: {rank_rho:+.3f} "
-          f"({len(common)} candidates)")
+    if rows_self is not None:
+        rs = {r["candidate"]: i for i, r in enumerate(rows_self)}
+        rf = {r["candidate"]: i for i, r in enumerate(rows_fixed)}
+        common = sorted(set(rs) & set(rf), key=lambda c: rs[c])
+        rank_rho = float(_sp([rs[c] for c in common], [rf[c] for c in common]).statistic)
+        print(f"\nrank correlation of D2 between protocols: {rank_rho:+.3f} "
+              f"({len(common)} candidates)")
+    else:
+        rank_rho = None
 
     summary = {
         "config": {**vars(args), "eig_ks": list(EIG_KS), "n_experts": N_EXPERTS},
@@ -285,7 +327,7 @@ def main() -> None:
             "n_sign_invariant_fixed_expert": n_inv_fixed,
             "per_candidate": inv_rows,
         },
-        "self_routing": {"results": rows_self, **ref_self},
+        "self_routing": ({"results": rows_self, **ref_self} if rows_self else None),
         "fixed_expert": {"results": rows_fixed, **ref_fixed},
         "d2_rank_correlation_between_protocols": rank_rho,
     }

@@ -592,6 +592,138 @@ def test_mixture_accuracy_invariant_to_channel_permutation():
     assert acc_a == pytest.approx(acc_b, abs=1e-12)
 
 
+def test_shared_pool_single_global_is_trained_on_all_train_nodes():
+    """The no-routing reference must not inherit the shared pool's blind spot.
+
+    ``single_global`` is a one-column assignment, but protocol B shares a
+    3-column k-means pool across conditions. Without a dedicated one-column fit,
+    argmax sends every test node to head 0 -- a head trained on cluster 0 only --
+    which understates the no-routing baseline and quietly flatters every
+    candidate.
+    """
+    from spectral_distillation.experiments.run_fixed_expert_protocol import (
+        evaluate_all, feature_kmeans_routing, single_global_condition,
+    )
+
+    rng = np.random.default_rng(0)
+    n, d = 300, 6
+    # Cluster structure correlated with the label, so the k-means pool splits
+    # the training rows -- the exact situation that made head 0 partial.
+    X = np.concatenate([
+        rng.normal(loc=[-2.0] * d, size=(n // 2, d)),
+        rng.normal(loc=[2.0] * d, size=(n // 2, d)),
+    ])
+    y = (X[:, 0] > 0).astype(int)
+    train = np.zeros(n, dtype=bool)
+    train[:200] = True
+
+    km = feature_kmeans_routing(X, n_experts=3)
+    assert km.shape[1] == 3
+
+    class _NullLog:
+        def info(self, *a, **k):
+            pass
+
+    # Record the training mask each head is built from. Accuracy alone cannot
+    # catch this: on separable data a partial head still classifies the test set
+    # perfectly, so the contract has to be asserted directly.
+    seen: list[np.ndarray] = []
+
+    def spy_factory(mask):
+        seen.append(np.asarray(mask).copy())
+        return EXPERT_FACTORIES["logistic"](mask)
+
+    evaluate_all(
+        {"single_global": single_global_condition(n)}, X, y, 1, 1,
+        log=_NullLog(), expert_assignment=km, expert_factory=spy_factory,
+    )
+
+    # ``evaluate_all`` uses split=0/seed=0, so replicate that exact train mask
+    # and require the global head to cover every one of its training nodes.
+    expected_train, _ = train_test_split(y, 0, 0)
+    covering = [m for m in seen if np.array_equal(m, expected_train)]
+    assert len(covering) == 1, [int(m.sum()) for m in seen]
+    # The k-means heads must be strict subsets, otherwise the assertion above
+    # would pass even if the dedicated global fit were missing.
+    assert any(
+        m.sum() < int(expected_train.sum()) for m in seen if not np.array_equal(m, expected_train)
+    ), [int(m.sum()) for m in seen]
+
+
+def _ring_graph(n: int):
+    A = np.zeros((n, n))
+    for i in range(n):
+        A[i, (i + 1) % n] = 1.0
+        A[i, (i - 1) % n] = 1.0
+    return A
+
+
+def test_gnn_expert_trains_on_routed_subset_not_nodes_zero_and_one():
+    """Regression: ``fit_experts`` passes a *boolean* mask to the factory.
+
+    ``numpy`` casts a bool array to 0/1 rather than to node indices, so a naive
+    ``asarray(train_idx, dtype=int)`` silently trains the graph expert on nodes 0
+    and 1 only. That is invisible in the output shape and destroys accuracy, so
+    it is pinned here.
+    """
+    from spectral_distillation.src.gnn_expert import gnn_head_factory
+    from spectral_distillation.src.laplacian import normalize_adjacency
+
+    rng = np.random.default_rng(0)
+    n, d = 300, 6
+    A = _ring_graph(n)
+    X = rng.normal(size=(n, d))
+    # Label depends on the neighbourhood, so only message passing can see it.
+    y = ((0.25 * X[:, 0] + 1.0 * (A @ X)[:, 0]) > 0).astype(int)
+    W_norm = normalize_adjacency(A)
+
+    train = np.zeros(n, dtype=bool)
+    train[:200] = True
+    idx = np.flatnonzero(train)
+
+    factory = gnn_head_factory(W_norm=W_norm, n_features=d, epochs=200)
+    from_mask = factory(train).fit_graph(X, y)
+    from_idx = factory(idx).fit_graph(X, y)
+
+    assert np.array_equal(from_mask.train_idx, idx)
+    p_mask = from_mask.predict_nodes(X, idx)
+    p_idx = from_idx.predict_nodes(X, idx)
+    assert np.array_equal(p_mask, p_idx)
+
+
+def test_gnn_expert_beats_per_row_experts_on_neighbour_dependent_label():
+    """The graph expert must actually exploit structure.
+
+    Guards the premise of the whole GNN-expert arm: if message passing bought
+    nothing, "routing does not help" would be an artefact of weak experts.
+    """
+    from spectral_distillation.src.gnn_expert import gnn_head_factory
+    from spectral_distillation.src.laplacian import normalize_adjacency
+
+    rng = np.random.default_rng(0)
+    n, d = 400, 6
+    A = _ring_graph(n)
+    X = rng.normal(size=(n, d))
+    y = ((0.25 * X[:, 0] + 1.0 * (A @ X)[:, 0]) > 0).astype(int)
+    W_norm = normalize_adjacency(A)
+
+    train = np.zeros(n, dtype=bool)
+    train[:250] = True
+    assign = np.ones((n, 1))  # one global expert, so this isolates model quality
+
+    def acc_of(factory):
+        heads = fit_experts(X, y, assign, train, expert_factory=factory)
+        acc, _ = mixture_accuracy(X, y, assign, heads, ~train)
+        return acc
+
+    gnn_acc = acc_of(gnn_head_factory(W_norm=W_norm, n_features=d, epochs=600))
+    lin_acc = acc_of(EXPERT_FACTORIES["logistic"])
+    chance = max(y[~train].mean(), 1 - y[~train].mean())
+
+    assert gnn_acc > lin_acc + 0.15, (gnn_acc, lin_acc, chance)
+    assert gnn_acc > 0.7, gnn_acc
+
+
 def test_expert_factory_swaps_head_and_stays_deterministic():
     """``expert_factory`` lets the protocol use non-linear heads reproducibly.
 
@@ -610,7 +742,6 @@ def test_expert_factory_swaps_head_and_stays_deterministic():
     test = ~train
 
     assert set(EXPERT_FACTORIES) == {"logistic", "mlp"}
-
     accs = []
     for _ in range(2):
         heads = fit_experts(X, y, assignment, train, expert_factory=EXPERT_FACTORIES["mlp"])

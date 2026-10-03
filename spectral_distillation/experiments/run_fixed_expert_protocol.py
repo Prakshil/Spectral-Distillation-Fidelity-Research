@@ -70,6 +70,24 @@ from spectral_distillation.src.router_protocol import (
 from spectral_distillation.src.utils import ensure_dir, get_logger, set_seed
 
 N_EXPERTS = 3
+EXPERT_NAMES = ("logistic", "mlp", "gnn")
+
+
+def build_expert_factory(name: str, graph, device: str):
+    """Resolve an expert family name to an ``expert_factory`` callable.
+
+    ``gnn`` is not in ``EXPERT_FACTORIES`` because it needs the graph: each
+    expert message-passes over the symmetrically normalized adjacency, which is
+    the only way a specialist can exploit the structure a router routes on.
+    """
+    if name == "gnn":
+        from spectral_distillation.src.gnn_expert import gnn_head_factory
+        from spectral_distillation.src.laplacian import normalize_adjacency
+
+        W_norm = normalize_adjacency(graph["W"])
+        return gnn_head_factory(W_norm=W_norm, n_features=graph["d_features"],
+                               device=device)
+    return EXPERT_FACTORIES[name]
 
 
 def feature_kmeans_routing(X: np.ndarray, n_experts: int = N_EXPERTS, seed: int = 0) -> np.ndarray:
@@ -97,30 +115,61 @@ def evaluate_all(
     (split, seed) from that partition and reused for every routing. This is the
     whole point of protocol B -- without it the experts would be refitted from
     each candidate's own routing and the two protocols would coincide.
+
+    Because that pool does not depend on the condition, it is fitted once per
+    (split, seed) and shared across all conditions. Fitting is deterministic in
+    ``(X, y, assignment, train)``, so this is a pure speedup: it removes the
+    56x duplicate work of refitting an identical pool per condition.
     """
-    out: dict[str, dict[int, float]] = {c: {} for c in conditions}
+    shared_pool = expert_assignment is not None
+    per_cond_acc: dict[str, list[float]] = {c: [] for c in conditions}
     t0 = time.perf_counter()
     for split in range(splits):
-        _, test = train_test_split(y, split, 0)
-        for cond, a in conditions.items():
-            accs = []
-            for seed in range(seeds):
-                train, te = train_test_split(y, split, seed)
-                fit_a = a if expert_assignment is None else expert_assignment
-                experts = fit_experts(X, y, fit_a, train, expert_factory=expert_factory)
-                acc, _ = mixture_accuracy(X, y, a, experts, te)
-                accs.append(acc)
-            out[cond][split] = float(np.mean(accs))
+        for seed in range(seeds):
+            train, te = train_test_split(y, split, seed)
+            if shared_pool:
+                pool = fit_experts(
+                    X, y, expert_assignment, train, expert_factory=expert_factory
+                )
+                experts_per_cond = {c: pool for c in conditions}
+                # The no-routing reference must be a model fitted on *every*
+                # training node. Reusing the k-means pool would silently score
+                # "route everything to the cluster-0 expert", which never saw
+                # the other two clusters -- a weaker, mislabelled baseline. It
+                # costs one extra head fit per (split, seed).
+                if "single_global" in conditions:
+                    experts_per_cond["single_global"] = fit_experts(
+                        X, y, np.ones((X.shape[0], 1)), train,
+                        expert_factory=expert_factory,
+                    )
+            else:
+                experts_per_cond = {
+                    c: fit_experts(X, y, a, train, expert_factory=expert_factory)
+                    for c, a in conditions.items()
+                }
+            for cond, a in conditions.items():
+                acc, _ = mixture_accuracy(X, y, a, experts_per_cond[cond], te)
+                per_cond_acc[cond].append(acc)
         log.info("  split %d/%d (%.0fs)", split + 1, splits, time.perf_counter() - t0)
-    return out
+
+    n_seeds = max(1, seeds)
+    return {
+        cond: {
+            split: float(np.mean(vals[split * n_seeds:(split + 1) * n_seeds]))
+            for split in range(splits)
+        }
+        for cond, vals in per_cond_acc.items()
+    }
 
 
 def single_global_condition(n: int) -> np.ndarray:
-    """One column of ones -> argmax routes every node to expert 0.
+    """One column of ones -> argmax routes every node to the single expert.
 
-    ``fit_experts`` then trains that expert on *all* training nodes, so this
-    condition is a no-routing baseline: the accuracy a single global model gets.
-    It bounds how much any routing scheme could possibly contribute.
+    Fitted against a one-column pool this head sees *all* training nodes, so the
+    condition is a genuine no-routing baseline: the accuracy one global model
+    gets, which upper-bounds what any routing scheme can contribute. Under a
+    shared multi-column pool that would no longer hold, so ``evaluate_all``
+    refits this condition against its own one-column pool.
     """
     return np.ones((n, 1))
 
@@ -134,8 +183,9 @@ def main() -> None:
     p.add_argument("--seeds", type=int, default=3)
     p.add_argument("--out", default="logs")
     p.add_argument("--device", default="cpu")
-    p.add_argument("--expert", default="logistic", choices=sorted(EXPERT_FACTORIES),
-                   help="expert head family; 'mlp' gives non-linear capacity")
+    p.add_argument("--expert", default="logistic", choices=EXPERT_NAMES,
+                   help="expert head family; 'mlp' adds non-linear capacity, "
+                        "'gnn' adds message passing over the graph")
     p.add_argument("--skip-self-routing", action="store_true",
                    help="run only the honest fixed-expert protocol (much faster with mlp)")
     args = p.parse_args()
@@ -173,7 +223,7 @@ def main() -> None:
         base_cond[f"{name}::fwd"] = bucket_from_score(s)
         base_cond[f"{name}::neg"] = bucket_from_score(-s)
 
-    factory = EXPERT_FACTORIES[args.expert]
+    factory = build_expert_factory(args.expert, graph, args.device)
     log.info("expert head: %s", args.expert)
 
     # ------------------------------------------------------------------ #
@@ -188,7 +238,7 @@ def main() -> None:
 
     # ------------------------------------------------------------------ #
     # Protocol A: self-routing -- each expert fitted to its own routing.
-    # Optional: with MLP experts this refits per condition and is very slow.
+    # Optional: with MLP/GNN experts this refits per condition and is slow.
     # ------------------------------------------------------------------ #
     if args.skip_self_routing:
         log.info("protocol A skipped (--skip-self-routing)")
@@ -269,6 +319,16 @@ def main() -> None:
             "single_global_dz": glob.effect_size_dz,
             "n_holm_significant": sum(1 for r in rows if r["holm_significant"]),
             "n_candidates": len(rows),
+            # Absolute accuracies, not just deltas. A negative routing result is
+            # only meaningful if the experts are actually competent, and that is
+            # checked against these numbers rather than assumed.
+            "mean_accuracy": {
+                c: float(np.mean(list(acc[c].values())))
+                for c in ("single_global", "oracle", "feature_kmeans", "random")
+            },
+            "best_candidate_accuracy": float(
+                np.mean(list(acc[rows[0]["candidate"] + "::fwd"].values()))
+            ),
         }
         return rows, refs
 

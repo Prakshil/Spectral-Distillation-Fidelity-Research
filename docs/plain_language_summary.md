@@ -74,14 +74,58 @@ When we applied the fair test to the Amazon graph:
   than under the old test — which shows the old rankings were measuring the wrong
   thing.
 
+### 5. We then asked: was the negative just because our experts were too weak?
+
+This is the obvious objection, and a negative result is worthless if the experts
+are too simple to do anything interesting. So we ran the whole thing again with
+much stronger experts:
+
+- a **neural network** expert (instead of a straight-line one), and
+- a **graph neural network** expert, which is a model that actually looks at each
+  node's neighbours. This is the kind of expert used in the published routing
+  work, so it is the fairest test of the idea.
+
+First we checked the new experts were actually good, not broken. On a small
+test problem whose answer depends only on a node's neighbours, ordinary experts
+score *no better than a coin flip* (0.52), while the graph expert reaches 0.93 —
+essentially as good as knowing the answer in advance (0.94). So the graph expert
+genuinely does understand the structure it is given.
+
+Then we re-ran everything. Across **all 182 combinations** of router, expert type,
+and graph:
+
+**Not a single router beat simply training one model on everything.**
+
+The graph expert is the interesting case, because it made *more* routers look
+good than before (17 of 26 beat random splitting, up from 11) — and still not one
+of them beat the single model. So:
+
+- Beating *random* routing is easy and does not mean much.
+- The real question is whether routing beats *no routing*, and it never does.
+
+### A bug we found along the way
+
+While setting up the graph expert we discovered our own "no routing" baseline was
+not doing what its name said. Because the test reuses a fixed pool of three
+experts, the "single model" was actually being judged by one of those three
+experts — which had only seen a third of the training data. That made the
+baseline too *weak*, which would have flattered our routers.
+
+We measured the size of the mistake (under 0.5%, and in the direction that made
+us look worse, not better), fixed it, regenerated every result, and added a test
+so it cannot come back. The conclusion did not change.
+
 ### What this does *not* mean
 
 It does **not** mean routing is useless in general. It means that *on these fraud
-graphs, with simple straight-line (linear) experts*, splitting the work up did
-not pay for the cost of giving each expert less training data. The honest next
-question is whether **stronger, non-linear experts** (like small neural networks)
-can specialize well enough for routing to be worth it. That is the experiment we
-are running next.
+graphs*, splitting the work up does not pay for the cost of giving each expert
+less training data — and this holds even when the experts are neural networks that
+can see structure, not just straight lines.
+
+Two limits are worth being explicit about. The graph expert was only tested on
+Amazon, and we have not yet re-implemented the published routing methods
+themselves, so this is a result about *structural-score* routers rather than a
+direct head-to-head with prior work.
 
 ## Why this is worth a serious paper
 

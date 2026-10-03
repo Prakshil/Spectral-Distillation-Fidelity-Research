@@ -18,12 +18,16 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.neural_network import MLPClassifier
 
 
-def expert_head() -> LogisticRegression:
-    """Build a single expert head (identical for every expert/condition)."""
+def expert_head(train_idx: np.ndarray | None = None) -> LogisticRegression:
+    """Build a single expert head (identical for every expert/condition).
+
+    ``train_idx`` is accepted (and ignored) so every expert factory shares one
+    signature; :func:`fit_experts` always passes the routed training mask.
+    """
     return LogisticRegression(C=1.0, max_iter=5000, solver="lbfgs", n_jobs=1)
 
 
-def mlp_head() -> MLPClassifier:
+def mlp_head(train_idx: np.ndarray | None = None) -> MLPClassifier:
     """A small non-linear expert head.
 
     The linear head may simply be too weak to specialise, so a router can never
@@ -48,7 +52,7 @@ def fit_experts(
     y: np.ndarray,
     assignment: np.ndarray,
     train_mask: np.ndarray,
-    expert_factory: Callable[[], object] = expert_head,
+    expert_factory: Callable[[np.ndarray], object] = expert_head,
 ) -> list[object | None]:
     """Fit K expert heads, each on its own routed train subset.
 
@@ -56,6 +60,13 @@ def fit_experts(
     unless the masked set is empty) so the mixture stays well defined even
     under heavy dilution. ``expert_factory`` builds each head; it defaults to
     the linear ``expert_head`` so existing callers reproduce exactly.
+
+    Each factory is called as ``expert_factory(train_mask_k)`` so a head that
+    needs the full graph (see :mod:`spectral_distillation.src.gnn_expert`) can
+    learn which nodes it owns. Heads exposing ``fit_graph`` receive the whole
+    feature matrix -- message passing needs every node, while the loss is still
+    restricted to ``train_mask_k``. All other heads get the usual sklearn
+    ``fit(X[masked], y[masked])`` call.
     """
     assignment = np.asarray(assignment, dtype=float)
     K = assignment.shape[1]
@@ -71,8 +82,11 @@ def fit_experts(
             dummy.fit(X[masked], y[masked])
             experts.append(dummy)
             continue
-        head = expert_factory()
-        head.fit(X[masked], y[masked])
+        head = expert_factory(masked)
+        if hasattr(head, "fit_graph"):
+            head.fit_graph(X, y)
+        else:
+            head.fit(X[masked], y[masked])
         experts.append(head)
     return experts
 
@@ -88,6 +102,11 @@ def mixture_accuracy(
 
     Returns (accuracy, n_evaluated). Nodes routed to experts that had no
     training data are skipped and reported neither correct nor wrong.
+
+    Heads exposing ``predict_nodes`` are handed the global node indices as well
+    as the full feature matrix, because a message-passing expert cannot recover
+    node identity from a feature submatrix alone. Every other head gets the
+    ordinary ``predict(X[block])`` call.
     """
     assignment = np.asarray(assignment, dtype=float)
     hard = np.argmax(assignment, axis=1)
@@ -102,7 +121,10 @@ def mixture_accuracy(
         block = idx[hard[idx] == k]
         if block.size == 0:
             continue
-        pred = head.predict(X[block])
+        if hasattr(head, "predict_nodes"):
+            pred = head.predict_nodes(X, block)
+        else:
+            pred = head.predict(X[block])
         correct += int(np.count_nonzero(pred == y[block]))
         evaluated += int(block.size)
     if evaluated == 0:

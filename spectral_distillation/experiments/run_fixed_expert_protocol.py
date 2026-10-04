@@ -99,6 +99,39 @@ def feature_kmeans_routing(X: np.ndarray, n_experts: int = N_EXPERTS, seed: int 
     return out
 
 
+def uniform_ensemble_accuracy_fixed(
+    X: np.ndarray,
+    y: np.ndarray,
+    experts: list[object | None],
+    test_mask: np.ndarray,
+) -> float:
+    idx = np.flatnonzero(test_mask)
+    if idx.size == 0:
+        return 0.0
+    all_preds = []
+    for k, head in enumerate(experts):
+        if head is None:
+            continue
+        if hasattr(head, "predict_nodes"):
+            pred = head.predict_nodes(X, idx)
+        else:
+            try:
+                pred = head.predict(X[idx])
+            except Exception:
+                continue
+        all_preds.append(pred)
+    if len(all_preds) == 0:
+        return 0.0
+    votes = np.stack(all_preds, axis=0)
+    try:
+        from scipy.stats import mode
+        ens = mode(votes, axis=0, keepdims=False).mode
+    except Exception:
+        ens = votes[0]
+    correct = int(np.count_nonzero(ens == y[idx]))
+    return float(correct / idx.size)
+
+
 def evaluate_all(
     conditions: dict[str, np.ndarray],
     X,
@@ -150,16 +183,21 @@ def evaluate_all(
             for cond, a in conditions.items():
                 acc, _ = mixture_accuracy(X, y, a, experts_per_cond[cond], te)
                 per_cond_acc[cond].append(acc)
+            # ensemble
+            if shared_pool:
+                ens_acc = uniform_ensemble_accuracy_fixed(X, y, pool, te)
+                per_cond_acc.setdefault("ensemble_uniform", []).append(ens_acc)
         log.info("  split %d/%d (%.0fs)", split + 1, splits, time.perf_counter() - t0)
 
     n_seeds = max(1, seeds)
-    return {
+    out = {
         cond: {
             split: float(np.mean(vals[split * n_seeds:(split + 1) * n_seeds]))
             for split in range(splits)
         }
         for cond, vals in per_cond_acc.items()
     }
+    return out
 
 
 def single_global_condition(n: int) -> np.ndarray:

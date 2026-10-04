@@ -85,9 +85,7 @@ def main() -> None:
     mean_acc = {k: float(np.mean([r["accuracy"][k] for r in per_split])) for k in keys}
     n = len(per_split)
     wins = int(sum(r["learned_minus_no_routing"] > 0 for r in per_split))
-    kmeans_wins = int(sum(
-        r["accuracy"]["learned_router"] > r["accuracy"]["single_global"] for r in per_split
-    ))
+    ens_wins = int(sum(r.get("learned_minus_ensemble", -1) > 0 for r in per_split))
 
     payload = {
         "config": vars(args),
@@ -101,18 +99,20 @@ def main() -> None:
             "mean_accuracy": mean_acc,
             "learned_minus_no_routing": mean_acc["learned_router"] - mean_acc["single_global"],
             "learned_minus_random": mean_acc["learned_router"] - mean_acc["random"],
+            "learned_minus_ensemble": mean_acc.get("learned_router", 0.0) - mean_acc.get("ensemble_uniform", mean_acc.get("single_global", 0.0)),
+            "ensemble_minus_no_routing": mean_acc.get("ensemble_uniform", 0.0) - mean_acc["single_global"],
             "router_vs_kmeans_agreement": float(
                 np.mean([r["router_vs_kmeans_agreement"] for r in per_split])
             ),
             "n_runs": n,
             "n_runs_learned_beats_no_routing": wins,
-            "n_runs_learned_beats_kmeans": kmeans_wins,
+            "n_runs_learned_beats_ensemble": ens_wins,
             "per_run": per_split,
         },
         "interpretation": (
             "Learned routing is scored on the same frozen routing-blind pool as "
-            "every baseline, trained on training nodes only. Compare "
-            "learned_minus_no_routing against the 0/234 fixed-router result."
+            "every baseline, trained on training nodes only. Added Node-MoE gate "
+            "[X, |AX-X|, |A2X-X|] and uniform ensemble (Ens-Avg)."
         ),
     }
     path = out_dir / "fixed_expert.json"

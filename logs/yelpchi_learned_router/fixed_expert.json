@@ -3,9 +3,9 @@
     "dataset": "yelpchi",
     "data_path": null,
     "max_nodes": 14840,
-    "splits": 3,
+    "splits": 1,
     "seeds": 1,
-    "epochs": 200,
+    "epochs": 40,
     "router_frac": 0.35,
     "expert": "logistic",
     "out": "logs",
@@ -19,71 +19,43 @@
   },
   "results": {
     "mean_accuracy": {
-      "single_global": 0.8564228306770195,
-      "learned_router": 0.8570585297189303,
-      "feature_kmeans": 0.8578304499841076,
-      "oracle": 0.8472960087181582,
-      "random": 0.8529718930209328
+      "single_global": 0.8554692821141534,
+      "learned_router": 0.853289742541888,
+      "feature_kmeans": 0.8586023702492849,
+      "oracle": 0.8447078054760931,
+      "random": 0.8502928756300232,
+      "ensemble_uniform": 0.8558779457839532
     },
-    "learned_minus_no_routing": 0.0006356990419107422,
-    "learned_minus_random": 0.00408663669799747,
-    "router_vs_kmeans_agreement": 0.37127352814295117,
-    "n_runs": 3,
-    "n_runs_learned_beats_no_routing": 2,
-    "n_runs_learned_beats_kmeans": 2,
+    "learned_minus_no_routing": -0.0021795395722653543,
+    "learned_minus_random": 0.0029968669118648483,
+    "learned_minus_ensemble": -0.0025882032420651013,
+    "ensemble_minus_no_routing": 0.000408663669799747,
+    "router_vs_kmeans_agreement": 0.5499625366119474,
+    "n_runs": 1,
+    "n_runs_learned_beats_no_routing": 0,
+    "n_runs_learned_beats_ensemble": 0,
     "per_run": [
       {
         "accuracy": {
           "single_global": 0.8554692821141534,
-          "learned_router": 0.8573763792398855,
+          "learned_router": 0.853289742541888,
           "feature_kmeans": 0.8586023702492849,
           "oracle": 0.8447078054760931,
-          "random": 0.8502928756300232
+          "random": 0.8502928756300232,
+          "ensemble_uniform": 0.8558779457839532
         },
-        "learned_minus_no_routing": 0.0019070971257321157,
-        "learned_minus_random": 0.007083503609862318,
-        "router_vs_kmeans_agreement": 0.3098562768203801,
-        "final_train_loss": 1.0975420475006104,
+        "learned_minus_no_routing": -0.0021795395722653543,
+        "learned_minus_random": 0.0029968669118648483,
+        "learned_minus_ensemble": -0.0025882032420651013,
+        "ensemble_minus_no_routing": 0.000408663669799747,
+        "router_vs_kmeans_agreement": 0.5499625366119474,
+        "final_train_loss": 1.0985857248306274,
         "n_fit_nodes": 4771,
         "n_router_nodes": 2569,
         "split": 0,
         "seed": 0
-      },
-      {
-        "accuracy": {
-          "single_global": 0.8558779457839532,
-          "learned_router": 0.8543795123280207,
-          "feature_kmeans": 0.8558779457839532,
-          "oracle": 0.8466149026018254,
-          "random": 0.8524724152022886
-        },
-        "learned_minus_no_routing": -0.0014984334559324797,
-        "learned_minus_random": 0.0019070971257321157,
-        "router_vs_kmeans_agreement": 0.2925550030651863,
-        "final_train_loss": 1.0982714891433716,
-        "n_fit_nodes": 4771,
-        "n_router_nodes": 2569,
-        "split": 1,
-        "seed": 0
-      },
-      {
-        "accuracy": {
-          "single_global": 0.8579212641329519,
-          "learned_router": 0.8594196975888844,
-          "feature_kmeans": 0.8590110339190846,
-          "oracle": 0.8505653180765563,
-          "random": 0.8561503882304863
-        },
-        "learned_minus_no_routing": 0.0014984334559324797,
-        "learned_minus_random": 0.003269309358398087,
-        "router_vs_kmeans_agreement": 0.5114093045432873,
-        "final_train_loss": 1.0980234146118164,
-        "n_fit_nodes": 4771,
-        "n_router_nodes": 2569,
-        "split": 2,
-        "seed": 0
       }
     ]
   },
-  "interpretation": "Learned routing is scored on the same frozen routing-blind pool as every baseline, trained on training nodes only. Compare learned_minus_no_routing against the 0/234 fixed-router result."
+  "interpretation": "Learned routing is scored on the same frozen routing-blind pool as every baseline, trained on training nodes only. Added Node-MoE gate [X, |AX-X|, |A2X-X|] and uniform ensemble (Ens-Avg)."
 }

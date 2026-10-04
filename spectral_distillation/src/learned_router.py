@@ -84,16 +84,17 @@ def build_router_targets(
 
 
 def _router_features(X: np.ndarray, W_norm: np.ndarray) -> np.ndarray:
-    """Cached one-hop propagated features ``[X, AX]``.
+    """Node-MoE gate features: ``[X, |AX−X|, |A²X−X|]``.
 
-    Re-propagating inside every training step costs ~1s/epoch on the Amazon
-    graph, which is unaffordable across splits. The propagation is label-free and
-    the graph is fixed, so it is identical at every epoch -- computing it once is
-    a pure speedup, and matches how :mod:`spectral_distillation.src.gnn_expert`
-    caches its own ``h0``. Being transductive, this is still label-free: no test
-    label ever enters the features.
+    Node-MoE (arXiv:2406.03464) shows raw features are insufficient for routing:
+    the gate must see neighborhood discrepancy over 1–2 hops to estimate
+    homophily/structural regime per node. Using cached label-free propagations
+    matches the existing ``[X, AX]`` design while adding the discrepancy terms.
     """
-    return np.hstack([X, np.asarray(W_norm) @ X])
+    A = np.asarray(W_norm)
+    AX = A @ X
+    A2X = A @ (AX)
+    return np.hstack([X, np.abs(AX - X), np.abs(A2X - X)])
 
 
 class LiteRouterMLP(torch.nn.Module):
@@ -187,6 +188,61 @@ def split_fit_router(train_mask: np.ndarray, y: np.ndarray, seed: int = 0,
     return fit, router
 
 
+def uniform_ensemble_accuracy(
+    X: np.ndarray,
+    y: np.ndarray,
+    experts: list[object | None],
+    test_mask: np.ndarray,
+) -> float:
+    """Uniform ensemble (Ens-Avg): average predictions across all experts.
+
+    For each test node, get prediction/prob from every expert that is usable;
+    if experts return class labels, vote uniformly; if probabilities, average.
+    Skips experts that are None. Returns accuracy over evaluated nodes.
+    """
+    idx = np.flatnonzero(test_mask)
+    if idx.size == 0:
+        return 0.0
+    # collect predictions per expert
+    all_preds = []
+    usable_experts = []
+    for k, head in enumerate(experts):
+        if head is None:
+            continue
+        usable_experts.append(head)
+        if hasattr(head, "predict_nodes"):
+            pred = head.predict_nodes(X, idx)
+        elif hasattr(head, "predict_proba"):
+            # take argmax from proba
+            proba = head.predict_proba(X[idx]) if hasattr(head, "predict") or True else None
+            # sklearn style
+            try:
+                proba = head.predict_proba(X[idx])
+                pred = proba.argmax(axis=1)
+            except Exception:
+                pred = head.predict(X[idx])
+        else:
+            try:
+                pred = head.predict(X[idx])
+            except Exception:
+                continue  # skip unusable
+        all_preds.append(pred)
+    if len(all_preds) == 0:
+        return 0.0
+    # vote
+    votes = np.stack(all_preds, axis=0)  # (n_experts, n_test)
+    # majority vote
+    from scipy.stats import mode
+    try:
+        ens = mode(votes, axis=0, keepdims=False).mode
+    except Exception:
+        ens = votes[0]
+        for v in votes[1:]:
+            ens = (ens + v) // 2  # rough
+    correct = int(np.count_nonzero(ens == y[idx]))
+    return float(correct / idx.size)
+
+
 def evaluate_learned_routing(
     X: np.ndarray,
     y: np.ndarray,
@@ -203,8 +259,9 @@ def evaluate_learned_routing(
 ) -> dict:
     """Score learned routing against every baseline on one frozen pool/split.
 
-    All conditions reuse one ``fit_experts`` call, so the pool is identical across
-    conditions and any difference is attributable to routing alone.
+    All conditions reuse one ``fit_experts`` call for the frozen pool, so the
+    pool is identical across conditions; any difference is attributable to routing
+    alone. Adds uniform ensemble (Ens-Avg) baseline.
     """
     from spectral_distillation.src.router_protocol import random_assignment
 
@@ -235,12 +292,16 @@ def evaluate_learned_routing(
     for name, assignment in conditions.items():
         heads = global_experts if name == "single_global" else experts
         acc[name] = mixture_accuracy(X, y, assignment, heads, test_mask)[0]
+    # uniform ensemble over frozen pool experts
+    acc["ensemble_uniform"] = uniform_ensemble_accuracy(X, y, experts, test_mask)
 
     pool_labels = pool.argmax(axis=1)
     return {
         "accuracy": acc,
         "learned_minus_no_routing": acc["learned_router"] - acc["single_global"],
         "learned_minus_random": acc["learned_router"] - acc["random"],
+        "learned_minus_ensemble": acc["learned_router"] - acc.get("ensemble_uniform", 0.0),
+        "ensemble_minus_no_routing": acc.get("ensemble_uniform", 0.0) - acc["single_global"],
         "router_vs_kmeans_agreement": float(
             (learned.argmax(axis=1) == pool_labels).mean()
         ),

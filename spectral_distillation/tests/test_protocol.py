@@ -920,6 +920,110 @@ def test_expert_factory_swaps_head_and_stays_deterministic():
 
 
 # --------------------------------------------------------------------------- #
+# Ens-Avg: the ensemble baseline must average probabilities, not hard votes
+# --------------------------------------------------------------------------- #
+
+def test_ensemble_averages_probabilities_not_majority_vote():
+    """Regression: Ens-Avg must average class-1 probabilities.
+
+    It previously majority-voted on hard labels, so an expert at p=0.51 counted
+    exactly as much as one at p=0.99 and the baseline measured voting strength
+    instead of pool complementarity -- the quantity the whole ensemble control
+    exists to isolate.
+
+    The fixture is built so majority vote and probability averaging *disagree*:
+    expert 0 is mildly right, experts 1 and 2 are confidently wrong. Averaging
+    probabilities yields the correct class; hard voting does not.
+    """
+    from spectral_distillation.src.learned_router import uniform_ensemble_accuracy
+
+    class _Fixed:
+        """Minimal head exposing only ``predict_proba``."""
+
+        def __init__(self, p1):
+            self.p1 = np.asarray(p1, dtype=float)
+
+        def predict_proba(self, block):
+            p = self.p1
+            return np.column_stack([1.0 - p, p])
+
+        def predict(self, block):
+            return (self.p1 > 0.5).astype(int)
+
+    n = 4
+    y = np.array([1, 1, 0, 0])
+    all_test = np.ones(n, dtype=bool)
+
+    # One strong expert plus two weak ones that individually outvote it. Under
+    # probability averaging the strong expert carries the decision; under a count
+    # of hard labels it does not.
+    strong = _Fixed([0.90, 0.90, 0.10, 0.10])
+    weak_a = _Fixed([0.45, 0.45, 0.55, 0.55])
+    weak_b = _Fixed([0.45, 0.45, 0.55, 0.55])
+    acc_ens = uniform_ensemble_accuracy(X=np.zeros((n, 1)), y=y,
+                                       experts=[strong, weak_a, weak_b],
+                                       test_mask=all_test)
+    # mean p on node0 = (0.90+0.45+0.45)/3 = 0.60 -> 1 (correct)
+    # mean p on node2 = (0.10+0.55+0.55)/3 = 0.40 -> 0 (correct)
+    assert acc_ens == 1.0
+
+    # Hard majority vote on the same pool: weak_a/weak_b both say 0 on node 0,
+    # so the vote is 0 and node 0 is scored wrong. The gap is what the averaging
+    # implementation buys.
+    from scipy.stats import mode
+
+    votes = np.stack([strong.predict(np.zeros((n, 1))),
+                      weak_a.predict(np.zeros((n, 1))),
+                      weak_b.predict(np.zeros((n, 1)))], axis=0)
+    vote_pred = mode(votes, axis=0, keepdims=False).mode
+    vote_acc = float(np.count_nonzero(vote_pred == y) / n)
+    assert vote_acc < acc_ens, (vote_acc, acc_ens)
+
+
+def test_ensemble_supports_graph_expert_probability_hook():
+    """The graph expert must expose probabilities for Ens-Avg.
+
+    It previously offered only ``predict_nodes`` (hard labels), so the ensemble
+    either skipped it or fell back to voting -- which would have quietly dropped
+    the GNN pool from the very control meant to explain the GNN results.
+    """
+    from spectral_distillation.src.gnn_expert import gnn_head_factory
+    from spectral_distillation.src.laplacian import normalize_adjacency
+
+    rng = np.random.default_rng(0)
+    n, d = 200, 5
+    A = _ring_graph(n)
+    X = rng.normal(size=(n, d))
+    y = (X[:, 0] > 0).astype(int)
+    W_norm = normalize_adjacency(A)
+
+    train = np.zeros(n, dtype=bool)
+    train[:140] = True
+    assign = np.zeros((n, 2))
+    assign[np.arange(n), np.arange(n) % 2] = 1.0
+
+    heads = fit_experts(X, y, assign, train,
+                        expert_factory=gnn_head_factory(W_norm=W_norm,
+                                                        n_features=d, epochs=60))
+    idx = np.flatnonzero(train)
+    for head in heads:
+        if head is None or hasattr(head, "_fallback"):
+            continue
+        assert hasattr(head, "predict_proba_nodes")
+        p = head.predict_proba_nodes(X, idx)
+        assert p.shape == (idx.size, 1)
+        assert np.all((p >= 0) & (p <= 1))
+        # label and probability paths must agree at the decision boundary
+        labels = head.predict_nodes(X, idx)
+        assert np.array_equal(labels, (p[:, 0] > 0.5).astype(int))
+
+    from spectral_distillation.src.learned_router import uniform_ensemble_accuracy
+
+    acc = uniform_ensemble_accuracy(X, y, heads, ~train)
+    assert 0.0 < acc <= 1.0
+
+
+# --------------------------------------------------------------------------- #
 # fixtures
 # --------------------------------------------------------------------------- #
 

@@ -9,7 +9,7 @@
       "logistic",
       "mlp"
     ],
-    "epochs": 200,
+    "epochs": 100,
     "out": "logs/positive_control",
     "device": "cpu"
   },
@@ -30,7 +30,8 @@
         "single_global": 0.7877777777777778,
         "oracle": 0.9785185185185186,
         "feature_kmeans": 0.9785185185185186,
-        "random": 0.7259259259259259
+        "random": 0.7259259259259259,
+        "ensemble_uniform": 0.8044444444444445
       },
       "per_split": {
         "single_global": {
@@ -52,6 +53,11 @@
           "0": 0.7188888888888889,
           "1": 0.7255555555555555,
           "2": 0.7333333333333333
+        },
+        "ensemble_uniform": {
+          "0": 0.8055555555555556,
+          "1": 0.8088888888888889,
+          "2": 0.7988888888888889
         }
       },
       "oracle_minus_no_routing": 0.19074074074074077,
@@ -63,7 +69,8 @@
         "single_global": 0.9740740740740742,
         "oracle": 0.987037037037037,
         "feature_kmeans": 0.987037037037037,
-        "random": 0.6748148148148148
+        "random": 0.6748148148148148,
+        "ensemble_uniform": 0.797037037037037
       },
       "per_split": {
         "single_global": {
@@ -85,6 +92,11 @@
           "0": 0.6755555555555556,
           "1": 0.6844444444444444,
           "2": 0.6644444444444444
+        },
+        "ensemble_uniform": {
+          "0": 0.8044444444444444,
+          "1": 0.7933333333333333,
+          "2": 0.7933333333333333
         }
       },
       "oracle_minus_no_routing": 0.012962962962962843,
@@ -95,14 +107,14 @@
   "learned_router": {
     "mean_accuracy": {
       "single_global": 0.7837037037037037,
-      "learned_router": 0.9377777777777778,
+      "learned_router": 0.954074074074074,
       "feature_kmeans": 0.9729629629629629,
       "oracle": 0.9729629629629629,
       "random": 0.7274074074074074,
-      "ensemble_uniform": 0.8070370370370371
+      "ensemble_uniform": 0.8011111111111111
     },
-    "learned_minus_no_routing": 0.15407407407407414,
-    "router_vs_kmeans_agreement": 0.712037037037037,
+    "learned_minus_no_routing": 0.17037037037037028,
+    "router_vs_kmeans_agreement": 0.7772222222222221,
     "n_runs": 3,
     "n_runs_learned_beats_no_routing": 3
   },

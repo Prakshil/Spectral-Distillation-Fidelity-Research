@@ -55,6 +55,7 @@ from spectral_distillation.experiments.run_candidate_search import (
     candidate_scores,
 )
 from spectral_distillation.src.evaluation import evaluate_comparison, holm_bonferroni
+from spectral_distillation.src.learned_router import uniform_ensemble_accuracy
 from spectral_distillation.src.mixture import (
     EXPERT_FACTORIES,
     fit_experts,
@@ -105,31 +106,14 @@ def uniform_ensemble_accuracy_fixed(
     experts: list[object | None],
     test_mask: np.ndarray,
 ) -> float:
-    idx = np.flatnonzero(test_mask)
-    if idx.size == 0:
-        return 0.0
-    all_preds = []
-    for k, head in enumerate(experts):
-        if head is None:
-            continue
-        if hasattr(head, "predict_nodes"):
-            pred = head.predict_nodes(X, idx)
-        else:
-            try:
-                pred = head.predict(X[idx])
-            except Exception:
-                continue
-        all_preds.append(pred)
-    if len(all_preds) == 0:
-        return 0.0
-    votes = np.stack(all_preds, axis=0)
-    try:
-        from scipy.stats import mode
-        ens = mode(votes, axis=0, keepdims=False).mode
-    except Exception:
-        ens = votes[0]
-    correct = int(np.count_nonzero(ens == y[idx]))
-    return float(correct / idx.size)
+    """Ens-Avg over the shared frozen pool.
+
+    Delegates to the single implementation in
+    :mod:`spectral_distillation.src.learned_router` so the learned-router and
+    fixed-protocol baselines cannot drift apart -- they previously were two
+    near-duplicate copies that already disagreed on the fallback path.
+    """
+    return uniform_ensemble_accuracy(X, y, experts, test_mask)
 
 
 def evaluate_all(
@@ -346,6 +330,17 @@ def main() -> None:
                 "beats_no_routing": bool(g.mean_diff > 0),
             })
         rows.sort(key=lambda r: -r["d2"])
+        # Ens-Avg needs the same treatment as every other condition: a paired
+        # test against no-routing, not just a bare mean. Averaging the same
+        # frozen pool can only help if the pool is complementary, so this is the
+        # number that decides whether any routing gain could have come from
+        # capacity rather than routing.
+        if "ensemble_uniform" in acc:
+            ens_cmp = evaluate_comparison(acc["ensemble_uniform"], acc["single_global"],
+                                          "ensemble_vs_global")
+        else:
+            ens_cmp = None
+
         orc = evaluate_comparison(acc["oracle"], acc["random"], "oracle_vs_random")
         kmc = evaluate_comparison(acc["feature_kmeans"], acc["random"], "kmeans_vs_random")
         glob = evaluate_comparison(acc["single_global"], acc["random"], "global_vs_random")
@@ -355,6 +350,10 @@ def main() -> None:
             "feature_kmeans_dz": kmc.effect_size_dz,
             "single_global_d2": glob.mean_diff, "single_global_p": glob.p_wilcoxon,
             "single_global_dz": glob.effect_size_dz,
+            "ensemble_vs_global_d2": (ens_cmp.mean_diff if ens_cmp else None),
+            "ensemble_vs_global_p": (ens_cmp.p_wilcoxon if ens_cmp else None),
+            "ensemble_vs_global_dz": (ens_cmp.effect_size_dz if ens_cmp else None),
+            "ensemble_beats_no_routing": (bool(ens_cmp.mean_diff > 0) if ens_cmp else None),
             "n_holm_significant": sum(1 for r in rows if r["holm_significant"]),
             "n_candidates": len(rows),
             # Absolute accuracies, not just deltas. A negative routing result is
@@ -362,7 +361,9 @@ def main() -> None:
             # checked against these numbers rather than assumed.
             "mean_accuracy": {
                 c: float(np.mean(list(acc[c].values())))
-                for c in ("single_global", "oracle", "feature_kmeans", "random")
+                for c in ("single_global", "oracle", "feature_kmeans", "random",
+                          "ensemble_uniform")
+                if c in acc
             },
             "best_candidate_accuracy": float(
                 np.mean(list(acc[rows[0]["candidate"] + "::fwd"].values()))
@@ -386,6 +387,10 @@ def main() -> None:
         print(f"oracle D2={ref['oracle_d2']:+.5f} (dz {ref['oracle_dz']:.2f})   "
               f"feature-kmeans D2={ref['feature_kmeans_d2']:+.5f} "
               f"(dz {ref['feature_kmeans_dz']:.2f}, p={ref['feature_kmeans_p']:.4f})")
+        if ref.get("ensemble_vs_global_d2") is not None:
+            print(f"Ens-Avg vs no-routing: {ref['ensemble_vs_global_d2']:+.5f} "
+                  f"(dz {ref['ensemble_vs_global_dz']:.2f}, "
+                  f"p={ref['ensemble_vs_global_p']:.4f})")
         print(hdr.format("candidate", "rho", "D2", "p", "dz", "sig", "vs-no-route"))
         for r in rows[:10]:
             print(hdr.format(

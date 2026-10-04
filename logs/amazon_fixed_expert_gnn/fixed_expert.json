@@ -102,13 +102,13 @@
       },
       {
         "candidate": "eig_nb_sim_k2",
-        "rho": -0.0382156061300426,
+        "rho": -0.038215606129864785,
         "max_abs_delta_self_routing": null,
         "max_abs_delta_fixed_expert": 0.03410493827160499
       },
       {
         "candidate": "eig_nb_sim_abs_k2",
-        "rho": 0.017612971433626588,
+        "rho": 0.017612971433544632,
         "max_abs_delta_self_routing": null,
         "max_abs_delta_fixed_expert": 0.014583333333333282
       },
@@ -126,7 +126,7 @@
       },
       {
         "candidate": "eig_nb_sim_abs_k8",
-        "rho": 0.07172911449097004,
+        "rho": 0.07172911449030253,
         "max_abs_delta_self_routing": null,
         "max_abs_delta_fixed_expert": 0.02430555555555547
       },
@@ -138,7 +138,7 @@
       },
       {
         "candidate": "eig_nb_sim_k32",
-        "rho": 0.17994959996112495,
+        "rho": 0.17994959996196228,
         "max_abs_delta_self_routing": null,
         "max_abs_delta_fixed_expert": 0.008873456790123413
       },
@@ -156,7 +156,7 @@
       },
       {
         "candidate": "eig_nb_sim_k128",
-        "rho": 0.3462464843732372,
+        "rho": 0.3462464843748484,
         "max_abs_delta_self_routing": null,
         "max_abs_delta_fixed_expert": 0.029166666666666785
       },
@@ -180,9 +180,9 @@
       },
       {
         "candidate": "spectral_energy",
-        "rho": -0.02271072661490545,
+        "rho": -0.014606094426860143,
         "max_abs_delta_self_routing": null,
-        "max_abs_delta_fixed_expert": 0.014969135802469058
+        "max_abs_delta_fixed_expert": 0.011419753086419848
       }
     ]
   },
@@ -311,7 +311,7 @@
       },
       {
         "candidate": "eig_nb_sim_abs_k8",
-        "rho": 0.07172911449097004,
+        "rho": 0.07172911449030253,
         "d2": 0.009830246913580254,
         "p": 0.001953125,
         "dz": 3.9972082319281674,
@@ -323,7 +323,7 @@
       },
       {
         "candidate": "eig_nb_sim_k2",
-        "rho": -0.0382156061300426,
+        "rho": -0.038215606129864785,
         "d2": 0.009297839506172845,
         "p": 0.001953125,
         "dz": 1.9875587354810589,
@@ -347,7 +347,7 @@
       },
       {
         "candidate": "eig_nb_sim_k32",
-        "rho": 0.17994959996112495,
+        "rho": 0.17994959996196228,
         "d2": 0.006049382716049356,
         "p": 0.001953125,
         "dz": 2.250644539655695,
@@ -371,7 +371,7 @@
       },
       {
         "candidate": "eig_nb_sim_abs_k2",
-        "rho": 0.017612971433626588,
+        "rho": 0.017612971433544632,
         "d2": 0.004753086419753072,
         "p": 0.001953125,
         "dz": 1.5128059025775165,
@@ -383,19 +383,19 @@
       },
       {
         "candidate": "spectral_energy",
-        "rho": -0.02271072661490545,
-        "d2": 0.004745370370370395,
-        "p": 0.001953125,
-        "dz": 1.9782693417988073,
-        "holm_significant": true,
-        "d2_vs_no_routing": -0.08682098765432097,
+        "rho": -0.014606094426860143,
+        "d2": 0.0012731481481480956,
+        "p": 0.16015625,
+        "dz": 0.6589202554467397,
+        "holm_significant": false,
+        "d2_vs_no_routing": -0.09029320987654328,
         "p_vs_no_routing": 0.001953125,
-        "dz_vs_no_routing": -3.32498361030031,
+        "dz_vs_no_routing": -3.396424790971971,
         "beats_no_routing": false
       },
       {
         "candidate": "eig_nb_sim_k128",
-        "rho": 0.3462464843732372,
+        "rho": 0.3462464843748484,
         "d2": -0.002222222222222203,
         "p": 0.193359375,
         "dz": -0.5335382982498077,
@@ -510,13 +510,18 @@
     "single_global_d2": 0.09156635802469137,
     "single_global_p": 0.001953125,
     "single_global_dz": 3.575484277906393,
-    "n_holm_significant": 17,
+    "ensemble_vs_global_d2": -0.028765432098765455,
+    "ensemble_vs_global_p": 0.001953125,
+    "ensemble_vs_global_dz": -1.5858724803060351,
+    "ensemble_beats_no_routing": false,
+    "n_holm_significant": 16,
     "n_candidates": 26,
     "mean_accuracy": {
       "single_global": 0.9427623456790123,
       "oracle": 0.8338580246913582,
       "feature_kmeans": 0.9401466049382716,
-      "random": 0.851195987654321
+      "random": 0.851195987654321,
+      "ensemble_uniform": 0.9139969135802468
     },
     "best_candidate_accuracy": 0.9109645061728393
   },

@@ -194,53 +194,43 @@ def uniform_ensemble_accuracy(
     experts: list[object | None],
     test_mask: np.ndarray,
 ) -> float:
-    """Uniform ensemble (Ens-Avg): average predictions across all experts.
+    """Uniform soft-voting ensemble over the frozen expert pool (Ens-Avg).
 
-    For each test node, get prediction/prob from every expert that is usable;
-    if experts return class labels, vote uniformly; if probabilities, average.
-    Skips experts that are None. Returns accuracy over evaluated nodes.
+    Averages each expert's *class-1 probability* and takes the argmax, so an
+    expert that is mildly confident contributes 0.6 rather than a hard vote. This
+    is the control the central claim needs: if averaging the same frozen pool
+    matches learned routing, then the routing signal never paid for itself.
+
+    Averaging probabilities rather than labels is the whole point. An earlier
+    version majority-voted on ``predict`` output, which discards confidence and
+    is not the quantity the ensemble baseline is supposed to isolate.
+
+    Requires every head to expose probabilities -- ``predict_proba`` (sklearn) or
+    ``predict_proba_nodes`` (:class:`~spectral_distillation.src.gnn_expert.GNNExpertHead`).
+    Heads with neither are skipped rather than silently down-weighted to a hard
+    vote, so a missing hook can never masquerade as a legitimate ensemble. All
+    tasks here are binary fraud detection, so one column per expert suffices.
     """
     idx = np.flatnonzero(test_mask)
     if idx.size == 0:
         return 0.0
-    # collect predictions per expert
-    all_preds = []
-    usable_experts = []
-    for k, head in enumerate(experts):
+    probas = []
+    for head in experts:
         if head is None:
             continue
-        usable_experts.append(head)
-        if hasattr(head, "predict_nodes"):
-            pred = head.predict_nodes(X, idx)
+        if hasattr(head, "predict_proba_nodes"):
+            p = np.asarray(head.predict_proba_nodes(X, idx), dtype=float)
         elif hasattr(head, "predict_proba"):
-            # take argmax from proba
-            proba = head.predict_proba(X[idx]) if hasattr(head, "predict") or True else None
-            # sklearn style
-            try:
-                proba = head.predict_proba(X[idx])
-                pred = proba.argmax(axis=1)
-            except Exception:
-                pred = head.predict(X[idx])
+            p = np.asarray(head.predict_proba(X[idx]), dtype=float)
         else:
-            try:
-                pred = head.predict(X[idx])
-            except Exception:
-                continue  # skip unusable
-        all_preds.append(pred)
-    if len(all_preds) == 0:
+            continue
+        if p.ndim == 2 and p.shape[1] >= 2:
+            p = p[:, 1]  # sklearn binary: column 1 is P(y=1)
+        probas.append(p.reshape(-1))
+    if not probas:
         return 0.0
-    # vote
-    votes = np.stack(all_preds, axis=0)  # (n_experts, n_test)
-    # majority vote
-    from scipy.stats import mode
-    try:
-        ens = mode(votes, axis=0, keepdims=False).mode
-    except Exception:
-        ens = votes[0]
-        for v in votes[1:]:
-            ens = (ens + v) // 2  # rough
-    correct = int(np.count_nonzero(ens == y[idx]))
-    return float(correct / idx.size)
+    ens = (np.mean(np.stack(probas, axis=0), axis=0) > 0.5).astype(int)
+    return float(np.count_nonzero(ens == y[idx]) / idx.size)
 
 
 def evaluate_learned_routing(

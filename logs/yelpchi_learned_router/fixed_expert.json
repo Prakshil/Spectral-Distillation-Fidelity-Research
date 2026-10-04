@@ -24,12 +24,12 @@
       "feature_kmeans": 0.8586023702492849,
       "oracle": 0.8447078054760931,
       "random": 0.8502928756300232,
-      "ensemble_uniform": 0.8558779457839532
+      "ensemble_uniform": 0.8553330608908868
     },
     "learned_minus_no_routing": -0.0021795395722653543,
     "learned_minus_random": 0.0029968669118648483,
-    "learned_minus_ensemble": -0.0025882032420651013,
-    "ensemble_minus_no_routing": 0.000408663669799747,
+    "learned_minus_ensemble": -0.002043318348998735,
+    "ensemble_minus_no_routing": -0.00013622122326661934,
     "router_vs_kmeans_agreement": 0.5499625366119474,
     "n_runs": 1,
     "n_runs_learned_beats_no_routing": 0,
@@ -42,12 +42,12 @@
           "feature_kmeans": 0.8586023702492849,
           "oracle": 0.8447078054760931,
           "random": 0.8502928756300232,
-          "ensemble_uniform": 0.8558779457839532
+          "ensemble_uniform": 0.8553330608908868
         },
         "learned_minus_no_routing": -0.0021795395722653543,
         "learned_minus_random": 0.0029968669118648483,
-        "learned_minus_ensemble": -0.0025882032420651013,
-        "ensemble_minus_no_routing": 0.000408663669799747,
+        "learned_minus_ensemble": -0.002043318348998735,
+        "ensemble_minus_no_routing": -0.00013622122326661934,
         "router_vs_kmeans_agreement": 0.5499625366119474,
         "final_train_loss": 1.0985857248306274,
         "n_fit_nodes": 4771,

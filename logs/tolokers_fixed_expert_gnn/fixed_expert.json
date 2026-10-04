@@ -102,87 +102,87 @@
       },
       {
         "candidate": "eig_nb_sim_k2",
-        "rho": 0.3821484358250438,
+        "rho": 0.3821490005004186,
         "max_abs_delta_self_routing": null,
         "max_abs_delta_fixed_expert": 0.06146169983557298
       },
       {
         "candidate": "eig_nb_sim_abs_k2",
-        "rho": 0.38187932205637287,
+        "rho": 0.38187988673173673,
         "max_abs_delta_self_routing": null,
         "max_abs_delta_fixed_expert": 0.06146169983557298
       },
       {
         "candidate": "eig_centrality_k2",
-        "rho": 0.3774443921091994,
+        "rho": 0.3774442630451438,
         "max_abs_delta_self_routing": null,
         "max_abs_delta_fixed_expert": 0.04467880024947557
       },
       {
         "candidate": "eig_nb_sim_k8",
-        "rho": 0.4183649647272393,
+        "rho": 0.4183646418567331,
         "max_abs_delta_self_routing": null,
         "max_abs_delta_fixed_expert": 0.09712536145603007
       },
       {
         "candidate": "eig_nb_sim_abs_k8",
-        "rho": 0.41661279923421374,
+        "rho": 0.416612476363769,
         "max_abs_delta_self_routing": null,
         "max_abs_delta_fixed_expert": 0.09695526450076547
       },
       {
         "candidate": "eig_centrality_k8",
-        "rho": 0.3945865330587752,
+        "rho": 0.3945864499643379,
         "max_abs_delta_self_routing": null,
         "max_abs_delta_fixed_expert": 0.05153937744514375
       },
       {
         "candidate": "eig_nb_sim_k32",
-        "rho": 0.37625443116143564,
+        "rho": 0.3762545022146285,
         "max_abs_delta_self_routing": null,
         "max_abs_delta_fixed_expert": 0.08873391166298128
       },
       {
         "candidate": "eig_nb_sim_abs_k32",
-        "rho": 0.3569062136282436,
+        "rho": 0.35690626159672484,
         "max_abs_delta_self_routing": null,
         "max_abs_delta_fixed_expert": 0.08867721267789302
       },
       {
         "candidate": "eig_centrality_k32",
-        "rho": 0.37949738620914014,
+        "rho": 0.3794975049654232,
         "max_abs_delta_self_routing": null,
         "max_abs_delta_fixed_expert": 0.04978170890741057
       },
       {
         "candidate": "eig_nb_sim_k128",
-        "rho": 0.36237116495532773,
+        "rho": 0.3623718492541812,
         "max_abs_delta_self_routing": null,
         "max_abs_delta_fixed_expert": 0.08164653852696041
       },
       {
         "candidate": "eig_nb_sim_abs_k128",
-        "rho": 0.345820941890677,
+        "rho": 0.3458214980674585,
         "max_abs_delta_self_routing": null,
         "max_abs_delta_fixed_expert": 0.08317741112434085
       },
       {
         "candidate": "eig_centrality_k128",
-        "rho": 0.38065169064685794,
+        "rho": 0.38065149959923117,
         "max_abs_delta_self_routing": null,
         "max_abs_delta_fixed_expert": 0.0449055961898282
       },
       {
         "candidate": "fiedler_nb_sim",
-        "rho": 0.5231933233332011,
+        "rho": 0.5231934872265589,
         "max_abs_delta_self_routing": null,
         "max_abs_delta_fixed_expert": 0.0935533253954755
       },
       {
         "candidate": "spectral_energy",
-        "rho": 0.004904766390417933,
+        "rho": 0.018173124032868183,
         "max_abs_delta_self_routing": null,
-        "max_abs_delta_fixed_expert": 0.008731643703577707
+        "max_abs_delta_fixed_expert": 0.011906786868515096
       }
     ]
   },
@@ -211,18 +211,6 @@
         "d2_vs_no_routing": -0.150756931450927,
         "p_vs_no_routing": 0.001953125,
         "dz_vs_no_routing": -32.32985344893593,
-        "beats_no_routing": false
-      },
-      {
-        "candidate": "spectral_energy",
-        "rho": 0.004904766390417933,
-        "d2": 0.0051369280489879324,
-        "p": 0.001953125,
-        "dz": 2.2666722876958554,
-        "holm_significant": true,
-        "d2_vs_no_routing": -0.15195328003628733,
-        "p_vs_no_routing": 0.001953125,
-        "dz_vs_no_routing": -27.94093148364814,
         "beats_no_routing": false
       },
       {
@@ -286,6 +274,18 @@
         "beats_no_routing": false
       },
       {
+        "candidate": "spectral_energy",
+        "rho": 0.018173124032868183,
+        "d2": -0.007852809434711122,
+        "p": 0.001953125,
+        "dz": -4.750371093705182,
+        "holm_significant": false,
+        "d2_vs_no_routing": -0.16494301751998638,
+        "p_vs_no_routing": 0.001953125,
+        "dz_vs_no_routing": -29.325530337729305,
+        "beats_no_routing": false
+      },
+      {
         "candidate": "neigh_feat_sim",
         "rho": -0.14314713295129616,
         "d2": -0.007937857912343365,
@@ -323,7 +323,7 @@
       },
       {
         "candidate": "eig_nb_sim_k2",
-        "rho": 0.3821484358250438,
+        "rho": 0.3821490005004186,
         "d2": -0.01779214152066676,
         "p": 0.001953125,
         "dz": -6.511887204013739,
@@ -335,7 +335,7 @@
       },
       {
         "candidate": "eig_nb_sim_abs_k2",
-        "rho": 0.38187932205637287,
+        "rho": 0.38187988673173673,
         "d2": -0.01779214152066676,
         "p": 0.001953125,
         "dz": -6.511887204013739,
@@ -347,7 +347,7 @@
       },
       {
         "candidate": "eig_nb_sim_abs_k32",
-        "rho": 0.3569062136282436,
+        "rho": 0.35690626159672484,
         "d2": -0.018387480864092524,
         "p": 0.001953125,
         "dz": -6.251805125060779,
@@ -359,7 +359,7 @@
       },
       {
         "candidate": "eig_nb_sim_k32",
-        "rho": 0.37625443116143564,
+        "rho": 0.3762545022146285,
         "d2": -0.020383285139196017,
         "p": 0.001953125,
         "dz": -6.889236388015147,
@@ -371,7 +371,7 @@
       },
       {
         "candidate": "eig_nb_sim_k128",
-        "rho": 0.36237116495532773,
+        "rho": 0.3623718492541812,
         "d2": -0.020445654022793018,
         "p": 0.001953125,
         "dz": -6.611185115774898,
@@ -383,7 +383,7 @@
       },
       {
         "candidate": "eig_nb_sim_abs_k128",
-        "rho": 0.345820941890677,
+        "rho": 0.3458214980674585,
         "d2": -0.021245109712536153,
         "p": 0.001953125,
         "dz": -6.433805608549379,
@@ -395,7 +395,7 @@
       },
       {
         "candidate": "eig_nb_sim_abs_k8",
-        "rho": 0.41661279923421374,
+        "rho": 0.416612476363769,
         "d2": -0.023031127742813413,
         "p": 0.001953125,
         "dz": -7.120663581537487,
@@ -407,7 +407,7 @@
       },
       {
         "candidate": "eig_nb_sim_k8",
-        "rho": 0.4183649647272393,
+        "rho": 0.4183646418567331,
         "d2": -0.023331632363780698,
         "p": 0.001953125,
         "dz": -7.344877527558476,
@@ -431,7 +431,7 @@
       },
       {
         "candidate": "eig_centrality_k32",
-        "rho": 0.37949738620914014,
+        "rho": 0.3794975049654232,
         "d2": -0.02528774734932245,
         "p": 0.001953125,
         "dz": -8.61942369182902,
@@ -443,7 +443,7 @@
       },
       {
         "candidate": "eig_centrality_k2",
-        "rho": 0.3774443921091994,
+        "rho": 0.3774442630451438,
         "d2": -0.025610931564325007,
         "p": 0.001953125,
         "dz": -10.298382105742249,
@@ -455,7 +455,7 @@
       },
       {
         "candidate": "eig_centrality_k8",
-        "rho": 0.3945865330587752,
+        "rho": 0.3945864499643379,
         "d2": -0.02604751374950388,
         "p": 0.001953125,
         "dz": -9.100616771968769,
@@ -467,7 +467,7 @@
       },
       {
         "candidate": "fiedler_nb_sim",
-        "rho": 0.5231933233332011,
+        "rho": 0.5231934872265589,
         "d2": -0.026778930657141247,
         "p": 0.001953125,
         "dz": -4.439723598607115,
@@ -479,7 +479,7 @@
       },
       {
         "candidate": "eig_centrality_k128",
-        "rho": 0.38065169064685794,
+        "rho": 0.38065149959923117,
         "d2": -0.028054657821624984,
         "p": 0.001953125,
         "dz": -10.245909601227737,
@@ -510,13 +510,18 @@
     "single_global_d2": 0.15709020808527527,
     "single_global_p": 0.001953125,
     "single_global_dz": 29.395330972412893,
-    "n_holm_significant": 3,
+    "ensemble_vs_global_d2": -0.15470885071157228,
+    "ensemble_vs_global_p": 0.001953125,
+    "ensemble_vs_global_dz": -21.5171877510647,
+    "ensemble_beats_no_routing": false,
+    "n_holm_significant": 2,
     "n_candidates": 26,
     "mean_accuracy": {
       "single_global": 0.6721267789306571,
       "oracle": 0.4938765096104779,
       "feature_kmeans": 0.6745648352894482,
-      "random": 0.5150365708453819
+      "random": 0.5150365708453819,
+      "ensemble_uniform": 0.5174179282190849
     },
     "best_candidate_accuracy": 0.5248795146566876
   },

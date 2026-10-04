@@ -216,16 +216,43 @@ class GNNExpertHead:
         self._model.eval()
         return self
 
-    def predict_nodes(self, X: np.ndarray, idx: np.ndarray) -> np.ndarray:
-        """Predict labels for global node indices ``idx``."""
-        if hasattr(self, "_fallback"):
-            return self._fallback.predict(np.asarray(X)[idx])
-        assert self._model is not None, "fit_graph must be called before predict_nodes"
+    def _logits_nodes(self, X: np.ndarray, idx: np.ndarray) -> np.ndarray:
+        """Raw read-out logits for global node indices ``idx`` (shape ``(len(idx),)``).
+
+        Single source of truth for both label and probability prediction, so the
+        two can never disagree on a node that sits exactly at logit 0.
+        """
+        assert self._model is not None, "fit_graph must be called before prediction"
         Wt = self._W() if self._model_hidden_depth() > 1 else None
         with torch.no_grad():
             logits = self._model(self._h0(X), Wt)
             sel = torch.as_tensor(np.asarray(idx, dtype=np.int64), device=self.device)
-            return (logits[sel] > 0).long().cpu().numpy()
+            return logits[sel].cpu().numpy().astype(float)
+
+    def predict_nodes(self, X: np.ndarray, idx: np.ndarray) -> np.ndarray:
+        """Predict labels for global node indices ``idx``."""
+        if hasattr(self, "_fallback"):
+            return self._fallback.predict(np.asarray(X)[idx])
+        return (self._logits_nodes(X, idx) > 0).astype(np.int64)
+
+    def predict_proba_nodes(self, X: np.ndarray, idx: np.ndarray) -> np.ndarray:
+        """Class-1 probability for global node indices ``idx``.
+
+        Required by the soft-voting ensemble in
+        :func:`spectral_distillation.src.mixture.uniform_ensemble_accuracy`.
+        ``predict_nodes`` alone is not enough for it: an ensemble that averages
+        hard labels degenerates into majority voting and cannot express graded
+        confidence, which is the entire quantity the ensemble baseline is meant
+        to measure. This expert is binary (``BCEWithLogitsLoss``), so the
+        returned column is the only column and ``classes_`` is ``[0, 1]``.
+
+        The dummy fallback keeps sklearn's ``predict_proba`` so a degenerate
+        one-class routed subset still contributes a valid distribution.
+        """
+        if hasattr(self, "_fallback"):
+            return np.asarray(self._fallback.predict_proba(np.asarray(X)[idx]),
+                              dtype=float)
+        return 1.0 / (1.0 + np.exp(-self._logits_nodes(X, idx)))[:, None]
 
 
 def gnn_head_factory(

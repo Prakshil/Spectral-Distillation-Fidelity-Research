@@ -24,12 +24,12 @@
       "feature_kmeans": 0.9726851851851851,
       "oracle": 0.9284722222222221,
       "random": 0.9319444444444445,
-      "ensemble_uniform": 0.9655092592592593
+      "ensemble_uniform": 0.9682098765432099
     },
     "learned_minus_no_routing": -0.00030864197530866555,
     "learned_minus_random": 0.04112654320987652,
-    "learned_minus_ensemble": 0.00756172839506164,
-    "ensemble_minus_no_routing": -0.007870370370370305,
+    "learned_minus_ensemble": 0.004861111111111094,
+    "ensemble_minus_no_routing": -0.005169753086419759,
     "router_vs_kmeans_agreement": 0.7312960605008295,
     "n_runs": 3,
     "n_runs_learned_beats_no_routing": 1,
@@ -42,12 +42,12 @@
           "feature_kmeans": 0.9731481481481481,
           "oracle": 0.9180555555555555,
           "random": 0.9171296296296296,
-          "ensemble_uniform": 0.9599537037037037
+          "ensemble_uniform": 0.9659722222222222
         },
         "learned_minus_no_routing": 0.0004629629629629983,
         "learned_minus_random": 0.057638888888888906,
-        "learned_minus_ensemble": 0.014814814814814836,
-        "ensemble_minus_no_routing": -0.014351851851851838,
+        "learned_minus_ensemble": 0.008796296296296302,
+        "ensemble_minus_no_routing": -0.008333333333333304,
         "router_vs_kmeans_agreement": 0.7289038083111471,
         "final_train_loss": 1.0781093835830688,
         "n_fit_nodes": 2807,
@@ -62,12 +62,12 @@
           "feature_kmeans": 0.9724537037037037,
           "oracle": 0.9460648148148149,
           "random": 0.9534722222222223,
-          "ensemble_uniform": 0.9636574074074075
+          "ensemble_uniform": 0.9650462962962963
         },
         "learned_minus_no_routing": -0.0011574074074073293,
         "learned_minus_random": 0.01851851851851849,
-        "learned_minus_ensemble": 0.008333333333333304,
-        "ensemble_minus_no_routing": -0.009490740740740633,
+        "learned_minus_ensemble": 0.00694444444444442,
+        "ensemble_minus_no_routing": -0.008101851851851749,
         "router_vs_kmeans_agreement": 0.724157888644519,
         "final_train_loss": 1.0984888076782227,
         "n_fit_nodes": 2807,
@@ -82,12 +82,12 @@
           "feature_kmeans": 0.9724537037037037,
           "oracle": 0.9212962962962963,
           "random": 0.9252314814814815,
-          "ensemble_uniform": 0.9729166666666667
+          "ensemble_uniform": 0.9736111111111111
         },
         "learned_minus_no_routing": -0.00023148148148155467,
         "learned_minus_random": 0.047222222222222165,
-        "learned_minus_ensemble": -0.0004629629629629983,
-        "ensemble_minus_no_routing": 0.00023148148148144365,
+        "learned_minus_ensemble": -0.0011574074074074403,
+        "ensemble_minus_no_routing": 0.0009259259259258856,
         "router_vs_kmeans_agreement": 0.7408264845468225,
         "final_train_loss": 1.0835812091827393,
         "n_fit_nodes": 2807,

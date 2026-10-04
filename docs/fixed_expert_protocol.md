@@ -113,17 +113,24 @@ for itself. Across **all three expert families on all three graphs**:
 |---|---|---|---|
 | Amazon | logistic | 11/26 | **0/26** |
 | Amazon | MLP | 11/26 | **0/26** |
-| Amazon | GNN | **17/26** | **0/26** |
+| Amazon | GNN | **16/26** | **0/26** |
 | Tolokers | logistic | 0/26 | **0/26** |
 | Tolokers | MLP | 1/26 | **0/26** |
-| Tolokers | GNN | 3/26 | **0/26** |
+| Tolokers | GNN | 2/26 | **0/26** |
 | YelpChi | logistic | 0/26 | **0/26** |
 | YelpChi | MLP | 0/26 | **0/26** |
-| YelpChi | GNN | 1/26 | **0/26** |
+| YelpChi | GNN (capped) | 2/26 | 2/26 † |
 
 **0 of 234 candidate/expert/graph combinations beat training one model on
-everything** (44 beat a random routing). The best gap in each row is negative
+everything** (43 beat a random routing). The best gap in each row is negative
 throughout.
+
+† The two YelpChi cases are `eig_nb_sim_k32` and `eig_nb_sim_abs_k32`, both
+positive by ~+0.002 with p=0.25 on a 3-split capped run — not significant, and
+they appear only because YelpChi must be node-capped for memory (14840 of 45954
+nodes, 3 splits × 1 seed instead of 10 × 3). Every full-scale cell is 0/26. Do not
+quote this row as a routing win; it is the reduced-power arm, and the honest
+summary remains 0/26 at full power.
 
 ### The GNN expert is a real graph model, not a proxy
 
@@ -156,9 +163,44 @@ Two design details were settled by measurement, not taste:
   measurably strong, and a weak expert would make the negative unfalsifiable.
 
 Even with the graph expert — the strongest single demonstration of structure
-being exploitable, 17/26 beating random routing — **no candidate beats one global
+being exploitable, 16/26 beating random routing — **no candidate beats one global
 model**. Routing by structural score is reliably better than routing at random,
 and reliably worse than not routing at all.
+
+## Result 4: the frozen pool is not complementary either (Ens-Avg)
+
+A "routing does not help" result has an obvious alternative explanation: maybe the
+*pool* carries the capacity and the router is incidental. The control is to average
+the **same frozen pool** with no routing at all — every test node scored by all
+experts, no assignment.
+
+Ens-Avg averages class-1 **probabilities**, not hard labels. An earlier version
+majority-voted on `predict` output, which throws away confidence and measures
+voting strength instead of pool complementarity; the two copies of that helper had
+also drifted apart. Fixed, and pinned by
+`test_ensemble_averages_probabilities_not_majority_vote`, which builds a pool where
+averaging and voting provably disagree. The graph expert needed a new
+`predict_proba_nodes` hook for this — it previously exposed only hard labels, so
+the GNN pool would have been silently dropped from the very control meant to
+explain the GNN results.
+
+GNN pool, 26 candidates, protocol B:
+
+| graph | Ens-Avg | no-routing | Δ | p | beats no-routing |
+|---|---|---|---|---|---|
+| Amazon | 0.9140 | 0.9428 | −0.0288 | 0.0020 | no |
+| Tolokers | 0.5174 | 0.6721 | −0.1547 | 0.0020 | no |
+| YelpChi (capped) | 0.7320 | 0.7166 | +0.0154 | 0.5000 | no |
+
+Ens-Avg loses to no-routing on all three, significantly on the two full-scale
+graphs. So the capacity explanation is **also** refuted: the k-means pool is not
+complementary, and neither routing nor averaging extracts anything from it. This
+strengthens the negative result — it is not "routing failed but the pool was
+valuable".
+
+The YelpChi Ens-Avg is the one condition in the whole study that nominally favours
+the pool (+0.0154), and it is the reduced-power arm: 3 splits × 1 seed, p=0.5.
+Reported for completeness, not as support.
 
 ## Reading
 
@@ -240,27 +282,62 @@ cluster is this node" and the learned number is just k-means routing wearing a
 disguise. Holding the experts out makes the target mean "which expert *generalizes*
 to this node", which is what a router must guess at deployment.
 
-"Lite" refers to the router: a small MLP over cached `[X, AX]` propagated features,
-the same caching trick `gnn_expert.py` uses. Re-propagating every step cost ~1s per
-epoch on Amazon; caching makes 3 splits × 200 epochs run in ~20s.
+"Lite" refers to the router: a small MLP over cached propagated features, the same
+caching trick `gnn_expert.py` uses. Re-propagating every step cost ~1s per epoch on
+Amazon; caching makes 3 splits × 100 epochs run in ~20s.
+
+The gate features are Node-MoE's (`arXiv:2406.03464`): `[X, |AX−X|, |A²X−X|]`.
+Node-MoE shows raw `X` is insufficient for routing because the gate needs
+neighbourhood discrepancy over 1–2 hops to estimate per-node structural regime;
+the previous `[X, AX]` form did not expose that discrepancy.
 
 Run: `python -m spectral_distillation.experiments.run_learned_router --dataset amazon`
 
-| graph | no-routing | learned router | k-means | random | oracle | learned − no-routing | runs won |
-|---|---|---|---|---|---|---|---|
-| Amazon | 0.9734 | 0.9726 | 0.9727 | 0.9319 | 0.9285 | −0.0008 | 1/3 |
-| Tolokers | 0.7826 | 0.7822 | 0.7820 | 0.7817 | 0.7815 | −0.0004 | 1/3 |
-| YelpChi (capped) | 0.8564 | 0.8571 | 0.8578 | 0.8530 | 0.8473 | +0.0006 | 2/3 |
+| graph | no-routing | learned router | k-means | random | oracle | Ens-Avg | learned − no-routing | learned − Ens-Avg |
+|---|---|---|---|---|---|---|---|---|
+| Amazon | 0.9734 | 0.9731 | 0.9727 | 0.9319 | 0.9285 | 0.9682 | −0.0003 | +0.0049 |
+| Tolokers | 0.7826 | 0.7819 | 0.7820 | 0.7817 | 0.7815 | 0.7818 | −0.0006 | +0.0002 |
+| YelpChi (capped) | 0.8555 | 0.8533 | 0.8586 | 0.8503 | 0.8447 | 0.8553 | −0.0022 | −0.0020 |
 
-**Every gap is ±0.002 — indistinguishable from noise**, and the sign flips across
-datasets. The router tracks the frozen k-means partition closely (agreement
-0.685/0.317/0.371), i.e. it mostly rediscovers the pool it was handed rather than
-finding new structure.
+**Every gap to no-routing is ≤0.002 — indistinguishable from noise** — and the sign
+flips across datasets. Against the *ensemble* baseline the learned router is
+nominally ahead on Amazon and Tolokers by ≤0.005 and behind on YelpChi; none of
+these separate either. The router tracks the frozen k-means partition closely
+(agreement 0.731/0.314/0.550), i.e. it mostly rediscovers the pool it was handed
+rather than finding new structure.
 
-The control matters: on the positive control the same router reaches 0.9596 against
-a global 0.7838, recovering **+0.176 of the oracle's +0.191**. So the router is not
+Note the oracle is *below* no-routing in all three rows. The label-optimal routing
+is worse than training one model, which bounds the achievable routing gain at ≤ 0
+here: no router, however good, could have won. This is a bound rather than a
+failure to search.
+
+The control matters: on the positive control the same router reaches 0.9541 against
+a global 0.7837, recovering **+0.170** of the oracle's +0.189. So the router is not
 broken and the harness is not blind — on these three fraud graphs there is simply
 no per-node expert-selection signal to exploit.
+
+### Ens-Avg on the positive control is the mechanism, not just a baseline
+
+| condition | positive control | real graphs (GNN pool) |
+|---|---|---|
+| no-routing | 0.7837 | 0.9428 / 0.6721 / 0.7166 |
+| Ens-Avg | 0.8011 | 0.9140 / 0.5174 / 0.7320 |
+| k-means routing | **0.9730** | 0.9401 / — |
+| oracle routing | **0.9730** | 0.8339 / 0.4939 / 0.6886 |
+| learned router | **0.9541** | 0.9731 / 0.7819 / 0.8533 |
+
+On the positive control the experts are genuine *specialists* — each is optimal on
+one latent group — so averaging their probabilities blurs three distinct decision
+boundaries into one mediocre one (+0.017 over global), while routing to the right
+specialist recovers almost everything (+0.19). Ens-Avg and routing are not
+redundant controls; they fail in opposite regimes, and which one wins tells you
+what kind of pool you have.
+
+That is the interpretive key for the real graphs. Ens-Avg landing at or below
+no-routing there, *while* k-means routing also fails to beat no-routing, says the
+k-means pool is neither specialist (routing cannot exploit it) nor complementary
+(ensembling cannot exploit it). A pool with no exploitable structure at all — which
+is precisely the low-heterogeneity regime the routing-payoff hypothesis predicts.
 
 Pinned by `test_learned_router_recovers_routing_gain_on_positive_control` and
 `test_learned_router_never_sees_test_labels` (flipping every test label must leave

@@ -210,3 +210,72 @@ and remain valid; the k=16 D1 failure (Â§5) stands.
 | k=16 adaptive terciles | `logs/rk16_adapt/real_attention/...` |
 | router feature ablation (this doc Â§6) | `logs/rk_ablation/real_attention/ablation.json` |
 | D2 usage-matched control | `logs/rk_ablation/real_attention/control.json` |
+---
+
+## 9. SD vs routing, and the Protocol B rerun (2026-10-04)
+
+Two new experiments on the real SmolLM2 attention graph. Both use
+`data/erp_attention/corpus_scaled.txt` (24 passages, 11,520 token nodes, 29
+sentence labels), `--top-k 32`, and a strided subsample to 2,000 nodes. Striding
+rather than slicing matters: the attention graph is block-diagonal by passage, so
+taking the first 2,000 rows would keep only the first ~4 passages and discard
+every later block and its labels.
+
+### 9.1 Spectral distortion predicts routing stability (`run_sd_vs_routing.py`)
+
+Low-frequency spectral error vs same-seed assignment stability of the label-free
+structural router:
+
+| Graph | density | Spearman(lowfreq, stability), collapse-free | Spearman(survival, stability), collapse-free |
+|---|---|---|---|
+| Amazon | 1.49e-01 | -0.424 (p=0.115) — no signal | +0.777 (p=0.000655) |
+| **SmolLM2** | 4.39e-03 | **-0.673 (p=0.033)** | **+0.988 (p=9.3e-08)** |
+| Tolokers | 7.19e-03 | -0.600 (p=0.030) | +0.978 (p=8.2e-09) |
+| YelpChi | 5.13e-03 | -0.711 (p=0.0064) | +0.778 (p=0.0018) |
+| Pooled | — | -0.549 (p=3.0e-05) | +0.880 (p=2.0e-17) |
+
+All three sparsifiers degrade SmolLM2 routing monotonically with retention:
+
+| method | r=1.0 | r=0.5 | r=0.25 | r=0.1 | r=0.05 |
+|---|---|---|---|---|---|
+| degree | 1.000 | 0.650 | 0.415 | 0.362 | 0.192 |
+| effective resistance | 1.000 | 0.539 | 0.275 | 0.124 | 0.076 |
+| random | 1.000 | 0.980 | 0.857 | 0.531 | 0.324 |
+
+So spectral distortion does track *routing stability* on real LLM attention.
+Note the confound: on SmolLM2 the isolated-node fraction alone correlates -0.996
+with stability, and at r=0.05 effective resistance leaves 1,826 of 2,000 nodes
+isolated. The spectral term is not separable from connectivity destruction on
+this graph.
+
+### 9.2 Protocol B accuracy: null (`run_llm_protocol_b.py`)
+
+Protocol B freezes the expert pool: k-means on dense node features (routing-blind,
+never sees labels or the sparsified graph), fitted once per split, then only the
+routing varies. Uses `feature_mode=per_layer` (24 features); the legacy `agg`
+mode gives 3 features, and a 29-way classifier from 3 features is near-chance for
+any routing, which would make the arm uninformative.
+
+| routing | dense-graph accuracy |
+|---|---|
+| label-free (dense) | 0.1492 |
+| oracle | 0.1421 |
+| random | 0.1297 |
+| uniform ensemble over frozen pool | 0.0325 (chance = 0.0345) |
+
+Accuracy across sparsification is flat and non-monotone (0.1051-0.1622); heavily
+sparsified conditions are sometimes *better* than dense. Distortion does not
+predict the accuracy drop:
+
+- Spearman(low_frequency_error, accuracy_drop) = **+0.231 (p=0.448)**
+- Spearman(routing_survival, accuracy_drop) = **+0.066 (p=0.831)**
+
+**Conclusion.** Under Protocol B, sparsifying the SmolLM2 attention graph does not
+measurably degrade downstream accuracy. The frozen routing-blind pool sits at
+chance and random routing is close to the label-free router, so on this task there
+is no useful routing channel for spectral distortion to corrupt. This confirms
+the earlier positive SmolLM2 result was a Protocol A self-routing artifact. The
+defensible claim is the stability result in 9.1, not an accuracy claim.
+
+Artifacts: `logs/sd_vs_routing/**`, `logs/sd_vs_routing/summary.json`,
+`logs/llm_protocol_b/llm_protocol_b.json`.

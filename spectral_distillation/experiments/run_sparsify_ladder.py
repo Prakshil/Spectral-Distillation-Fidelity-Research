@@ -34,7 +34,12 @@ from pathlib import Path
 import numpy as np
 
 from spectral_distillation.src.baselines import degree_sparsify, random_sparsify
-from spectral_distillation.src.distortion import spectral_distortion_profile
+from spectral_distillation.src.distortion import (
+    connectivity_report,
+    low_frequency_distortion,
+    routing_survival,
+    spectral_distortion_profile,
+)
 from spectral_distillation.src.effective_resistance import effective_resistance_exact
 from spectral_distillation.src.evaluation import (
     combine_comparisons,
@@ -155,14 +160,33 @@ def _run_point(graph: dict, W: np.ndarray, method: str, retention: float, args, 
     sd = 0.0
     sd_profile = {}
     if retention < 1.0 and not args.skip_sd:
+        L_pt = compute_laplacian(W_pt)
         sd_profile = spectral_distortion_profile(
-            None, compute_laplacian(W_pt), ref_eigenvalues=args._ref_eigenvalues
+            None, L_pt, ref_eigenvalues=args._ref_eigenvalues
         )
         sd = sd_profile["SD"]
+        # The legacy scalar above saturates at 1.0 whenever sparsification
+        # fragments the graph, so it cannot rank methods or budgets. These two
+        # are the graded, component-robust replacements used for conclusions.
+        lf = low_frequency_distortion(
+            None, L_pt, ref_eigenvalues=args._ref_eigenvalues
+        )
+        conn = connectivity_report(
+            None, L_pt, ref_eigenvalues=args._ref_eigenvalues
+        )
+        sd_profile["low_frequency"] = lf
+        sd_profile["connectivity"] = conn
+        sd_profile["routing_survival"] = routing_survival(
+            lf["low_freq_mean_error"], conn["n_isolated_perturbed"],
+            int(graph["n_nodes"]),
+        )
         log.info("  SD vs original = %.4f (median %.2e, p99 %.2e, argmax mode %d/%d)",
                  sd, sd_profile["median_relative_error"],
                  sd_profile["p99_relative_error"], sd_profile["argmax_index"],
                  args._ref_eigenvalues.size - 1)
+        log.info("  low-freq err = %.5f (p90 %.5f, k=%d) | isolated = %d | survival = %.4f",
+                 lf["low_freq_mean_error"], lf["low_freq_p90_error"], lf["low_freq_k"],
+                 conn["n_isolated_perturbed"], sd_profile["routing_survival"])
 
     decisions = evaluate_decision_rules(
         comparisons=comparisons, control_comparisons=args._pc_control
@@ -362,11 +386,16 @@ def main() -> None:
             (out_dir / "ladder_summary.json").write_text(
                 json.dumps(summary, indent=2, default=str), encoding="utf-8"
             )
+            lf_err = record["sd_profile"].get("low_frequency", {}).get(
+                "low_freq_mean_error", float("nan"))
+            surv = record["sd_profile"].get("routing_survival", float("nan"))
             print(
                 f"{m:<7} r={b:<5.2f} kept={record['n_edges_kept']:<9d} "
                 f"D2={record['comparisons'].get('label_free_vs_random', {}).get('mean_diff', float('nan')):>+.4f}"
                 f"  D1={record['comparisons'].get('oracle_vs_uniform', {}).get('mean_diff', float('nan')):>+.4f}"
                 f"  SD={record['sd_laplacian']:.4f}"
+                f"  lowfreq={lf_err:.5f}"
+                f"  survival={surv:.4f}"
             )
 
     log.info("wrote %s and ladder_summary.json", out_path)

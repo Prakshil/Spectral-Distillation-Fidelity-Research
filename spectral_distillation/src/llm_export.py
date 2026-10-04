@@ -86,6 +86,7 @@ def build_attention_graph(
     records: list[AttentionRecord] | AttentionRecord,
     how: str = "mean",
     max_edges_per_node: int | None = None,
+    feature_mode: str = "agg",
 ) -> dict:
     """Build a protocol-ready graph dict from one or more exported passages.
 
@@ -94,6 +95,15 @@ def build_attention_graph(
     (token -> sentence label ids), ``tokens``, and provenance metadata.
     Rows of every attention layer are used for entropy so the feature
     dimension is independent of passage count.
+
+    ``feature_mode``:
+      - ``"agg"`` (default, legacy): mean/max/std of the per-layer entropy, so
+        ``d_features == 3`` regardless of model depth. This is what the
+        committed artifacts used, and it keeps them reproducible.
+      - ``"per_layer"``: one column per transformer layer (``d_features ==
+        n_layers``). Needed for any downstream *accuracy* arm: with only 3
+        features a classifier over 29 passage labels is near-chance no matter
+        how good the routing is, which makes Protocol B uninformative.
     """
     if isinstance(records, AttentionRecord):
         records = [records]
@@ -112,12 +122,19 @@ def build_attention_graph(
         ys.append(np.asarray(rec.sentence_ids, dtype=int))
 
     W = _block_diag(blocks)
-    y = np.concatenate(ys) if ys else np.zeros(W.shape[0], dtype=int)
+    y = np.concatenate(ys) if len(ys) else np.zeros(W.shape[0], dtype=int)
 
-    entropies = [
-        aggregate_entropy_features(compute_attention_entropy(rec.attention))
-        for rec in records
-    ]
+    if feature_mode == "per_layer":
+        entropies = [compute_attention_entropy(rec.attention).T for rec in records]
+    elif feature_mode == "agg":
+        entropies = [
+            aggregate_entropy_features(compute_attention_entropy(rec.attention))
+            for rec in records
+        ]
+    else:
+        raise ValueError(
+            f"feature_mode must be 'agg' or 'per_layer', got {feature_mode!r}"
+        )
     features = np.concatenate(entropies, axis=0) if len(entropies) > 1 else entropies[0]
 
     return {
@@ -128,6 +145,7 @@ def build_attention_graph(
         "n_nodes": W.shape[0],
         "n_layers": n_layers,
         "d_features": features.shape[1],
+        "feature_mode": feature_mode,
         "passages": len(records),
     }
 

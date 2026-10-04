@@ -1,0 +1,324 @@
+{
+  "graph": {
+    "source": "C:\\Users\\Prakshil\\.cache\\huggingface\\hub\\models--HuggingFaceTB--SmolLM2-1.7B\\snapshots\\effd688a12921b4cc83e3312b6feb579f70f9c71",
+    "n_nodes": 2000,
+    "n_features": 24,
+    "n_labels": 29,
+    "feature_mode": "per_layer",
+    "passages": 24
+  },
+  "protocol": "B (frozen routing-blind k-means pool)",
+  "n_experts": 3,
+  "dense_label_free_accuracy": 0.14921588254921586,
+  "conditions": [
+    {
+      "method": "dense",
+      "retention": 1.0,
+      "n_edges_kept": 8773,
+      "n_edges_orig": 8773,
+      "protocol_b_accuracy": {
+        "label_free": 0.14921588254921586,
+        "oracle": 0.14214214214214216,
+        "random": 0.1297297297297297,
+        "ensemble_pool": 0.03249916583249916
+      },
+      "protocol_b_accuracy_sd": {
+        "label_free": 0.008791096539239858,
+        "oracle": 0.010364107391827651,
+        "random": 0.008244748861651247,
+        "ensemble_pool": 0.000957804477437927
+      },
+      "legacy_SD": 3.1268389866616753e-08,
+      "low_frequency_error": 1.635277629364614e-18,
+      "n_isolated_perturbed": 0,
+      "routing_survival": 1.0,
+      "accuracy_drop_vs_dense": 0.0
+    },
+    {
+      "method": "random",
+      "retention": 0.5,
+      "n_edges_kept": 4386,
+      "n_edges_orig": 8773,
+      "protocol_b_accuracy": {
+        "label_free": 0.14828161494828163,
+        "oracle": 0.14214214214214216,
+        "random": 0.1297297297297297,
+        "ensemble_pool": 0.03249916583249916
+      },
+      "protocol_b_accuracy_sd": {
+        "label_free": 0.011175802481815477,
+        "oracle": 0.010364107391827651,
+        "random": 0.008244748861651247,
+        "ensemble_pool": 0.000957804477437927
+      },
+      "legacy_SD": 0.9999956422359595,
+      "low_frequency_error": 2.7148143658770916e-05,
+      "n_isolated_perturbed": 36,
+      "routing_survival": 0.9819733405229271,
+      "accuracy_drop_vs_dense": 0.0009342676009342354
+    },
+    {
+      "method": "random",
+      "retention": 0.25,
+      "n_edges_kept": 2193,
+      "n_edges_orig": 8773,
+      "protocol_b_accuracy": {
+        "label_free": 0.1558224891558225,
+        "oracle": 0.14214214214214216,
+        "random": 0.1297297297297297,
+        "ensemble_pool": 0.03249916583249916
+      },
+      "protocol_b_accuracy_sd": {
+        "label_free": 0.00931642242925126,
+        "oracle": 0.010364107391827651,
+        "random": 0.008244748861651247,
+        "ensemble_pool": 0.000957804477437927
+      },
+      "legacy_SD": 1.8952553712603322,
+      "low_frequency_error": 2.9359513375988857e-05,
+      "n_isolated_perturbed": 361,
+      "routing_survival": 0.8194759398787883,
+      "accuracy_drop_vs_dense": -0.006606606606606641
+    },
+    {
+      "method": "random",
+      "retention": 0.1,
+      "n_edges_kept": 877,
+      "n_edges_orig": 8773,
+      "protocol_b_accuracy": {
+        "label_free": 0.14721388054721388,
+        "oracle": 0.14214214214214216,
+        "random": 0.1297297297297297,
+        "ensemble_pool": 0.03249916583249916
+      },
+      "protocol_b_accuracy_sd": {
+        "label_free": 0.01154391381577242,
+        "oracle": 0.010364107391827651,
+        "random": 0.008244748861651247,
+        "ensemble_pool": 0.000957804477437927
+      },
+      "legacy_SD": 4.868476588730459,
+      "low_frequency_error": 0.00014031628294291178,
+      "n_isolated_perturbed": 1137,
+      "routing_survival": 0.43143945352391017,
+      "accuracy_drop_vs_dense": 0.0020020020020019846
+    },
+    {
+      "method": "random",
+      "retention": 0.05,
+      "n_edges_kept": 438,
+      "n_edges_orig": 8773,
+      "protocol_b_accuracy": {
+        "label_free": 0.10510510510510511,
+        "oracle": 0.14214214214214216,
+        "random": 0.1297297297297297,
+        "ensemble_pool": 0.03249916583249916
+      },
+      "protocol_b_accuracy_sd": {
+        "label_free": 0.006867382426259824,
+        "oracle": 0.010364107391827651,
+        "random": 0.008244748861651247,
+        "ensemble_pool": 0.000957804477437927
+      },
+      "legacy_SD": 8.545723541480724,
+      "low_frequency_error": 0.0009587488650760313,
+      "n_isolated_perturbed": 1538,
+      "routing_survival": 0.23077852901216742,
+      "accuracy_drop_vs_dense": 0.04411077744411075
+    },
+    {
+      "method": "degree",
+      "retention": 0.5,
+      "n_edges_kept": 4386,
+      "n_edges_orig": 8773,
+      "protocol_b_accuracy": {
+        "label_free": 0.1490824157490824,
+        "oracle": 0.14214214214214216,
+        "random": 0.1297297297297297,
+        "ensemble_pool": 0.03249916583249916
+      },
+      "protocol_b_accuracy_sd": {
+        "label_free": 0.010839607876808518,
+        "oracle": 0.010364107391827651,
+        "random": 0.008244748861651247,
+        "ensemble_pool": 0.000957804477437927
+      },
+      "legacy_SD": 0.9999996228480297,
+      "low_frequency_error": 1.4812297230590072e-05,
+      "n_isolated_perturbed": 702,
+      "routing_survival": 0.6489903868190974,
+      "accuracy_drop_vs_dense": 0.00013346680013345824
+    },
+    {
+      "method": "degree",
+      "retention": 0.25,
+      "n_edges_kept": 2193,
+      "n_edges_orig": 8773,
+      "protocol_b_accuracy": {
+        "label_free": 0.1602268935602269,
+        "oracle": 0.14214214214214216,
+        "random": 0.1297297297297297,
+        "ensemble_pool": 0.03249916583249916
+      },
+      "protocol_b_accuracy_sd": {
+        "label_free": 0.010119301046150726,
+        "oracle": 0.010364107391827651,
+        "random": 0.008244748861651247,
+        "ensemble_pool": 0.000957804477437927
+      },
+      "legacy_SD": 0.9999997993767399,
+      "low_frequency_error": 0.0004187856466257491,
+      "n_isolated_perturbed": 1157,
+      "routing_survival": 0.4213234818499472,
+      "accuracy_drop_vs_dense": -0.01101101101101104
+    },
+    {
+      "method": "degree",
+      "retention": 0.1,
+      "n_edges_kept": 877,
+      "n_edges_orig": 8773,
+      "protocol_b_accuracy": {
+        "label_free": 0.1570236903570237,
+        "oracle": 0.14214214214214216,
+        "random": 0.1297297297297297,
+        "ensemble_pool": 0.03249916583249916
+      },
+      "protocol_b_accuracy_sd": {
+        "label_free": 0.009717904598770288,
+        "oracle": 0.010364107391827651,
+        "random": 0.008244748861651247,
+        "ensemble_pool": 0.000957804477437927
+      },
+      "legacy_SD": 0.9999998325462003,
+      "low_frequency_error": 0.0008716054821700477,
+      "n_isolated_perturbed": 1262,
+      "routing_survival": 0.3686783775770793,
+      "accuracy_drop_vs_dense": -0.007807807807807848
+    },
+    {
+      "method": "degree",
+      "retention": 0.05,
+      "n_edges_kept": 438,
+      "n_edges_orig": 8773,
+      "protocol_b_accuracy": {
+        "label_free": 0.10510510510510512,
+        "oracle": 0.14214214214214216,
+        "random": 0.1297297297297297,
+        "ensemble_pool": 0.03249916583249916
+      },
+      "protocol_b_accuracy_sd": {
+        "label_free": 0.006759536743196849,
+        "oracle": 0.010364107391827651,
+        "random": 0.008244748861651247,
+        "ensemble_pool": 0.000957804477437927
+      },
+      "legacy_SD": 0.9999999207367699,
+      "low_frequency_error": 0.0034179245679392058,
+      "n_isolated_perturbed": 1597,
+      "routing_survival": 0.20081128819956026,
+      "accuracy_drop_vs_dense": 0.04411077744411074
+    },
+    {
+      "method": "er",
+      "retention": 0.5,
+      "n_edges_kept": 4386,
+      "n_edges_orig": 8773,
+      "protocol_b_accuracy": {
+        "label_free": 0.16209542876209543,
+        "oracle": 0.14214214214214216,
+        "random": 0.1297297297297297,
+        "ensemble_pool": 0.03249916583249916
+      },
+      "protocol_b_accuracy_sd": {
+        "label_free": 0.00919953261810648,
+        "oracle": 0.010364107391827651,
+        "random": 0.008244748861651247,
+        "ensemble_pool": 0.000957804477437927
+      },
+      "legacy_SD": 0.9999997174159584,
+      "low_frequency_error": 1.0720640621205154e-05,
+      "n_isolated_perturbed": 911,
+      "routing_survival": 0.5444941626111817,
+      "accuracy_drop_vs_dense": -0.012879546212879567
+    },
+    {
+      "method": "er",
+      "retention": 0.25,
+      "n_edges_kept": 2193,
+      "n_edges_orig": 8773,
+      "protocol_b_accuracy": {
+        "label_free": 0.10577243910577243,
+        "oracle": 0.14214214214214216,
+        "random": 0.1297297297297297,
+        "ensemble_pool": 0.03249916583249916
+      },
+      "protocol_b_accuracy_sd": {
+        "label_free": 0.005878602748226959,
+        "oracle": 0.010364107391827651,
+        "random": 0.008244748861651247,
+        "ensemble_pool": 0.000957804477437927
+      },
+      "legacy_SD": 0.9999998735531637,
+      "low_frequency_error": 4.9019364075731896e-05,
+      "n_isolated_perturbed": 1432,
+      "routing_survival": 0.28398607850060253,
+      "accuracy_drop_vs_dense": 0.04344344344344343
+    },
+    {
+      "method": "er",
+      "retention": 0.1,
+      "n_edges_kept": 877,
+      "n_edges_orig": 8773,
+      "protocol_b_accuracy": {
+        "label_free": 0.16216216216216214,
+        "oracle": 0.14214214214214216,
+        "random": 0.1297297297297297,
+        "ensemble_pool": 0.03249916583249916
+      },
+      "protocol_b_accuracy_sd": {
+        "label_free": 0.009969889567958943,
+        "oracle": 0.010364107391827651,
+        "random": 0.008244748861651247,
+        "ensemble_pool": 0.000957804477437927
+      },
+      "legacy_SD": 0.999999952520446,
+      "low_frequency_error": 0.00018570504282213826,
+      "n_isolated_perturbed": 1730,
+      "routing_survival": 0.13497492981921902,
+      "accuracy_drop_vs_dense": -0.012946279612946282
+    },
+    {
+      "method": "er",
+      "retention": 0.05,
+      "n_edges_kept": 438,
+      "n_edges_orig": 8773,
+      "protocol_b_accuracy": {
+        "label_free": 0.1614280947614281,
+        "oracle": 0.14214214214214216,
+        "random": 0.1297297297297297,
+        "ensemble_pool": 0.03249916583249916
+      },
+      "protocol_b_accuracy_sd": {
+        "label_free": 0.009844929519338021,
+        "oracle": 0.010364107391827651,
+        "random": 0.008244748861651247,
+        "ensemble_pool": 0.000957804477437927
+      },
+      "legacy_SD": 0.9999999589257386,
+      "low_frequency_error": 0.0002274102682143723,
+      "n_isolated_perturbed": 1826,
+      "routing_survival": 0.08698021530666532,
+      "accuracy_drop_vs_dense": -0.012212212212212248
+    }
+  ],
+  "sd_vs_accuracy_drop": {
+    "low_frequency_error": {
+      "rho": 0.23076923076923078,
+      "p": 0.44812738231536575
+    },
+    "routing_survival": {
+      "rho": 0.06593406593406594,
+      "p": 0.8305423857560938
+    }
+  }
+}

@@ -1,0 +1,47 @@
+[
+  {
+    "label": "amazon (n=2000)",
+    "n_points": 15,
+    "collapse_affected": 0,
+    "lowfreq_max": 0.006389339478695334,
+    "density": 0.1485447723861931,
+    "rho_lowfreq_stability_collapsefree": -0.4244604316546763,
+    "p_lowfreq_stability_collapsefree": 0.11480531996282868
+  },
+  {
+    "label": "llm:HuggingFaceTB (n=2000)",
+    "n_points": 15,
+    "collapse_affected": 5,
+    "lowfreq_max": 0.0034179245679392053,
+    "density": 0.004388694347173587,
+    "rho_lowfreq_stability_collapsefree": -0.6727272727272726,
+    "p_lowfreq_stability_collapsefree": 0.0330412225454377
+  },
+  {
+    "label": "tolokers (n=2000)",
+    "n_points": 15,
+    "collapse_affected": 2,
+    "lowfreq_max": 0.009048937330089409,
+    "density": 0.007190595297648824,
+    "rho_lowfreq_stability_collapsefree": -0.6,
+    "p_lowfreq_stability_collapsefree": 0.03017079516557383
+  },
+  {
+    "label": "yelpchi (n=2000)",
+    "n_points": 15,
+    "collapse_affected": 2,
+    "lowfreq_max": 0.40737189164916154,
+    "density": 0.005125062531265633,
+    "rho_lowfreq_stability_collapsefree": -0.7111111111111109,
+    "p_lowfreq_stability_collapsefree": 0.006426039332004917
+  },
+  {
+    "label": "POOLED (all graphs)",
+    "n_points": 60,
+    "collapse_affected": 9,
+    "lowfreq_max": 0.40737189164916154,
+    "density": 0.1485447723861931,
+    "rho_lowfreq_stability_collapsefree": -0.5493175614194722,
+    "p_lowfreq_stability_collapsefree": 2.9864702061525828e-05
+  }
+]

@@ -76,8 +76,31 @@ Companion documents:
 | `run_fixed_expert_protocol.py` | Protocol B: one frozen routing-blind expert pool, 26 routings, logistic/MLP/GNN heads (`--expert`) | `logs/{dataset}_fixed_expert*/fixed_expert.json` |
 | `run_positive_control.py` | Positive control: same protocol on a non-separable mixture of linear rules, where routing provably helps; also scores RouterGNN-lite | `logs/positive_control/fixed_expert.json` |
 | `run_learned_router.py` | RouterGNN-lite vs no-routing / k-means / random / oracle on a frozen pool, real graphs (`--dataset amazon\|tolokers\|yelpchi`) | `logs/{dataset}_learned_router*/fixed_expert.json` |
+| `run_sd_vs_routing.py` | Spectral distortion vs label-free routing stability across a retention ladder on fraud **and** real LLM attention (`--dataset llm`); same-seed multi-router stability, collapse detection | `logs/sd_vs_routing/{dataset}/sd_vs_routing.json` |
+| `analyze_sd_vs_routing.py` | Pooled/per-graph Spearman of low-frequency error and connectivity survival vs stability and oracle agreement | `logs/sd_vs_routing/summary.json` |
+| `run_llm_protocol_b.py` | Protocol B on real LLM attention: frozen routing-blind k-means pool, only the routing varies with sparsification. `--feature-mode per_layer` (24 features) | `logs/llm_protocol_b/llm_protocol_b.json` |
 
-### 2.3 Tests (`spectral_distillation/tests/`, 151 tests)
+### Two environment landmines (cost real debugging time)
+
+1. **Import order.** Importing `transformers` *before* `spectral_distillation.src.llm_export`
+   hard-segfaults with `0xC0000005` on this machine; the reverse order is stable.
+   `run_real_attention.py` only avoids it by importing `transformers` lazily inside
+   `main()`. Both new LLM scripts import `llm_export` first, with a comment.
+2. **`--top-k` must match.** `run_sd_vs_routing.py` reads `top_k: 32` from
+   `configs/default.yaml`; a runner that defaults to `None` keeps the fully dense
+   attention matrix and produces a ~8x denser graph (2,759,040 vs 345,216 edges),
+   which silently makes SD numbers incomparable. `run_llm_protocol_b.py` now
+   defaults to 32 for this reason.
+
+### Feature modes
+
+`build_attention_graph(..., feature_mode=...)`: `agg` (default, legacy) gives 3
+columns (mean/max/std of per-layer entropy) and keeps the committed artifacts
+reproducible; `per_layer` gives one column per transformer layer and is required
+for any downstream accuracy arm. A 29-way task from 3 features is near-chance
+regardless of routing.
+
+### 2.3 Tests (`spectral_distillation/tests/`, 173 tests)
 
 | File | Coverage |
 |------|----------|

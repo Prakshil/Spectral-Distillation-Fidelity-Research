@@ -1,0 +1,694 @@
+{
+  "config": {
+    "dataset": "yelpchi",
+    "config": "configs/default.yaml",
+    "model_id": "None",
+    "text_file": "data/erp_attention/corpus.txt",
+    "max_tokens": "None",
+    "top_k": "None",
+    "max_nodes": "3000",
+    "max_spectral_nodes": "2000",
+    "methods": "['random', 'degree', 'er']",
+    "retentions": "[1.0, 0.5, 0.25, 0.1, 0.05]",
+    "hidden_dim": "32",
+    "n_layers": "2",
+    "router_epochs": "50",
+    "router_seed": "0",
+    "stability_seeds": "[0, 1, 2]",
+    "random_seed": "1",
+    "strategy": "kmeans",
+    "order_feature": "hx",
+    "spectral_k": "0",
+    "top_k_router": "32",
+    "adaptive_oracle": "False",
+    "budget_oracle": "False",
+    "splits": "2",
+    "seeds": "[0, 1]",
+    "protocol_b_accuracy": "False",
+    "skip_sparse_router": "False",
+    "device": "cpu",
+    "out": "logs/sd_vs_routing/yelpchi"
+  },
+  "graph": {
+    "source": "yelpchi",
+    "n_nodes": 2000,
+    "n_edges": 10245
+  },
+  "dense_reference": {
+    "low_freq_k": 32,
+    "low_freq_mean_error": 0.0,
+    "low_freq_median_error": 0.0,
+    "low_freq_p90_error": 0.0,
+    "low_freq_max_error": 0.0,
+    "low_freq_gap_ref": 0.0003119472548695837,
+    "normalisation": 32.13797956219617,
+    "n_matched_modes_ref": 1984,
+    "n_matched_modes_perturbed": 1984
+  },
+  "points": [
+    {
+      "method": "random",
+      "retention": 1.0,
+      "n_edges_kept": 10245,
+      "n_edges_orig": 10245,
+      "fraction_kept": 1.0,
+      "legacy_SD": 0.0,
+      "legacy_min_eigengap": 0.0,
+      "legacy_fragility": 0.0,
+      "low_frequency": {
+        "low_freq_k": 32,
+        "low_freq_mean_error": 0.0,
+        "low_freq_median_error": 0.0,
+        "low_freq_p90_error": 0.0,
+        "low_freq_max_error": 0.0,
+        "low_freq_gap_ref": 0.0003119472548695837,
+        "normalisation": 32.13797956219617,
+        "n_matched_modes_ref": 1984,
+        "n_matched_modes_perturbed": 1984
+      },
+      "connectivity": {
+        "n_components_ref": 16,
+        "n_components_perturbed": 16,
+        "n_isolated_perturbed": 0,
+        "largest_ref": 32.13797956219617,
+        "largest_perturbed": 32.13797956219617
+      },
+      "routing_survival": 1.0,
+      "assignment_stability": 1.0,
+      "assignment_stability_per_seed": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "oracle_agreement": 0.36766666666666664,
+      "router_collapse_seeds": 0,
+      "davis_kahan_bound": 0.0,
+      "protocol_b_accuracy": {},
+      "low_frequency_error": 0.0
+    },
+    {
+      "method": "random",
+      "retention": 0.5,
+      "n_edges_kept": 5122,
+      "n_edges_orig": 10245,
+      "fraction_kept": 0.49995119570522206,
+      "legacy_SD": 0.9999999820403331,
+      "legacy_min_eigengap": 0.0,
+      "legacy_fragility": 99999998.20403332,
+      "low_frequency": {
+        "low_freq_k": 32,
+        "low_freq_mean_error": 0.0005100518218806146,
+        "low_freq_median_error": 0.00029228609241268384,
+        "low_freq_p90_error": 0.001294893260183465,
+        "low_freq_max_error": 0.0014306191492942594,
+        "low_freq_gap_ref": 0.0003119472548695837,
+        "normalisation": 32.13797956219617,
+        "n_matched_modes_ref": 1984,
+        "n_matched_modes_perturbed": 1869
+      },
+      "connectivity": {
+        "n_components_ref": 16,
+        "n_components_perturbed": 131,
+        "n_isolated_perturbed": 115,
+        "largest_ref": 32.13797956219617,
+        "largest_perturbed": 43.39823048993337
+      },
+      "routing_survival": 0.9420192761578776,
+      "assignment_stability": 0.14600000000000002,
+      "assignment_stability_per_seed": [
+        0.135,
+        0.168,
+        0.135
+      ],
+      "oracle_agreement": 0.5924999999999999,
+      "router_collapse_seeds": 0,
+      "davis_kahan_bound": 25130075.86424294,
+      "protocol_b_accuracy": {},
+      "low_frequency_error": 0.0005100518218806146
+    },
+    {
+      "method": "random",
+      "retention": 0.25,
+      "n_edges_kept": 2561,
+      "n_edges_orig": 10245,
+      "fraction_kept": 0.24997559785261103,
+      "legacy_SD": 0.999999997499998,
+      "legacy_min_eigengap": 0.0,
+      "legacy_fragility": 99999999.7499998,
+      "low_frequency": {
+        "low_freq_k": 32,
+        "low_freq_mean_error": 0.007032748885132313,
+        "low_freq_median_error": 0.00662613411205094,
+        "low_freq_p90_error": 0.010930683392508283,
+        "low_freq_max_error": 0.01165198131124107,
+        "low_freq_gap_ref": 0.0003119472548695837,
+        "normalisation": 32.13797956219617,
+        "n_matched_modes_ref": 1984,
+        "n_matched_modes_perturbed": 1583
+      },
+      "connectivity": {
+        "n_components_ref": 16,
+        "n_components_perturbed": 417,
+        "n_isolated_perturbed": 401,
+        "largest_ref": 32.13797956219617,
+        "largest_perturbed": 54.9979993749493
+      },
+      "routing_survival": 0.7938773172663367,
+      "assignment_stability": 0.6333333333333334,
+      "assignment_stability_per_seed": [
+        0.631,
+        0.638,
+        0.631
+      ],
+      "oracle_agreement": 0.416,
+      "router_collapse_seeds": 0,
+      "davis_kahan_bound": 67865050.19380957,
+      "protocol_b_accuracy": {},
+      "low_frequency_error": 0.007032748885132313
+    },
+    {
+      "method": "random",
+      "retention": 0.1,
+      "n_edges_kept": 1024,
+      "n_edges_orig": 10245,
+      "fraction_kept": 0.09995119570522205,
+      "legacy_SD": 1.8163271846758295,
+      "legacy_min_eigengap": 0.0,
+      "legacy_fragility": 181632718.46758294,
+      "low_frequency": {
+        "low_freq_k": 32,
+        "low_freq_mean_error": 0.04018627259761708,
+        "low_freq_median_error": 0.03945475805241209,
+        "low_freq_p90_error": 0.05989199025005333,
+        "low_freq_max_error": 0.0625637027517288,
+        "low_freq_gap_ref": 0.0003119472548695837,
+        "normalisation": 32.13797956219617,
+        "n_matched_modes_ref": 1984,
+        "n_matched_modes_perturbed": 926
+      },
+      "connectivity": {
+        "n_components_ref": 16,
+        "n_components_perturbed": 1074,
+        "n_isolated_perturbed": 1058,
+        "largest_ref": 32.13797956219617,
+        "largest_perturbed": 90.51106551973257
+      },
+      "routing_survival": 0.4520722656065223,
+      "assignment_stability": 0.35233333333333333,
+      "assignment_stability_per_seed": [
+        0.3505,
+        0.356,
+        0.3505
+      ],
+      "oracle_agreement": 0.3295,
+      "router_collapse_seeds": 0,
+      "davis_kahan_bound": 199999996.28292367,
+      "protocol_b_accuracy": {},
+      "low_frequency_error": 0.04018627259761708
+    },
+    {
+      "method": "random",
+      "retention": 0.05,
+      "n_edges_kept": 512,
+      "n_edges_orig": 10245,
+      "fraction_kept": 0.04997559785261103,
+      "legacy_SD": 3.512352213150425,
+      "legacy_min_eigengap": 0.0,
+      "legacy_fragility": 351235221.3150425,
+      "low_frequency": {
+        "low_freq_k": 32,
+        "low_freq_mean_error": 0.17495410155986066,
+        "low_freq_median_error": 0.1929060397363808,
+        "low_freq_p90_error": 0.236336380627023,
+        "low_freq_max_error": 0.23648458067315611,
+        "low_freq_gap_ref": 0.0003119472548695837,
+        "normalisation": 32.13797956219617,
+        "n_matched_modes_ref": 1984,
+        "n_matched_modes_perturbed": 502
+      },
+      "connectivity": {
+        "n_components_ref": 16,
+        "n_components_perturbed": 1498,
+        "n_isolated_perturbed": 1482,
+        "largest_ref": 32.13797956219617,
+        "largest_perturbed": 145.01788323878253
+      },
+      "routing_survival": 0.2136868876959961,
+      "assignment_stability": 0.21766666666666667,
+      "assignment_stability_per_seed": [
+        0.2205,
+        0.212,
+        0.2205
+      ],
+      "oracle_agreement": 0.1085,
+      "router_collapse_seeds": 0,
+      "davis_kahan_bound": 199999999.76238284,
+      "protocol_b_accuracy": {},
+      "low_frequency_error": 0.17495410155986066
+    },
+    {
+      "method": "degree",
+      "retention": 1.0,
+      "n_edges_kept": 10245,
+      "n_edges_orig": 10245,
+      "fraction_kept": 1.0,
+      "legacy_SD": 0.0,
+      "legacy_min_eigengap": 0.0,
+      "legacy_fragility": 0.0,
+      "low_frequency": {
+        "low_freq_k": 32,
+        "low_freq_mean_error": 0.0,
+        "low_freq_median_error": 0.0,
+        "low_freq_p90_error": 0.0,
+        "low_freq_max_error": 0.0,
+        "low_freq_gap_ref": 0.0003119472548695837,
+        "normalisation": 32.13797956219617,
+        "n_matched_modes_ref": 1984,
+        "n_matched_modes_perturbed": 1984
+      },
+      "connectivity": {
+        "n_components_ref": 16,
+        "n_components_perturbed": 16,
+        "n_isolated_perturbed": 0,
+        "largest_ref": 32.13797956219617,
+        "largest_perturbed": 32.13797956219617
+      },
+      "routing_survival": 1.0,
+      "assignment_stability": 1.0,
+      "assignment_stability_per_seed": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "oracle_agreement": 0.36766666666666664,
+      "router_collapse_seeds": 0,
+      "davis_kahan_bound": 0.0,
+      "protocol_b_accuracy": {},
+      "low_frequency_error": 0.0
+    },
+    {
+      "method": "degree",
+      "retention": 0.5,
+      "n_edges_kept": 5122,
+      "n_edges_orig": 10245,
+      "fraction_kept": 0.49995119570522206,
+      "legacy_SD": 0.9999999991666656,
+      "legacy_min_eigengap": 0.0,
+      "legacy_fragility": 99999999.91666655,
+      "low_frequency": {
+        "low_freq_k": 32,
+        "low_freq_mean_error": 0.01265176070790348,
+        "low_freq_median_error": 0.0048416554510644656,
+        "low_freq_p90_error": 0.02758156513873882,
+        "low_freq_max_error": 0.02767352322578159,
+        "low_freq_gap_ref": 0.0003119472548695837,
+        "normalisation": 32.13797956219617,
+        "n_matched_modes_ref": 1984,
+        "n_matched_modes_perturbed": 791
+      },
+      "connectivity": {
+        "n_components_ref": 16,
+        "n_components_perturbed": 1209,
+        "n_isolated_perturbed": 1193,
+        "largest_ref": 32.13797956219617,
+        "largest_perturbed": 32.124033823714974
+      },
+      "routing_survival": 0.3983950145543609,
+      "assignment_stability": 0.29816666666666664,
+      "assignment_stability_per_seed": [
+        0.2975,
+        0.2995,
+        0.2975
+      ],
+      "oracle_agreement": 0.1205,
+      "router_collapse_seeds": 0,
+      "davis_kahan_bound": 199999998.1585935,
+      "protocol_b_accuracy": {},
+      "low_frequency_error": 0.01265176070790348
+    },
+    {
+      "method": "degree",
+      "retention": 0.25,
+      "n_edges_kept": 2561,
+      "n_edges_orig": 10245,
+      "fraction_kept": 0.24997559785261103,
+      "legacy_SD": 0.9999999994075128,
+      "legacy_min_eigengap": 0.0,
+      "legacy_fragility": 99999999.94075128,
+      "low_frequency": {
+        "low_freq_k": 32,
+        "low_freq_mean_error": 0.03535690859632078,
+        "low_freq_median_error": 0.03013217917377064,
+        "low_freq_p90_error": 0.058175288715799585,
+        "low_freq_max_error": 0.06042103564666055,
+        "low_freq_gap_ref": 0.0003119472548695837,
+        "normalisation": 32.13797956219617,
+        "n_matched_modes_ref": 1984,
+        "n_matched_modes_perturbed": 305
+      },
+      "connectivity": {
+        "n_components_ref": 16,
+        "n_components_perturbed": 1695,
+        "n_isolated_perturbed": 1679,
+        "largest_ref": 32.13797956219617,
+        "largest_perturbed": 32.06887542232819
+      },
+      "routing_survival": 0.1548252161702905,
+      "assignment_stability": 0.041,
+      "assignment_stability_per_seed": [
+        0.041,
+        0.041,
+        0.041
+      ],
+      "oracle_agreement": 0.13,
+      "router_collapse_seeds": 0,
+      "davis_kahan_bound": 199999999.71428573,
+      "protocol_b_accuracy": {},
+      "low_frequency_error": 0.03535690859632078
+    },
+    {
+      "method": "degree",
+      "retention": 0.1,
+      "n_edges_kept": 1024,
+      "n_edges_orig": 10245,
+      "fraction_kept": 0.09995119570522205,
+      "legacy_SD": 0.9999999995323409,
+      "legacy_min_eigengap": 0.0,
+      "legacy_fragility": 99999999.95323409,
+      "low_frequency": {
+        "low_freq_k": 32,
+        "low_freq_mean_error": 0.15658650568485807,
+        "low_freq_median_error": 0.12355268428765054,
+        "low_freq_p90_error": 0.2787040735979539,
+        "low_freq_max_error": 0.278914706695539,
+        "low_freq_gap_ref": 0.0003119472548695837,
+        "normalisation": 32.13797956219617,
+        "n_matched_modes_ref": 1984,
+        "n_matched_modes_perturbed": 107
+      },
+      "connectivity": {
+        "n_components_ref": 16,
+        "n_components_perturbed": 1893,
+        "n_isolated_perturbed": 1877,
+        "largest_ref": 32.13797956219617,
+        "largest_perturbed": 30.00760089767262
+      },
+      "routing_survival": 0.05186992990038122,
+      "assignment_stability": 0.042,
+      "assignment_stability_per_seed": [
+        0.042,
+        0.042,
+        0.042
+      ],
+      "oracle_agreement": 0.026,
+      "router_collapse_seeds": 3,
+      "davis_kahan_bound": 199999999.77777776,
+      "protocol_b_accuracy": {},
+      "low_frequency_error": 0.15658650568485807
+    },
+    {
+      "method": "degree",
+      "retention": 0.05,
+      "n_edges_kept": 512,
+      "n_edges_orig": 10245,
+      "fraction_kept": 0.04997559785261103,
+      "legacy_SD": 0.9999999996181904,
+      "legacy_min_eigengap": 0.0,
+      "legacy_fragility": 99999999.96181904,
+      "low_frequency": {
+        "low_freq_k": 32,
+        "low_freq_mean_error": 0.40737189164916154,
+        "low_freq_median_error": 0.4347188591952583,
+        "low_freq_p90_error": 0.6207316503848527,
+        "low_freq_max_error": 0.7449693580008467,
+        "low_freq_gap_ref": 0.0003119472548695837,
+        "normalisation": 32.13797956219617,
+        "n_matched_modes_ref": 1984,
+        "n_matched_modes_perturbed": 54
+      },
+      "connectivity": {
+        "n_components_ref": 16,
+        "n_components_perturbed": 1946,
+        "n_isolated_perturbed": 1930,
+        "largest_ref": 32.13797956219617,
+        "largest_perturbed": 28.00000000000002
+      },
+      "routing_survival": 0.020741983792279366,
+      "assignment_stability": 0.0275,
+      "assignment_stability_per_seed": [
+        0.0275,
+        0.0275,
+        0.0275
+      ],
+      "oracle_agreement": 0.012500000000000002,
+      "router_collapse_seeds": 3,
+      "davis_kahan_bound": 199999999.79257694,
+      "protocol_b_accuracy": {},
+      "low_frequency_error": 0.40737189164916154
+    },
+    {
+      "method": "er",
+      "retention": 1.0,
+      "n_edges_kept": 10245,
+      "n_edges_orig": 10245,
+      "fraction_kept": 1.0,
+      "legacy_SD": 0.0,
+      "legacy_min_eigengap": 0.0,
+      "legacy_fragility": 0.0,
+      "low_frequency": {
+        "low_freq_k": 32,
+        "low_freq_mean_error": 0.0,
+        "low_freq_median_error": 0.0,
+        "low_freq_p90_error": 0.0,
+        "low_freq_max_error": 0.0,
+        "low_freq_gap_ref": 0.0003119472548695837,
+        "normalisation": 32.13797956219617,
+        "n_matched_modes_ref": 1984,
+        "n_matched_modes_perturbed": 1984
+      },
+      "connectivity": {
+        "n_components_ref": 16,
+        "n_components_perturbed": 16,
+        "n_isolated_perturbed": 0,
+        "largest_ref": 32.13797956219617,
+        "largest_perturbed": 32.13797956219617
+      },
+      "routing_survival": 1.0,
+      "assignment_stability": 1.0,
+      "assignment_stability_per_seed": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "oracle_agreement": 0.36766666666666664,
+      "router_collapse_seeds": 0,
+      "davis_kahan_bound": 0.0,
+      "protocol_b_accuracy": {},
+      "low_frequency_error": 0.0
+    },
+    {
+      "method": "er",
+      "retention": 0.5,
+      "n_edges_kept": 5122,
+      "n_edges_orig": 10245,
+      "fraction_kept": 0.49995119570522206,
+      "legacy_SD": 0.9999999962151301,
+      "legacy_min_eigengap": 0.0,
+      "legacy_fragility": 99999999.62151301,
+      "low_frequency": {
+        "low_freq_k": 32,
+        "low_freq_mean_error": 0.0001514016491405143,
+        "low_freq_median_error": 0.00014618828407256788,
+        "low_freq_p90_error": 0.0002554784956578602,
+        "low_freq_max_error": 0.00036817496495088263,
+        "low_freq_gap_ref": 0.0003119472548695837,
+        "normalisation": 32.13797956219617,
+        "n_matched_modes_ref": 1984,
+        "n_matched_modes_perturbed": 1677
+      },
+      "connectivity": {
+        "n_components_ref": 16,
+        "n_components_perturbed": 323,
+        "n_isolated_perturbed": 307,
+        "largest_ref": 32.13797956219617,
+        "largest_perturbed": 30.02991817425728
+      },
+      "routing_survival": 0.8463718385040025,
+      "assignment_stability": 0.3618333333333334,
+      "assignment_stability_per_seed": [
+        0.3605,
+        0.357,
+        0.368
+      ],
+      "oracle_agreement": 0.27616666666666667,
+      "router_collapse_seeds": 0,
+      "davis_kahan_bound": 141186309.5059944,
+      "protocol_b_accuracy": {},
+      "low_frequency_error": 0.0001514016491405143
+    },
+    {
+      "method": "er",
+      "retention": 0.25,
+      "n_edges_kept": 2561,
+      "n_edges_orig": 10245,
+      "fraction_kept": 0.24997559785261103,
+      "legacy_SD": 0.9999999986228308,
+      "legacy_min_eigengap": 0.0,
+      "legacy_fragility": 99999999.86228308,
+      "low_frequency": {
+        "low_freq_k": 32,
+        "low_freq_mean_error": 0.0008499050801244365,
+        "low_freq_median_error": 0.0009342508971657744,
+        "low_freq_p90_error": 0.0018196399282380835,
+        "low_freq_max_error": 0.0019243397977442846,
+        "low_freq_gap_ref": 0.0003119472548695837,
+        "normalisation": 32.13797956219617,
+        "n_matched_modes_ref": 1984,
+        "n_matched_modes_perturbed": 1266
+      },
+      "connectivity": {
+        "n_components_ref": 16,
+        "n_components_perturbed": 734,
+        "n_isolated_perturbed": 718,
+        "largest_ref": 32.13797956219617,
+        "largest_perturbed": 29.09787678707567
+      },
+      "routing_survival": 0.6404552108436403,
+      "assignment_stability": 0.4136666666666667,
+      "assignment_stability_per_seed": [
+        0.4175,
+        0.406,
+        0.4175
+      ],
+      "oracle_agreement": 0.147,
+      "router_collapse_seeds": 0,
+      "davis_kahan_bound": 181040930.0555293,
+      "protocol_b_accuracy": {},
+      "low_frequency_error": 0.0008499050801244365
+    },
+    {
+      "method": "er",
+      "retention": 0.1,
+      "n_edges_kept": 1024,
+      "n_edges_orig": 10245,
+      "fraction_kept": 0.09995119570522205,
+      "legacy_SD": 0.9999999991924888,
+      "legacy_min_eigengap": 0.0,
+      "legacy_fragility": 99999999.91924888,
+      "low_frequency": {
+        "low_freq_k": 32,
+        "low_freq_mean_error": 0.00866333826690743,
+        "low_freq_median_error": 0.00615804566603506,
+        "low_freq_p90_error": 0.0170794243718607,
+        "low_freq_max_error": 0.024352639252190816,
+        "low_freq_gap_ref": 0.0003119472548695837,
+        "normalisation": 32.13797956219617,
+        "n_matched_modes_ref": 1984,
+        "n_matched_modes_perturbed": 719
+      },
+      "connectivity": {
+        "n_components_ref": 16,
+        "n_components_perturbed": 1281,
+        "n_isolated_perturbed": 1265,
+        "largest_ref": 32.13797956219617,
+        "largest_perturbed": 28.00000000000003
+      },
+      "routing_survival": 0.36431622318691154,
+      "assignment_stability": 0.2831666666666667,
+      "assignment_stability_per_seed": [
+        0.2855,
+        0.2785,
+        0.2855
+      ],
+      "oracle_agreement": 0.058,
+      "router_collapse_seeds": 0,
+      "davis_kahan_bound": 199999998.96124583,
+      "protocol_b_accuracy": {},
+      "low_frequency_error": 0.00866333826690743
+    },
+    {
+      "method": "er",
+      "retention": 0.05,
+      "n_edges_kept": 512,
+      "n_edges_orig": 10245,
+      "fraction_kept": 0.04997559785261103,
+      "legacy_SD": 0.9999999993426033,
+      "legacy_min_eigengap": 0.0,
+      "legacy_fragility": 99999999.93426032,
+      "low_frequency": {
+        "low_freq_k": 32,
+        "low_freq_mean_error": 0.02038119461535281,
+        "low_freq_median_error": 0.029300217784212757,
+        "low_freq_p90_error": 0.030090489585220887,
+        "low_freq_max_error": 0.03017026128109628,
+        "low_freq_gap_ref": 0.0003119472548695837,
+        "normalisation": 32.13797956219617,
+        "n_matched_modes_ref": 1984,
+        "n_matched_modes_perturbed": 423
+      },
+      "connectivity": {
+        "n_components_ref": 16,
+        "n_components_perturbed": 1577,
+        "n_isolated_perturbed": 1561,
+        "largest_ref": 32.13797956219617,
+        "largest_perturbed": 28.00000000000006
+      },
+      "routing_survival": 0.2150263277819301,
+      "assignment_stability": 0.17766666666666664,
+      "assignment_stability_per_seed": [
+        0.181,
+        0.171,
+        0.181
+      ],
+      "oracle_agreement": 0.025000000000000005,
+      "router_collapse_seeds": 0,
+      "davis_kahan_bound": 199999999.66666666,
+      "protocol_b_accuracy": {},
+      "low_frequency_error": 0.02038119461535281
+    }
+  ],
+  "summary": {
+    "n_points": 15,
+    "legacy_SD_distinct_values": 4,
+    "spearman_lowfreq_vs_assignment_stability": -0.7913669064748201,
+    "pvalue_lowfreq_vs_assignment_stability": 0.00044050228879053343,
+    "pearson_lowfreq_vs_assignment_stability": -0.4749237086413221,
+    "spearman_legacy_vs_assignment_stability": -0.7086330935251799,
+    "spearman_lowfreq_vs_oracle_agreement": -0.7338129496402879,
+    "pvalue_lowfreq_vs_oracle_agreement": 0.0018449350517881252,
+    "pearson_lowfreq_vs_oracle_agreement": -0.5090056845512962,
+    "spearman_legacy_vs_oracle_agreement": -0.7122302158273381,
+    "per_method_monotonicity": {
+      "degree": {
+        "stability_by_descending_budget": [
+          1.0,
+          0.2982,
+          0.041,
+          0.042,
+          0.0275
+        ],
+        "monotone": false
+      },
+      "er": {
+        "stability_by_descending_budget": [
+          1.0,
+          0.3618,
+          0.4137,
+          0.2832,
+          0.1777
+        ],
+        "monotone": false
+      },
+      "random": {
+        "stability_by_descending_budget": [
+          1.0,
+          0.146,
+          0.6333,
+          0.3523,
+          0.2177
+        ],
+        "monotone": false
+      }
+    }
+  }
+}

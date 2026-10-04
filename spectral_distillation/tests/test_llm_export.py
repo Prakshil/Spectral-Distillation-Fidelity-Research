@@ -82,6 +82,41 @@ def test_max_edges_per_node_sparsifies():
     assert np.all(g["W"].sum(axis=1) < 1e18)  # sanity, not a check of count
 
 
+def test_feature_mode_agg_is_legacy_default():
+    # The committed artifacts were produced with mean/max/std entropy, so `agg`
+    # must stay the default and must keep d_features == 3 for any depth.
+    rec = _fake_record(n=12, layers=24)
+    g = build_attention_graph(rec)
+    assert g["feature_mode"] == "agg"
+    assert g["features"].shape == (12, 3)
+    assert g["d_features"] == 3
+
+
+def test_feature_mode_per_layer_gives_one_column_per_layer():
+    rec = _fake_record(n=12, layers=24)
+    g = build_attention_graph(rec, feature_mode="per_layer")
+    assert g["feature_mode"] == "per_layer"
+    assert g["features"].shape == (12, 24)
+    assert g["d_features"] == 24
+
+
+def test_feature_mode_does_not_change_the_graph():
+    # Feature extraction must not perturb W: Protocol B compares conditions on
+    # an identical adjacency, and a leaky feature path would silently change
+    # the sparsification target.
+    rec = _fake_record(n=12, layers=6)
+    a = build_attention_graph(rec, feature_mode="agg")
+    b = build_attention_graph(rec, feature_mode="per_layer")
+    assert np.array_equal(a["W"], b["W"])
+    assert np.array_equal(a["y"], b["y"])
+
+
+def test_feature_mode_rejects_unknown():
+    rec = _fake_record(n=8, layers=3)
+    with pytest.raises(ValueError, match="feature_mode"):
+        build_attention_graph(rec, feature_mode="nope")
+
+
 def test_sentence_ids_total_flow():
     ids = passage_to_sentence_ids(100, sentence_lengths=[30, 30, 40])
     assert ids.shape == (100,)

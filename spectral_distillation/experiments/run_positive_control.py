@@ -50,6 +50,9 @@ def main() -> None:
     p.add_argument("--epochs", type=int, default=200)
     p.add_argument("--out", default="logs/positive_control")
     p.add_argument("--device", default="cpu")
+    p.add_argument("--ragged-edges", action="store_true",
+                   help="restrict graph experts' message passing to each "
+                        "expert's own routed subset (implicit-routing control)")
     args = p.parse_args()
 
     log = get_logger(__name__)
@@ -81,7 +84,8 @@ def main() -> None:
     per_expert = {}
     for name in args.experts:
         set_seed(args.seed)
-        factory = build_expert_factory(name, graph, args.device)
+        factory = build_expert_factory(name, graph, args.device,
+                                       ragged_edges=args.ragged_edges)
         res = evaluate_all(
             conditions, X, y, args.splits, args.seeds, log,
             expert_assignment=pool, expert_factory=factory,

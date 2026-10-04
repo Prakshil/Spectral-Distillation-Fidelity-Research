@@ -123,6 +123,7 @@ class GNNExpertHead:
         weight_decay: float = 1e-3,
         seed: int = 0,
         device: str = "cpu",
+        ragged_edges: bool = False,
     ) -> None:
         self.W_norm = W_norm
         self.n_features = n_features
@@ -141,7 +142,9 @@ class GNNExpertHead:
         self.weight_decay = weight_decay
         self.seed = seed
         self.device = device
+        self.ragged_edges = ragged_edges
         self._Wt: torch.Tensor | None = None
+        self._Wt_sub: torch.Tensor | None = None
         self._h0_cache: torch.Tensor | None = None
         self._model: GraphExpertNet | None = None
         self.classes_: np.ndarray | None = None
@@ -153,18 +156,49 @@ class GNNExpertHead:
             self._Wt = _as_torch_W(self.W_norm).to(self.device)
         return self._Wt
 
+    def _subgraph_W(self) -> torch.Tensor:
+        """Adjacency with every non-owned node removed as an aggregation *source*.
+
+        Zeroes the **columns** of nodes outside ``train_idx``, keeping every row.
+        That asymmetry is deliberate and is what makes this a usable control:
+
+        * An owned node aggregates only from owned neighbours -- the induced
+          subgraph, so no structure outside the subset reaches it.
+        * A node scored at test time (which by construction is *not* in
+          ``train_idx``) still aggregates, but only from the expert's owned
+          nodes.
+
+        Masking rows as well would zero the aggregation of every test node, which
+        would silently demote a graph expert to a per-row model and make the arm
+        measure expert weakness rather than implicit routing.
+
+        Node identities are preserved (rows and columns stay in place), so no
+        index remapping is needed.
+        """
+        if self._Wt_sub is None:
+            n = self.W_norm.shape[0]
+            keep = torch.zeros(n, 1, device=self.device, dtype=torch.float32)
+            keep[torch.as_tensor(self.train_idx, device=self.device)] = 1.0
+            Wt = self._W()
+            self._Wt_sub = Wt * keep.t()  # broadcast across columns
+        return self._Wt_sub
+
     def _h0(self, X: np.ndarray) -> torch.Tensor:
         """One-hop propagated features ``[X, AX]``, computed once and cached.
 
         ``h0`` does not depend on any learnable parameter, so recomputing it on
-        every one of the thousands of training steps is pure waste -- and on a
+        every one of the thousands of training steps is pure waste -- and on an
         8.6k-node graph it dominated runtime by ~3 orders of magnitude. The
         cached tensor is also shared by ``predict_nodes`` so scoring cannot drift
         from training. Kept per-instance (one head per expert per split/seed).
+
+        With ``ragged_edges=True`` the propagation uses the expert's own induced
+        subgraph instead of the full graph, so its prediction for a node cannot
+        depend on the features of any node it does not own.
         """
         if self._h0_cache is None:
             xt = torch.as_tensor(np.asarray(X, dtype=np.float32), device=self.device)
-            Wt = self._W()
+            Wt = self._subgraph_W() if self.ragged_edges else self._W()
             a = torch.sparse.mm(Wt, xt) if Wt.layout == torch.sparse_coo \
                 else torch.mm(Wt, xt)
             self._h0_cache = torch.cat([xt, a], dim=-1)
@@ -174,6 +208,15 @@ class GNNExpertHead:
     def _model_hidden_depth(self) -> int:
         """Number of hidden layers that still need ``W`` to re-aggregate."""
         return self.n_layers if self.hidden_dim > 0 else 0
+
+    def _propagation_W(self) -> torch.Tensor:
+        """The adjacency this expert actually propagates over.
+
+        Deeper hidden layers must re-aggregate over the *same* operator used to
+        build ``h0``, otherwise a ragged-edge expert would silently regain full
+        graph context at layer 2 and the control would only constrain the read-out.
+        """
+        return self._subgraph_W() if self.ragged_edges else self._W()
 
     def fit_graph(self, X: np.ndarray, y: np.ndarray):
         """Fit on the routed train subset using full-graph message passing."""
@@ -193,7 +236,7 @@ class GNNExpertHead:
         h0 = self._h0(X)
         yt = torch.as_tensor(np.asarray(y, dtype=np.float32), device=self.device)
         idx = torch.as_tensor(self.train_idx, dtype=torch.long, device=self.device)
-        Wt = self._W() if self._model_hidden_depth() > 1 else None
+        Wt = self._propagation_W() if self._model_hidden_depth() > 1 else None
 
         # Balance the loss so the minority class is actually learned; the metric
         # is accuracy, so an unbalanced head would simply be a weaker expert.
@@ -223,7 +266,7 @@ class GNNExpertHead:
         two can never disagree on a node that sits exactly at logit 0.
         """
         assert self._model is not None, "fit_graph must be called before prediction"
-        Wt = self._W() if self._model_hidden_depth() > 1 else None
+        Wt = self._propagation_W() if self._model_hidden_depth() > 1 else None
         with torch.no_grad():
             logits = self._model(self._h0(X), Wt)
             sel = torch.as_tensor(np.asarray(idx, dtype=np.int64), device=self.device)
@@ -266,12 +309,19 @@ def gnn_head_factory(
     dropout: float = 0.0,
     weight_decay: float = 1e-3,
     seed: int = 0,
+    ragged_edges: bool = False,
 ):
     """Build an ``expert_factory`` for :func:`fit_experts`.
 
     ``fit_experts`` calls ``expert_factory(train_idx)`` with the routed training
     mask, so the returned callable bakes that mask into each expert -- the
     expert trains on its own routed subset only, never on the full train set.
+
+    ``ragged_edges=True`` additionally restricts message passing to that same
+    subset's induced subgraph. This is the stronger form of the implicit-routing
+    control: a full-graph expert sees every node's neighbourhood and could
+    specialise on structure without any router being involved, whereas a
+    ragged-edge expert cannot observe a single node it does not own.
     """
 
     def factory(train_idx):
@@ -287,6 +337,7 @@ def gnn_head_factory(
             weight_decay=weight_decay,
             seed=seed,
             device=device,
+            ragged_edges=ragged_edges,
         )
 
     return factory

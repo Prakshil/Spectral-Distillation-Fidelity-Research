@@ -1,0 +1,224 @@
+{
+  "config": {
+    "n": 1800,
+    "n_features": 4,
+    "seed": 0,
+    "splits": 5,
+    "seeds": 3,
+    "experts": [
+      "logistic",
+      "mlp",
+      "gnn"
+    ],
+    "epochs": 200,
+    "out": "logs/positive_control_gnn",
+    "device": "cpu",
+    "ragged_edges": false
+  },
+  "graph": {
+    "n_nodes": 1800,
+    "d_features": 4,
+    "n_edges": 21351.0,
+    "positive_ratio": 0.22611111111111112,
+    "pool_purity_per_latent_group": {
+      "0": 1.0,
+      "1": 1.0,
+      "2": 1.0
+    }
+  },
+  "results": {
+    "logistic": {
+      "mean_accuracy": {
+        "single_global": 0.7853333333333333,
+        "oracle": 0.9805925925925927,
+        "feature_kmeans": 0.9805925925925927,
+        "random": 0.746962962962963,
+        "ensemble_uniform": 0.8037037037037036
+      },
+      "per_split": {
+        "single_global": {
+          "0": 0.7929629629629629,
+          "1": 0.7811111111111111,
+          "2": 0.7870370370370371,
+          "3": 0.782962962962963,
+          "4": 0.7825925925925925
+        },
+        "oracle": {
+          "0": 0.9755555555555556,
+          "1": 0.9840740740740741,
+          "2": 0.9825925925925926,
+          "3": 0.9792592592592593,
+          "4": 0.9814814814814814
+        },
+        "feature_kmeans": {
+          "0": 0.9755555555555556,
+          "1": 0.9840740740740741,
+          "2": 0.9825925925925926,
+          "3": 0.9792592592592593,
+          "4": 0.9814814814814814
+        },
+        "random": {
+          "0": 0.7407407407407408,
+          "1": 0.7366666666666667,
+          "2": 0.7448148148148147,
+          "3": 0.7566666666666667,
+          "4": 0.755925925925926
+        },
+        "ensemble_uniform": {
+          "0": 0.8014814814814816,
+          "1": 0.8062962962962962,
+          "2": 0.8048148148148148,
+          "3": 0.8048148148148148,
+          "4": 0.8011111111111111
+        }
+      },
+      "oracle_minus_no_routing": 0.19525925925925935,
+      "kmeans_minus_no_routing": 0.19525925925925935,
+      "random_minus_no_routing": -0.03837037037037028
+    },
+    "mlp": {
+      "mean_accuracy": {
+        "single_global": 0.9757777777777779,
+        "oracle": 0.9874074074074073,
+        "feature_kmeans": 0.9874074074074073,
+        "random": 0.6774074074074073,
+        "ensemble_uniform": 0.7959259259259259
+      },
+      "per_split": {
+        "single_global": {
+          "0": 0.9707407407407408,
+          "1": 0.9781481481481481,
+          "2": 0.9785185185185186,
+          "3": 0.9737037037037037,
+          "4": 0.9777777777777779
+        },
+        "oracle": {
+          "0": 0.9814814814814814,
+          "1": 0.9914814814814815,
+          "2": 0.9877777777777778,
+          "3": 0.9855555555555556,
+          "4": 0.9907407407407408
+        },
+        "feature_kmeans": {
+          "0": 0.9814814814814814,
+          "1": 0.9914814814814815,
+          "2": 0.9877777777777778,
+          "3": 0.9855555555555556,
+          "4": 0.9907407407407408
+        },
+        "random": {
+          "0": 0.6762962962962963,
+          "1": 0.6718518518518518,
+          "2": 0.6733333333333333,
+          "3": 0.6822222222222223,
+          "4": 0.6833333333333332
+        },
+        "ensemble_uniform": {
+          "0": 0.792962962962963,
+          "1": 0.7977777777777777,
+          "2": 0.8018518518518518,
+          "3": 0.7948148148148148,
+          "4": 0.7922222222222223
+        }
+      },
+      "oracle_minus_no_routing": 0.011629629629629434,
+      "kmeans_minus_no_routing": 0.011629629629629434,
+      "random_minus_no_routing": -0.2983703703703705
+    },
+    "gnn": {
+      "mean_accuracy": {
+        "single_global": 0.6566666666666666,
+        "oracle": 0.9637037037037036,
+        "feature_kmeans": 0.9637037037037036,
+        "random": 0.6314814814814815,
+        "ensemble_uniform": 0.7427407407407407
+      },
+      "per_split": {
+        "single_global": {
+          "0": 0.6537037037037038,
+          "1": 0.6529629629629629,
+          "2": 0.657037037037037,
+          "3": 0.6603703703703704,
+          "4": 0.6592592592592592
+        },
+        "oracle": {
+          "0": 0.9674074074074074,
+          "1": 0.96,
+          "2": 0.9648148148148148,
+          "3": 0.9637037037037036,
+          "4": 0.9625925925925927
+        },
+        "feature_kmeans": {
+          "0": 0.9674074074074074,
+          "1": 0.96,
+          "2": 0.9648148148148148,
+          "3": 0.9637037037037036,
+          "4": 0.9625925925925927
+        },
+        "random": {
+          "0": 0.6344444444444445,
+          "1": 0.6244444444444445,
+          "2": 0.6229629629629629,
+          "3": 0.6374074074074074,
+          "4": 0.6381481481481482
+        },
+        "ensemble_uniform": {
+          "0": 0.7385185185185185,
+          "1": 0.7455555555555556,
+          "2": 0.7433333333333333,
+          "3": 0.7481481481481481,
+          "4": 0.7381481481481481
+        }
+      },
+      "oracle_minus_no_routing": 0.307037037037037,
+      "kmeans_minus_no_routing": 0.307037037037037,
+      "random_minus_no_routing": -0.02518518518518509
+    }
+  },
+  "learned_router": {
+    "mean_accuracy": {
+      "single_global": 0.7837777777777777,
+      "learned_router": 0.953037037037037,
+      "feature_kmeans": 0.9744444444444443,
+      "oracle": 0.9744444444444443,
+      "random": 0.7430370370370372,
+      "ensemble_uniform": 0.8002222222222223
+    },
+    "learned_minus_no_routing": 0.16925925925925933,
+    "router_vs_kmeans_agreement": 0.7182592592592594,
+    "n_runs": 15,
+    "n_runs_learned_beats_no_routing": 15
+  },
+  "learned_router_x_only": {
+    "mean_accuracy": {
+      "single_global": 0.7837777777777777,
+      "learned_router": 0.967037037037037,
+      "feature_kmeans": 0.9744444444444443,
+      "oracle": 0.9744444444444443,
+      "random": 0.7430370370370372,
+      "ensemble_uniform": 0.8002222222222223
+    },
+    "learned_minus_no_routing": 0.18325925925925934,
+    "router_vs_kmeans_agreement": 0.8100740740740741,
+    "n_runs": 15,
+    "n_runs_learned_beats_no_routing": 15
+  },
+  "per_split_win_counts": {
+    "logistic": {
+      "n_splits": 5,
+      "oracle_beats_no_routing": 5,
+      "kmeans_beats_no_routing": 5
+    },
+    "mlp": {
+      "n_splits": 5,
+      "oracle_beats_no_routing": 5,
+      "kmeans_beats_no_routing": 5
+    },
+    "gnn": {
+      "n_splits": 5,
+      "oracle_beats_no_routing": 5,
+      "kmeans_beats_no_routing": 5
+    }
+  },
+  "interpretation": "A correct positive control: oracle routing beats the global model by a wide margin under logistic experts, while random routing does not. The learned router also beats the global model here, so the router can exploit structure when it exists. The 0/234 result on real data is therefore a statement about those datasets, not a blind spot in the protocol or the router."
+}

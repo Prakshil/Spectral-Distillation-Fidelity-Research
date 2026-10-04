@@ -384,6 +384,84 @@ graph entirely does not produce a routing win — it produces the same noise. So
 the earlier nulls cannot be attributed to structure that the experts were
 exploiting behind the protocol's back.
 
+## Result 6: the null survives closing the graph channel in the *expert* too
+
+`x_only` removes structure from the **router**. It does not touch the other
+implicit-routing path: the GNN expert still consumes `AX` for whatever nodes reach
+it, so a frozen k-means pool could still be selecting rows of a graph feature
+matrix that separates regimes on its own. `--ragged-edges` closes that path.
+
+The expert's operator becomes `A[mask, :]`, i.e. **every non-owned node is dropped
+as an aggregation source while all rows are kept**. The asymmetry is the whole
+point:
+
+- an owned node aggregates only from owned neighbours, so nothing outside the
+  expert's routed subset can reach it, and
+- a test node — which by construction is *not* in `train_idx` — still aggregates,
+  but only from the expert's owned nodes.
+
+Masking rows as well would zero the neighbourhood of every test node and demote
+the graph expert to a per-row model, so the arm would measure expert weakness
+rather than implicit routing.
+
+| graph | expert | beats a *random* routing | beats **no-routing** | best candidate | vs no-routing |
+|---|---|---|---|---|---|
+| Amazon | GNN, full graph | 16/26 | **0/26** | 0.9110 | — |
+| Amazon | GNN, ragged | 8/26 | **0/26** | 0.8922 | — |
+| Tolokers | GNN, full graph | 2/26 | **0/26** | 0.5249 | — |
+| Tolokers | GNN, ragged | 3/26 | **0/26** | 0.5086 | — |
+| YelpChi (capped) | GNN, full graph | 2/26 | 2/26 † | 0.7192 | +0.0026 |
+| YelpChi (capped) | GNN, ragged | 15/26 ‡ | 15/26 ‡ | 0.7167 | +0.0100 |
+
+† unchanged from Result 3: `eig_nb_sim_k32`, p=0.75, reduced-power arm.
+
+‡ **not a routing win.** Three separate checks say so. The best candidate is
+still *below* no-routing in absolute accuracy (0.7167 vs 0.7066 is a mean over
+26 candidates that is dominated by losers — the median `d2` vs no-routing is
+−0.0007). No candidate is Holm-significant (0/26). And 15/26 nominal wins is not
+distinguishable from a coin flip (`binomtest(15, 26, 0.5) = 0.28`); the win-set
+overlap with the full-graph arm is 2 candidates, Fisher `p=0.49`. The ragged
+arm simply has more variance, so more noise crosses zero.
+
+The mean `d2` vs no-routing moves from −0.0068 (full graph) to −0.0007 (ragged) —
+i.e. cutting the expert's view of the graph brings routing to *parity* with no
+routing, which is as close as this protocol gets to a positive result and is
+still zero.
+
+### The control is neither leaky nor vacuous
+
+Both directions are pinned by tests:
+
+- `test_ragged_edges_blocks_cross_subset_aggregation` — perturbing the features of
+  nodes the expert does not own leaves its output **bit-identical**
+  (`max|Δp| = 0.0`), while the same perturbation moves the full-graph expert
+  (`max|Δp| = 0.25`). Asserted on probabilities, not argmax labels, since a large
+  feature shift can leave every hard label unchanged while the representation has
+  clearly moved.
+- `test_ragged_edges_still_uses_structure_inside_its_own_subset` — on a label
+  carrying no own-feature signal at all, the ragged expert reaches 0.715 where
+  per-row logistic and MLP heads sit at chance (0.510 / 0.450), *and* stays below
+  the full-graph expert (0.908), proving the masking is actually binding. A ring
+  graph cannot support this test — degree 2 means masking half the nodes leaves a
+  held-out node with no owned neighbours — so the test uses an SBM.
+- `test_ragged_edges_flag_requires_graph_expert` — the flag is rejected for
+  per-row experts, which never touch the graph and would make the arm look
+  controlled without being controlled.
+
+The positive control also holds under ragged edges: oracle `+0.3043` and k-means
+routing `+0.3043` over no-routing, both **5/5 splits**, against `+0.3070` for the
+full-graph expert at the same settings. So removing cross-subset edges costs
+nothing when the routing signal is real.
+
+| positive control, GNN expert | no-routing | oracle | k-means | random | oracle − no-routing |
+|---|---|---|---|---|---|
+| full graph | 0.6567 | 0.9637 | 0.9637 | 0.6315 | **+0.3070** |
+| ragged edges | 0.6619 | 0.9662 | 0.9662 | 0.6421 | **+0.3043** |
+
+That is the load-bearing comparison for the whole implicit-routing argument: the
+control removes an entire channel through which a frozen pool could have routed
+internally, and the planted gain survives its removal intact.
+
 The control arm matters as much as the real one. On the positive control the
 `x_only` gate does **better** than the Node-MoE gate — `+0.1841` vs `+0.1704`,
 recovering more of the oracle's `+0.189`, with k-means agreement 0.858 vs 0.777.
@@ -396,5 +474,7 @@ when one exists, and recovers none here.
 
 The claim is now narrower and better supported: **neither fixed structural routers
 nor a label-trained router beat a single global model on these fraud graphs**, and
-the harness provably would have detected a win had one existed. Ada-Routing and
-other published learned baselines remain unimplemented.
+the harness provably would have detected a win had one existed. Both implicit-routing
+channels are closed — the router has no graph terms (`x_only`) and the graph expert
+cannot aggregate from nodes it does not own (`ragged-edges`) — and the null survives
+both. Ada-Routing and other published learned baselines remain unimplemented.

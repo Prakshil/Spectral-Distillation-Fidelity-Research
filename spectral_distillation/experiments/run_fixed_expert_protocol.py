@@ -74,12 +74,17 @@ N_EXPERTS = 3
 EXPERT_NAMES = ("logistic", "mlp", "gnn")
 
 
-def build_expert_factory(name: str, graph, device: str):
+def build_expert_factory(name: str, graph, device: str, ragged_edges: bool = False):
     """Resolve an expert family name to an ``expert_factory`` callable.
 
     ``gnn`` is not in ``EXPERT_FACTORIES`` because it needs the graph: each
     expert message-passes over the symmetrically normalized adjacency, which is
     the only way a specialist can exploit the structure a router routes on.
+
+    ``ragged_edges`` only applies to the graph expert: it restricts propagation to
+    the expert's own routed subset, closing the implicit-routing channel of
+    "On the Benefits of Learning to Route in MoE Models" (EMNLP 2023). Ignored for
+    per-row heads, which never touch the graph in the first place.
     """
     if name == "gnn":
         from spectral_distillation.src.gnn_expert import gnn_head_factory
@@ -87,7 +92,7 @@ def build_expert_factory(name: str, graph, device: str):
 
         W_norm = normalize_adjacency(graph["W"])
         return gnn_head_factory(W_norm=W_norm, n_features=graph["d_features"],
-                               device=device)
+                               device=device, ragged_edges=ragged_edges)
     return EXPERT_FACTORIES[name]
 
 
@@ -210,13 +215,29 @@ def main() -> None:
                         "'gnn' adds message passing over the graph")
     p.add_argument("--skip-self-routing", action="store_true",
                    help="run only the honest fixed-expert protocol (much faster with mlp)")
+    p.add_argument("--ragged-edges", action="store_true",
+                   help="restrict each graph expert's message passing to its own "
+                        "routed subset's induced subgraph. The implicit-routing "
+                        "control of EMNLP 2023: a full-graph expert can specialise "
+                        "on structure with no router present, a ragged-edge one "
+                        "cannot see a node it does not own. Requires --expert gnn.")
     args = p.parse_args()
+
+    if args.ragged_edges and args.expert != "gnn":
+        p.error(
+            "--ragged-edges constrains graph message passing, so it requires "
+            "--expert gnn. Per-row experts (logistic/mlp) already never see the "
+            "graph, so the flag would be a silent no-op and the arm would look "
+            "controlled without being controlled."
+        )
 
     log = get_logger("fixed_expert")
     set_seed(0)
     # Expert family is part of the artifact identity: a logistic run and an mlp
     # run are different experiments and must not overwrite each other.
     suffix = "" if args.expert == "logistic" else f"_{args.expert}"
+    if args.ragged_edges:
+        suffix += "_ragged"
     out_dir = ensure_dir(Path(args.out) / f"{args.dataset}_fixed_expert{suffix}")
 
     t0 = time.perf_counter()
@@ -245,8 +266,10 @@ def main() -> None:
         base_cond[f"{name}::fwd"] = bucket_from_score(s)
         base_cond[f"{name}::neg"] = bucket_from_score(-s)
 
-    factory = build_expert_factory(args.expert, graph, args.device)
-    log.info("expert head: %s", args.expert)
+    factory = build_expert_factory(args.expert, graph, args.device,
+                                  ragged_edges=args.ragged_edges)
+    log.info("expert head: %s%s", args.expert,
+              " (ragged edges)" if args.ragged_edges else "")
 
     # ------------------------------------------------------------------ #
     # Protocol B: fixed routing-blind expert pool (k-means), routing varies.

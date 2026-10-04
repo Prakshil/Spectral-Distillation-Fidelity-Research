@@ -818,6 +818,30 @@ def _ring_graph(n: int):
     return A
 
 
+def _sbm(n_per_block: int, n_blocks: int, p_in: float, p_out: float,
+         seed: int = 0):
+    """Stochastic block model. Returns ``(A, block_labels)``.
+
+    Used instead of a ring wherever message passing must survive an induced
+    subgraph. A ring has degree 2, so masking half the nodes leaves a held-out
+    node with almost no owned neighbours and every graph expert degenerates into
+    a per-row one -- which measures subgraph sparsity, not implicit routing.
+    """
+    rng = np.random.default_rng(seed)
+    labels = np.repeat(np.arange(n_blocks), n_per_block)
+    n = n_per_block * n_blocks
+    P = np.where(labels[:, None] == labels[None, :], p_in, p_out)
+    A = np.triu((rng.random((n, n)) < P).astype(float), 1)
+    return A + A.T, labels
+
+
+def _neighbour_only_labels(A, X):
+    """Binary label from neighbour features only, so per-row models are at chance."""
+    deg = (A > 0).sum(1)
+    nbr_mean = (A @ X[:, 0]) / np.maximum(deg, 1)
+    return (nbr_mean > np.median(nbr_mean)).astype(int)
+
+
 def test_gnn_expert_trains_on_routed_subset_not_nodes_zero_and_one():
     """Regression: ``fit_experts`` passes a *boolean* mask to the factory.
 
@@ -980,6 +1004,137 @@ def test_ensemble_averages_probabilities_not_majority_vote():
     vote_pred = mode(votes, axis=0, keepdims=False).mode
     vote_acc = float(np.count_nonzero(vote_pred == y) / n)
     assert vote_acc < acc_ens, (vote_acc, acc_ens)
+
+
+def _proba_with_fresh_cache(head, X, idx):
+    """Class probabilities after clearing the ``h0`` cache.
+
+    ``GNNExpertHead`` caches propagated features per instance, keyed on nothing.
+    That is correct in the protocol (every caller passes the same ``X``) but it
+    means re-scoring with a *different* ``X`` silently returns the stale cache.
+    Tests that probe feature dependence have to drop the cache explicitly.
+    """
+    head._h0_cache = None
+    return head.predict_proba_nodes(X, idx)
+
+
+def test_ragged_edges_blocks_cross_subset_aggregation():
+    """A ragged-edge expert must not see any node outside its own subset.
+
+    This is the implicit-routing control (EMNLP 2023). A full-graph expert
+    aggregates from every neighbour, so it can specialise on structure with no
+    router involved. Perturbing the features of nodes the expert does *own*
+    nothing must leave its output bit-identical -- if the output moves, the
+    control is not in force and the null result would be uninterpretable.
+
+    Asserted on probabilities, not argmax labels: a 5.0 feature shift can leave
+    every hard label unchanged while the internal representation has clearly
+    moved, which would make a label-level assertion pass vacuously.
+    """
+    from spectral_distillation.src.gnn_expert import gnn_head_factory
+    from spectral_distillation.src.laplacian import normalize_adjacency
+
+    rng = np.random.default_rng(0)
+    n_per_block, n_blocks, d = 200, 4, 8
+    A, _ = _sbm(n_per_block, n_blocks, 0.06, 0.01, seed=1)
+    n = n_per_block * n_blocks
+    X = rng.normal(size=(n, d))
+    y = _neighbour_only_labels(A, X)
+    W_norm = normalize_adjacency(A)
+
+    own = np.zeros(n, dtype=bool)
+    own[rng.permutation(n)[: n // 2]] = True
+
+    ragged = gnn_head_factory(W_norm=W_norm, n_features=d, epochs=300,
+                             ragged_edges=True)(own).fit_graph(X, y)
+    full = gnn_head_factory(W_norm=W_norm, n_features=d, epochs=300,
+                           ragged_edges=False)(own).fit_graph(X, y)
+
+    idx = np.flatnonzero(own)
+    base_ragged = _proba_with_fresh_cache(ragged, X, idx)
+    base_full = _proba_with_fresh_cache(full, X, idx)
+
+    # Perturb only features of nodes outside the expert's subset.
+    X_perturbed = X.copy()
+    X_perturbed[~own] += 5.0
+
+    assert np.array_equal(
+        _proba_with_fresh_cache(ragged, X_perturbed, idx), base_ragged
+    )
+    # The full-graph expert *does* respond, which is what makes the control
+    # meaningful rather than vacuous.
+    assert np.abs(
+        _proba_with_fresh_cache(full, X_perturbed, idx) - base_full
+    ).max() > 1e-3
+
+
+def test_ragged_edges_still_uses_structure_inside_its_own_subset():
+    """Ragged edges must not accidentally disable message passing entirely.
+
+    If masking the non-owned columns left every node effectively isolated, the
+    "stronger graph expert" arm would silently become a per-row arm and the
+    experiment would measure expert weakness rather than implicit routing. So the
+    ragged expert must still beat per-row baselines on a label that carries no
+    own-feature signal at all.
+    """
+    from spectral_distillation.src.gnn_expert import gnn_head_factory
+    from spectral_distillation.src.laplacian import normalize_adjacency
+
+    rng = np.random.default_rng(0)
+    n_per_block, n_blocks, d = 200, 4, 8
+    A, _ = _sbm(n_per_block, n_blocks, 0.06, 0.01, seed=1)
+    n = n_per_block * n_blocks
+    X = rng.normal(size=(n, d))
+    y = _neighbour_only_labels(A, X)
+    W_norm = normalize_adjacency(A)
+
+    train = np.zeros(n, dtype=bool)
+    train[rng.permutation(n)[: n // 2]] = True
+    assign = np.ones((n, 1))  # one expert, so this isolates model quality
+
+    def acc_of(factory):
+        heads = fit_experts(X, y, assign, train, expert_factory=factory)
+        return mixture_accuracy(X, y, assign, heads, ~train)[0]
+
+    ragged_acc, n_eval = mixture_accuracy(
+        X, y, assign,
+        [gnn_head_factory(W_norm=W_norm, n_features=d, epochs=800,
+                         ragged_edges=True)(train).fit_graph(X, y)],
+        ~train)
+    full_acc = acc_of(gnn_head_factory(W_norm=W_norm, n_features=d, epochs=800))
+    lin_acc = acc_of(EXPERT_FACTORIES["logistic"])
+    mlp_acc = acc_of(EXPERT_FACTORIES["mlp"])
+
+    assert n_eval == int((~train).sum())
+    # Per-row models sit at chance because the label is neighbour-only.
+    assert lin_acc < 0.6 and mlp_acc < 0.6, (lin_acc, mlp_acc)
+    # The ragged expert must retain real propagation power...
+    assert ragged_acc > 0.65, ragged_acc
+    # ...while still being measurably handicapped against the full graph, since
+    # it sees roughly half the neighbourhood. A ragged arm that matched the
+    # full-graph arm would mean the masking is not actually binding.
+    assert ragged_acc < full_acc, (ragged_acc, full_acc)
+
+
+def test_ragged_edges_flag_requires_graph_expert():
+    """``--ragged-edges`` must be rejected for per-row experts.
+
+    Per-row heads never touch the graph, so the flag would be a silent no-op and
+    the arm would appear controlled without being controlled. Guarded in the
+    runner; pinned here.
+    """
+    import subprocess
+    import sys
+
+    for expert in ("logistic", "mlp"):
+        r = subprocess.run(
+            [sys.executable, "-m",
+             "spectral_distillation.experiments.run_fixed_expert_protocol",
+             "--ragged-edges", "--expert", expert, "--skip-self-routing"],
+            capture_output=True, text=True, cwd=Path.cwd(),
+        )
+        assert r.returncode != 0, expert
+        assert "requires" in (r.stderr + r.stdout)
 
 
 def test_router_x_only_mode_removes_every_graph_term():

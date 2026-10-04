@@ -1,3 +1,18 @@
+> **RETRACTED (2026-10-04).** Every D1/D3 oracle number in this document comes
+> from the self-routing protocol, where the oracle partition is fitted to its own
+> routing and is maximally label-homogeneous, so it collects credit no deployable
+> router can. Under the fixed-expert protocol the same partition scores
+> **+0.0000 (Tolokers logistic), -0.0047 (Amazon), -0.0101 (YelpChi)** against
+> random and is **negative against no-routing in 9/9 cells** (3 graphs x 3 expert
+> types). The D1 = +0.0365 (dz 14.94) and D3 = +0.0368 figures are void, and so is
+> the "13x and 15x larger than Amazon" comparison built on them -- that measures
+> label alignment, not routing quality.
+>
+> The D2 label-free rows are *not* void on protocol grounds (protocol A is if
+> anything harsher than protocol B), but they were measured against *random
+> routing*, not against no-routing, and they fall to 0/26 under the latter.
+> See `docs/fixed_expert_protocol.md` and `docs/d2_router_fix.md`.
+
 # Spectral-Distillation Retention Ladder on Real Fraud Data — Cross-Dataset Results
 
 Three real public fraud graphs, all fully labeled, single connected component, run through the

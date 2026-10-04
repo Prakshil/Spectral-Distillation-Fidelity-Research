@@ -1,3 +1,10 @@
+> **RETRACTED (2026-10-04).** This is the historical record and predates the
+> fixed-expert protocol. The D1/D3 oracle effect sizes it quotes (dz 14.94,
+> dz 25.74, dz 26.06) are self-routing artifacts and are void, as are the
+> "13x larger than Amazon" comparison and the label-free candidate wins they are
+> used to support. For current numbers see `docs/fixed_expert_protocol.md`, which
+> supersedes this document for every result claim.
+
 ﻿# Spectral Distillation â€” Implementation Status, Results & Next Steps
 
 This document is the living record of what has been built, what has been verified,

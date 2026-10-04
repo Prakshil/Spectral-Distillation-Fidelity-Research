@@ -206,15 +206,62 @@ Reported for completeness, not as support.
 
 On these fraud graphs, **no label-free router beats simply training one model on
 everything**, under an honest protocol, with linear, non-linear, or
-message-passing experts. The earlier Tolokers/YelpChi gains (dz 7.8/6.6) were
-measurement artifacts of the self-routing protocol.
+message-passing experts. The earlier headline effect sizes (dz 7.8/6.6) came from
+two different mistakes, and it is worth separating them because they do not carry
+the same weight:
+
+- The **oracle** effect sizes were measurement artifacts of the self-routing
+  protocol. The self-routing credit is granted to label-homogeneous partitions,
+  and the oracle partition is maximally label-homogeneous by construction, so it
+  collected +0.038 (Tolokers) and +0.044 (YelpChi) of pure artifact. Those
+  numbers are void.
+- The **label-free candidate** effect sizes were *not* artifacts of the protocol.
+  They were genuine gains over *random routing* on a self-fitted pool. What they
+  did not survive is the stronger comparison against a single global model, which
+  is what protocol B measures — and there they go to 0/26 on Amazon and Tolokers.
 
 Three independent metrics now agree:
 1. Correlation with label homophily does not identify a useful routing partition.
 2. The standard self-routing benchmark is confounded by the permutation invariance
-   and the free-credit-for-any-partition effect.
+   and by label-homogeneous subgroups scoring well against themselves.
 3. The oracle is *negative* against no-routing — routing by label homophily is
    actively harmful, not merely unhelpful.
+
+### The self-routing credit is label-specific, not universal
+
+It would be wrong to say self-routing inflates every arm. Measured against
+no-routing *within* protocol A:
+
+| graph | random routing − no-routing | oracle routing − no-routing |
+|---|---|---|
+| Amazon | −0.0005 | **+0.0031** |
+| Tolokers | −0.0014 | **+0.0382** |
+| YelpChi | −0.0014 | **+0.0439** |
+
+Random partitions collect no credit at all; label-homogeneous ones collect a lot.
+The mechanism is that a subgroup only has to predict inside its own subpopulation
+while one global model must learn the marginal, so the gain scales with how
+label-aligned the partition is. Protocol B removes both the credit and the
+double-dipping (the oracle buckets are themselves fitted on all of `y`, test
+included).
+
+Two corollaries for how far to retract:
+
+- **Oracle numbers under protocol A are invalid.** On Amazon two of three oracle
+  buckets have train positive-rate exactly 0.000, so `fit_experts` installs a
+  `DummyClassifier`; 1468 of 4320 held-out nodes route into a degenerate-prior
+  bucket. Any doc quoting protocol-A oracle D1/D3 must be marked superseded.
+- **Label-free candidate numbers are *not* invalid.** On the Amazon full declared
+  family (n=26), protocol A mean D2 is +0.00031 against +0.00450 for protocol B,
+  and Spearman(|rho|, D2) is ≈0 in both protocols (p=0.26, p=0.20). Protocol A is
+  if anything *harsher*. So the earlier candidate gains were not artifacts of the
+  protocol; they were real gains against *random routing* that simply do not beat
+  a single global model — which is exactly what protocol B shows (0/26 candidates
+  beat no-routing on Amazon and Tolokers).
+
+This narrows the retraction in the *Reading* section below: the self-routing
+artifact claim is about the oracle and the earlier headline effect sizes, not
+about every protocol-A number ever recorded.
 
 ### The oracle's negativity is not a training-budget artefact
 

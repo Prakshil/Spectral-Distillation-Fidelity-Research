@@ -1,5 +1,33 @@
 # D2 router fix: label-free routing on real fraud graphs
 
+> **RETRACTED (2026-10-04).** Every number in this document was produced by
+> `run_real_fraud.py` / `run_d2_candidates.py`, which use the **self-routing
+> protocol** (`fit_experts(X, y, a, train)` then `mixture_accuracy(..., a, ...)`).
+> Two problems, both fatal to the claims made here:
+>
+> 1. **The oracle rows (D1, D3) are void.** Self-routing grants credit to
+>    label-homogeneous partitions; the oracle partition is maximally
+>    label-homogeneous, so it collected +0.0368 (Tolokers) and +0.0443 (YelpChi)
+>    of artifact. Under the fixed-expert protocol the same partition scores
+>    +0.0000 / −0.0101 against random and is negative against no-routing in 9/9
+>    cells. See `docs/fixed_expert_protocol.md`.
+> 2. **The central claim is circular and empirically false.** "The failure mode is
+>    measurable in advance via the stage-1 rho screen" cannot hold: `rho` is the
+>    correlation with *true* label homophily, and the metric rewards
+>    label-homogeneous partitions, so the screen selects for what the metric
+>    flatters. Empirically it inverts on Tolokers — the graph carrying the
+>    headline verdict — where mean |rho| is 0.320 for supported candidates versus
+>    0.347 for unsupported ones (separation −0.028). `neigh_feat_sim` was
+>    "supported" at |rho| = 0.143 while `neigh_degree` was not at |rho| = 0.347.
+>
+> Additionally the headline candidate `eig_nb_sim` is **not in the fixed-expert
+> family at all** (it was superseded by the `eig_nb_sim_k*` sweep variants), so its
+> +0.0050 has never been measured under a routing-blind pool.
+>
+> What survives: the orientation correction below (it is provably a no-op) and the
+> observation that Amazon has no homophily-correlated candidate. The verdict
+> "Tolokers — Supported" is withdrawn.
+
 ## Summary
 
 D2 asks whether a **label-free** router recovers routing gains comparable to the

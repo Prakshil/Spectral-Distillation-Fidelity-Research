@@ -1,3 +1,11 @@
+> **RETRACTED (2026-10-04).** The D1/D3 oracle rows below (D1 = +0.0426 dz 25.74,
+> D3 = +0.0443 dz 26.06) are self-routing artifacts and are void; the same
+> partition scores -0.0101 against random and -0.0172 against no-routing under
+> the fixed-expert protocol. The "Supported" verdict in the table below rests on
+> the D2 comparison, which was against random routing rather than no-routing, and
+> it does not survive protocol B. See `docs/fixed_expert_protocol.md` and
+> `docs/d2_router_fix.md`.
+
 # Third fraud graph: YelpChi
 
 Adding YelpChi completes the standard Amazon / YelpChi / Elliptic fraud-detection

@@ -15,10 +15,24 @@ accuracy. The field's "orient by correlation with label homophily" step is a
 no-op, and D2 cannot distinguish a score from its negation.
 
 **2. Self-specialization credit.** Every partition is scored by experts fitted
-to that same partition, so any partition with non-degenerate subgroups collects
-partial credit regardless of whether its routing is *useful*. D2 then partly
-measures "do subgroups support their own specialist", not "does this routing
-send nodes to a *better* model".
+to that same partition, so accuracy partly measures "do subgroups support their
+own specialist" rather than "does this routing send nodes to a *better* model".
+This credit is *not* granted to arbitrary partitions. Measured against
+no-routing within protocol A: random routing is worth -0.0005 (Amazon), -0.0014
+(Tolokers), -0.0014 (YelpChi), while the label-aligned oracle is worth +0.0031,
++0.0382, +0.0439. The inflation therefore tracks *label homogeneity* of the
+partition, not partition-having-ness -- a label-homogeneous subgroup only has to
+predict within its own subpopulation, whereas one global model must learn the
+marginal. Consequences:
+
+- Oracle numbers under this protocol are inflated and must not be quoted. On the
+  Amazon oracle, two of three homophily buckets have train positive-rate exactly
+  0.000, so ``fit_experts`` installs a ``DummyClassifier`` for them and 1468 of
+  4320 held-out nodes are routed into a degenerate-prior bucket.
+- Label-*free* candidate numbers are not inflated this way. On the Amazon full
+  declared family (n=26) protocol A mean D2 is +0.00031 against +0.00450 for
+  protocol B, and Spearman(|rho|, D2) is ~0 in both protocols (p=0.26, p=0.20).
+  Do not over-retract: the confound hits the oracle, not every arm.
 
 A purely routing-blind expert pool (random disjoint splits) cannot resolve this:
 the experts become near-identical and routing cannot matter at all, so every

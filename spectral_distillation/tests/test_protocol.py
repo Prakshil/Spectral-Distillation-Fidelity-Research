@@ -1301,6 +1301,104 @@ def test_ensemble_supports_graph_expert_probability_hook():
 
 
 # --------------------------------------------------------------------------- #
+# self-routing credit is label-specific, not partition-generic
+# --------------------------------------------------------------------------- #
+
+def test_self_routing_credits_label_aligned_partitions_not_random_ones():
+    """The self-routing confound is not 'any partition gets free credit'.
+
+    Measured against no-routing *within* protocol A on the real graphs:
+    random routing is worth about -0.001 on all three, while the label-aligned
+    oracle is worth +0.003 / +0.038 / +0.044. If the credit were generic, the
+    random arm would collect it too. Pin the weaker, protocol-independent half of
+    that claim on a planted graph: a label-aligned partition must beat both a
+    random partition and no-routing under self-routing, by more than the random
+    partition does.
+    """
+    graph = generate_pc_graph(n_nodes=150, n_patches=3, d_features=8, seed=42)
+    X, y = graph["features"], graph["y"]
+    n = X.shape[0]
+    rng = np.random.default_rng(0)
+    from spectral_distillation.experiments.run_fixed_expert_protocol import (
+        feature_kmeans_routing,
+    )
+
+    k = int(y.max()) + 1
+
+    # a genuinely label-aligned partition: split on y itself
+    aligned = np.zeros((n, k))
+    aligned[np.arange(n), y] = 1.0
+    rand = np.zeros((n, k))
+    rand[np.arange(n), rng.integers(0, k, n)] = 1.0
+    one = np.ones((n, 1))
+
+    factory = EXPERT_FACTORIES["logistic"]
+    acc = {k: [] for k in ("nor", "rand", "aligned")}
+    for split in range(5):
+        for seed in range(2):
+            train, test = train_test_split(y, split, seed)
+            acc["nor"].append(mixture_accuracy(
+                X, y, one, fit_experts(X, y, one, train,
+                                       expert_factory=factory), test)[0])
+            acc["rand"].append(mixture_accuracy(
+                X, y, rand, fit_experts(X, y, rand, train,
+                                        expert_factory=factory), test)[0])
+            acc["aligned"].append(mixture_accuracy(
+                X, y, aligned, fit_experts(X, y, aligned, train,
+                                           expert_factory=factory), test)[0])
+
+    nor = float(np.mean(acc["nor"]))
+    rnd = float(np.mean(acc["rand"])) - nor
+    alg = float(np.mean(acc["aligned"])) - nor
+
+    assert alg > 0.0, "label-aligned partition should gain under self-routing"
+    assert alg > rnd, (
+        "the self-routing credit must favour label-aligned partitions over "
+        f"random ones (aligned {alg:+.4f} vs random {rnd:+.4f})"
+    )
+
+
+def test_self_routing_credit_vanishes_under_fixed_expert_protocol():
+    """The same label-aligned partition must stop paying once the pool is fixed.
+
+    This is the retractor for the retracted oracle numbers: with a routing-blind
+    pool, routing every node to the expert fitted to *its own* label can no longer
+    beat the same expert pool used without routing.
+    """
+    graph = generate_pc_graph(n_nodes=150, n_patches=3, d_features=8, seed=42)
+    X, y = graph["features"], graph["y"]
+    n = X.shape[0]
+    from spectral_distillation.experiments.run_fixed_expert_protocol import (
+        feature_kmeans_routing,
+    )
+
+    k = int(y.max()) + 1
+    aligned = np.zeros((n, k))
+    aligned[np.arange(n), y] = 1.0
+    pool = feature_kmeans_routing(X)
+    factory = EXPERT_FACTORIES["logistic"]
+
+    gain_self, gain_fixed = [], []
+    for split in range(5):
+        for seed in range(2):
+            train, test = train_test_split(y, split, seed)
+            nor = mixture_accuracy(
+                X, y, pool, fit_experts(X, y, pool, train,
+                                        expert_factory=factory), test)[0]
+            gain_self.append(mixture_accuracy(
+                X, y, aligned, fit_experts(X, y, aligned, train,
+                                           expert_factory=factory), test)[0] - nor)
+            gain_fixed.append(mixture_accuracy(
+                X, y, aligned, fit_experts(X, y, pool, train,
+                                           expert_factory=factory), test)[0] - nor)
+
+    assert np.mean(gain_self) > np.mean(gain_fixed), (
+        "fixing the pool must reduce the self-routing gain "
+        f"({np.mean(gain_self):+.4f} -> {np.mean(gain_fixed):+.4f})"
+    )
+
+
+# --------------------------------------------------------------------------- #
 # fixtures
 # --------------------------------------------------------------------------- #
 

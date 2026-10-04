@@ -216,6 +216,38 @@ Three independent metrics now agree:
 3. The oracle is *negative* against no-routing — routing by label homophily is
    actively harmful, not merely unhelpful.
 
+### The oracle's negativity is not a training-budget artefact
+
+A routed arm gives each expert ~N/K rows while the no-routing baseline gets all
+N, so "routing loses" could be arithmetic rather than evidence. It is not. A
+*single* global model trained on a random N/K subsample matches the full-data
+model, and matches the routed arms:
+
+| graph | global, all N | global, N/3 rows | random K=3 routing |
+|---|---|---|---|
+| Amazon | 0.9740 | 0.9719 | 0.9732 |
+| Tolokers | 0.7819 | 0.7809 | 0.7807 |
+
+Data fragmentation is free here, so the oracle's deficit is a genuine property of
+the partition, not of the budget.
+
+### One caveat on the oracle number, stated precisely
+
+The oracle falls below no-routing in **9/9** protocol-B cells (3 graphs × 3 expert
+types), the largest gap being Tolokers GNN at −0.178. But under protocol A — the
+self-routing arm already shown to be a permutation artefact — oracle routing
+*with a pool fitted to its own routing* scores **+0.0365 on Tolokers, winning
+30/30** paired splits, and +0.0028 on Amazon (29/30).
+
+That apparent headroom is label leakage through the router, not specialisation.
+`oracle_bucket_assignment` buckets on label homophily, and on Amazon two of its
+three buckets have train positive-rate exactly 0.000, so `fit_experts` installs a
+`DummyClassifier` for them; 1468 of 4320 held-out Amazon nodes are routed into a
+degenerate-prior bucket. On Tolokers no bucket is degenerate, yet the gain persists
+— consistent with homophily buckets acting as a coarse label proxy that a
+self-fitted expert pool can exploit. Protocol B removes exactly this by fixing a
+routing-blind pool, which is why 9/9 is the number to quote and this one is not.
+
 Caveats kept honest:
 - Specialists here are label-free and routing-independent; the natural routing
   (feature-kmeans) does beat random, but no *label-free structural* score matches

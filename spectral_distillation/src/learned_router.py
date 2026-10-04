@@ -83,14 +83,31 @@ def build_router_targets(
     return targets
 
 
-def _router_features(X: np.ndarray, W_norm: np.ndarray) -> np.ndarray:
-    """Node-MoE gate features: ``[X, |AX−X|, |A²X−X|]``.
+def _router_features(X: np.ndarray, W_norm: np.ndarray, mode: str = "nodemoe") -> np.ndarray:
+    """Gate features for the router.
+
+    ``mode="nodemoe"`` (default) uses ``[X, |AX−X|, |A²X−X|]``.
 
     Node-MoE (arXiv:2406.03464) shows raw features are insufficient for routing:
     the gate must see neighborhood discrepancy over 1–2 hops to estimate
     homophily/structural regime per node. Using cached label-free propagations
     matches the existing ``[X, AX]`` design while adding the discrepancy terms.
+
+    ``mode="x_only"`` returns ``X`` and nothing else. This exists for the
+    implicit-routing ablation: an expert that message-passes can still route
+    *internally* even under a frozen assignment (the implicit-routing problem of
+    "On the Benefits of Learning to Route in Mixture-of-Experts Models",
+    EMNLP 2023), and the graph terms are the channel through which that would
+    happen. Removing them from the router makes the arm genuinely
+    propagation-free, so a null result there cannot be attributed to hidden
+    structural routing. Pair it with a per-row expert (``logistic``/``mlp``),
+    which already ignores the graph; see ``--router-mode`` in
+    :mod:`spectral_distillation.experiments.run_learned_router`.
     """
+    if mode == "x_only":
+        return np.asarray(X, dtype=float)
+    if mode != "nodemoe":
+        raise ValueError(f"unknown router feature mode: {mode!r}")
     A = np.asarray(W_norm)
     AX = A @ X
     A2X = A @ (AX)
@@ -126,6 +143,7 @@ def train_router(
     dropout: float = 0.1,
     seed: int = 0,
     device: str = "cpu",
+    feature_mode: str = "nodemoe",
 ) -> tuple[LiteRouterMLP, list[float]]:
     """Fit the router on ``router_idx`` nodes only.
 
@@ -133,7 +151,7 @@ def train_router(
     gradient and no test label can leak in.
     """
     torch.manual_seed(seed)
-    feats = _router_features(X, W_norm)
+    feats = _router_features(X, W_norm, mode=feature_mode)
     model = LiteRouterMLP(
         n_features_in=feats.shape[1], hidden_dim=hidden_dim,
         n_experts=n_experts, dropout=dropout,
@@ -157,11 +175,11 @@ def train_router(
 
 
 def router_assignment(model: LiteRouterMLP, X: np.ndarray, W_norm: np.ndarray,
-                      device: str = "cpu") -> np.ndarray:
+                      device: str = "cpu", feature_mode: str = "nodemoe") -> np.ndarray:
     """Hard one-hot routing from a trained router's argmax."""
     model.eval()
     with torch.no_grad():
-        feats = _router_features(X, W_norm)
+        feats = _router_features(X, W_norm, mode=feature_mode)
         ht = torch.as_tensor(feats, dtype=torch.float32, device=device)
         pi = model(ht).cpu().numpy()
     out = np.zeros((X.shape[0], pi.shape[1]), dtype=float)
@@ -246,12 +264,19 @@ def evaluate_learned_routing(
     router_frac: float = 0.35,
     epochs: int = 200,
     device: str = "cpu",
+    feature_mode: str = "nodemoe",
 ) -> dict:
     """Score learned routing against every baseline on one frozen pool/split.
 
     All conditions reuse one ``fit_experts`` call for the frozen pool, so the
     pool is identical across conditions; any difference is attributable to routing
     alone. Adds uniform ensemble (Ens-Avg) baseline.
+
+    ``feature_mode="x_only"`` restricts the router's gate to the node's own
+    features. Combined with a per-row expert factory it removes every propagation
+    channel from the arm, which is the implicit-routing control: nothing in the
+    pipeline can consult the graph, so a null result cannot be explained away by a
+    frozen expert routing internally through ``AX`` (EMNLP 2023).
     """
     from spectral_distillation.src.router_protocol import random_assignment
 
@@ -267,9 +292,10 @@ def evaluate_learned_routing(
     router_idx = np.flatnonzero(router_mask)
     model, losses = train_router(
         X, W_norm, targets, router_idx, n_experts, epochs=epochs,
-        seed=seed, device=device,
+        seed=seed, device=device, feature_mode=feature_mode,
     )
-    learned = router_assignment(model, X, W_norm, device=device)
+    learned = router_assignment(model, X, W_norm, device=device,
+                                feature_mode=feature_mode)
 
     conditions = {
         "single_global": np.ones((X.shape[0], 1)),
@@ -295,6 +321,7 @@ def evaluate_learned_routing(
         "router_vs_kmeans_agreement": float(
             (learned.argmax(axis=1) == pool_labels).mean()
         ),
+        "router_feature_mode": feature_mode,
         "final_train_loss": losses[-1] if losses else float("nan"),
         "n_fit_nodes": int(fit_mask.sum()),
         "n_router_nodes": int(router_mask.sum()),

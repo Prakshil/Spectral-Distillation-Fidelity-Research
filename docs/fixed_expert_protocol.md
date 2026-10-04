@@ -228,8 +228,15 @@ Caveats kept honest:
 - `eig_nb_sim_k128` was selected on reported results and still does not survive
   fixed-expert scoring, but remains reporting-selected.
 - Real routing baselines (RouterGNN, Ada-Routing) are not implemented here, so
-  this is a negative result against *structural-score* routers, not against the
-  published methods.
+  this is a negative result against *structural-score* routers and a label-trained
+  MLP gate, not against the published methods. Node-MoE's own expert construction
+  (differentiated ChebNetII filter initialisation) is not reproduced; the gate
+  features are, the experts are not.
+- The `x_only` arm rules out implicit routing for *this* pipeline, not in general.
+  A ragged-edge / subgraph-restricted fit would be a stronger control still.
+- YelpChi stays node-capped (14840 of 45954) for memory, so its learned-router arm
+  runs 1 split × 1 seed and its GNN arm 3 × 1. Treat those two rows as
+  reduced-power and do not compare their gaps to the full-scale cells.
 
 ## Positive control: can the protocol detect a win at all?
 
@@ -342,6 +349,48 @@ is precisely the low-heterogeneity regime the routing-payoff hypothesis predicts
 Pinned by `test_learned_router_recovers_routing_gain_on_positive_control` and
 `test_learned_router_never_sees_test_labels` (flipping every test label must leave
 router parameters bit-identical).
+
+## Result 5: the null survives removing every graph channel (implicit routing)
+
+The strongest objection to a negative routing result is *implicit routing*
+("On the Benefits of Learning to Route in Mixture-of-Experts Models",
+EMNLP 2023): freeze the router and the earlier layers **still route internally**,
+so a frozen-assignment protocol can understate routing without any router present.
+Here the channel is real — a GNN expert consumes `AX` whether or not any router
+selects it, so a frozen k-means assignment could still be routing internally
+through the experts' own message passing.
+
+`--router-mode x_only` closes it. The gate becomes `X` alone (no `AX`, no
+`A²X`), paired with a per-row expert that ignores the graph, so nothing in the arm
+can consult structure. The runner **rejects** `x_only` with `--expert gnn`, because
+the graph expert would keep the channel open and the arm would be uninterpretable.
+
+Cleanliness is pinned, not asserted:
+- `test_router_x_only_mode_removes_every_graph_term` — scrambling the adjacency
+  leaves the `x_only` gate bit-identical while visibly changing the Node-MoE gate,
+  so the control is neither leaky nor vacuous.
+- `test_learned_router_x_only_arm_is_propagation_free_end_to_end` — the whole
+  arm's accuracy is invariant to adjacency scrambling, to 1e-12.
+- `test_x_only_arm_rejects_graph_expert` — the guard rail holds.
+
+| graph | no-routing | Node-MoE gate | x_only gate | Ens-Avg |
+|---|---|---|---|---|
+| Amazon | 0.9734 | 0.9731 (−0.0003) | 0.9735 (+0.0002) | 0.9682 |
+| Tolokers | 0.7826 | 0.7819 (−0.0006) | 0.7820 (−0.0005) | 0.7818 |
+| YelpChi (capped) | 0.8555 | 0.8533 (−0.0022) | 0.8579 (+0.0025) | 0.8553 |
+
+Every gap is ≤0.0025 and the sign flips across gates and datasets. Removing the
+graph entirely does not produce a routing win — it produces the same noise. So
+the earlier nulls cannot be attributed to structure that the experts were
+exploiting behind the protocol's back.
+
+The control arm matters as much as the real one. On the positive control the
+`x_only` gate does **better** than the Node-MoE gate — `+0.1841` vs `+0.1704`,
+recovering more of the oracle's `+0.189`, with k-means agreement 0.858 vs 0.777.
+The three planted regimes are linearly separable in raw feature space, so graph
+terms only add noise for the gate to fit. This is what makes the real-data arm
+interpretable: the propagation-free gate provably *can* recover a routing gain
+when one exists, and recovers none here.
 
 ### Revised scope
 

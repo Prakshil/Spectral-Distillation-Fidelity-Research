@@ -118,6 +118,20 @@
     "n_runs": 3,
     "n_runs_learned_beats_no_routing": 3
   },
+  "learned_router_x_only": {
+    "mean_accuracy": {
+      "single_global": 0.7837037037037037,
+      "learned_router": 0.9677777777777777,
+      "feature_kmeans": 0.9729629629629629,
+      "oracle": 0.9729629629629629,
+      "random": 0.7274074074074074,
+      "ensemble_uniform": 0.8011111111111111
+    },
+    "learned_minus_no_routing": 0.18407407407407406,
+    "router_vs_kmeans_agreement": 0.8583333333333334,
+    "n_runs": 3,
+    "n_runs_learned_beats_no_routing": 3
+  },
   "per_split_win_counts": {
     "logistic": {
       "n_splits": 3,

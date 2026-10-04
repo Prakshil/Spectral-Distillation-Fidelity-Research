@@ -6,6 +6,8 @@ expert mixture robustness, paired statistics, Holm correction, and the
 frozen-gate intervention. Kept fast (small graphs, few epochs) for CPU.
 """
 
+from pathlib import Path
+
 import numpy as np
 import pytest
 
@@ -978,6 +980,126 @@ def test_ensemble_averages_probabilities_not_majority_vote():
     vote_pred = mode(votes, axis=0, keepdims=False).mode
     vote_acc = float(np.count_nonzero(vote_pred == y) / n)
     assert vote_acc < acc_ens, (vote_acc, acc_ens)
+
+
+def test_router_x_only_mode_removes_every_graph_term():
+    """The implicit-routing control must actually remove graph propagation.
+
+    "On the Benefits of Learning to Route in MoE Models" (EMNLP 2023) shows a
+    frozen router still routes implicitly through earlier layers. Here the channel
+    is ``AX``: a graph expert consumes it regardless of the frozen assignment. The
+    ablation is only interpretable if the ``x_only`` gate contains *no* propagated
+    column, so that is pinned here by perturbing the adjacency and requiring the
+    features to be bit-identical.
+    """
+    from spectral_distillation.src.learned_router import _router_features
+
+    rng = np.random.default_rng(0)
+    n, d = 60, 4
+    X = rng.normal(size=(n, d))
+    A = rng.random((n, n))
+    A = (A + A.T) / 2.0
+    np.fill_diagonal(A, 0.0)
+
+    x_only = _router_features(X, A, mode="x_only")
+    assert x_only.shape == (n, d)
+    assert np.array_equal(x_only, X)
+
+    # Any change to the graph must leave the x_only gate untouched.
+    A2 = A.copy()
+    A2[0, 1] = A2[1, 0] = 5.0
+    assert np.array_equal(_router_features(X, A2, mode="x_only"), x_only)
+
+    # ...and must visibly change the default gate, or the control is vacuous.
+    assert not np.array_equal(_router_features(X, A, mode="nodemoe"),
+                              _router_features(X, A2, mode="nodemoe"))
+    assert _router_features(X, A, mode="nodemoe").shape == (n, 3 * d)
+
+    with pytest.raises(ValueError):
+        _router_features(X, A, mode="nonexistent")
+
+
+def test_learned_router_x_only_arm_is_propagation_free_end_to_end():
+    """The ``x_only`` arm must route on features alone, with no graph leakage.
+
+    Pins the wiring, not just the helper: the router's assignment must be
+    unchanged when the adjacency is scrambled, because a silent fall-through to
+    the Node-MoE gate would make the ablation a no-op while still looking like it
+    ran.
+    """
+    from spectral_distillation.src.learned_router import (
+        _router_features,
+        evaluate_learned_routing,
+    )
+
+    rng = np.random.default_rng(0)
+    n, d, k = 200, 5, 3
+    A = rng.random((n, n))
+    A = (A + A.T) / 2.0
+    np.fill_diagonal(A, 0.0)
+    W_norm = A / A.sum(axis=1, keepdims=True).clip(min=1e-12)
+    X = rng.normal(size=(n, d))
+    y = (X[:, 0] + 0.5 * X[:, 1] > 0).astype(int)
+
+    pool = np.zeros((n, k))
+    pool[np.arange(n), np.arange(n) % k] = 1.0
+    train = np.zeros(n, dtype=bool)
+    train[:130] = True
+    test = ~train
+    oracle = np.ones((n, k))
+    oracle /= k
+
+    def run(mode, adj):
+        return evaluate_learned_routing(
+            X, y, adj, pool, train, test, oracle,
+            expert_factory=EXPERT_FACTORIES["logistic"], seed=0, epochs=30,
+            feature_mode=mode,
+        )
+
+    A_scrambled = W_norm.copy()
+    A_scrambled[0, 1] = A_scrambled[1, 0] = 0.9
+
+    res = run("x_only", W_norm)
+    assert res["router_feature_mode"] == "x_only"
+
+    # Router gate is graph-free by construction in this mode.
+    assert np.array_equal(_router_features(X, W_norm, mode="x_only"),
+                          _router_features(X, A_scrambled, mode="x_only"))
+
+    # The logistic expert also ignores the graph, so the whole arm's accuracy
+    # must be invariant to scrambling the adjacency. If it is not, propagation is
+    # still leaking in somewhere and the control is not clean.
+    res_scrambled = run("x_only", A_scrambled)
+    for cond in ("single_global", "learned_router", "feature_kmeans",
+                 "ensemble_uniform"):
+        assert res["accuracy"][cond] == pytest.approx(
+            res_scrambled["accuracy"][cond], abs=1e-12
+        ), cond
+
+    # Sanity: the default arm is *not* graph-free in the same way, because the
+    # gate sees AX. Its features must respond to the scramble.
+    assert not np.array_equal(_router_features(X, W_norm, mode="nodemoe"),
+                              _router_features(X, A_scrambled, mode="nodemoe"))
+
+
+def test_x_only_arm_rejects_graph_expert():
+    """``x_only`` + GNN expert is rejected: the graph channel stays open.
+
+    The GNN expert consumes ``AX`` internally regardless of the gate, so pairing
+    it with a feature-only router would leave implicit routing possible and make a
+    null result uninterpretable. Guarded in the runner; pinned here.
+    """
+    import subprocess
+    import sys
+
+    r = subprocess.run(
+        [sys.executable, "-m",
+         "spectral_distillation.experiments.run_learned_router",
+         "--router-mode", "x_only", "--expert", "gnn"],
+        capture_output=True, text=True, cwd=Path.cwd(),
+    )
+    assert r.returncode != 0
+    assert "implicit routing" in (r.stderr + r.stdout)
 
 
 def test_ensemble_supports_graph_expert_probability_hook():

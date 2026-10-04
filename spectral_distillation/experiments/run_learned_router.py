@@ -41,13 +41,28 @@ def main() -> None:
     p.add_argument("--epochs", type=int, default=200)
     p.add_argument("--router-frac", type=float, default=0.35)
     p.add_argument("--expert", default="logistic", choices=["logistic", "mlp", "gnn"])
+    p.add_argument("--router-mode", default="nodemoe",
+                   choices=["nodemoe", "x_only"],
+                   help="router gate features. 'nodemoe' is [X, |AX-X|, |A2X-X|]; "
+                        "'x_only' removes every graph term, which with a per-row "
+                        "expert gives the implicit-routing control arm (EMNLP 2023)")
     p.add_argument("--out", default="logs")
     p.add_argument("--device", default="cpu")
     args = p.parse_args()
 
+    if args.router_mode == "x_only" and args.expert == "gnn":
+        p.error(
+            "--router-mode x_only with --expert gnn is not a clean control: the "
+            "graph expert still consumes AX internally, so implicit routing would "
+            "remain possible and a null result would be uninterpretable. Use "
+            "--expert logistic or mlp for this arm."
+        )
+
     log = get_logger("learned_router")
     set_seed(0)
     suffix = "" if args.expert == "logistic" else f"_{args.expert}"
+    if args.router_mode != "nodemoe":
+        suffix += f"_{args.router_mode}"
     out_dir = ensure_dir(Path(args.out) / f"{args.dataset}_learned_router{suffix}")
 
     t0 = time.perf_counter()
@@ -68,7 +83,7 @@ def main() -> None:
             res = evaluate_learned_routing(
                 X, y, W_norm, pool, train, test, oracle, expert_factory=factory,
                 seed=seed, router_frac=args.router_frac, epochs=args.epochs,
-                device=args.device,
+                device=args.device, feature_mode=args.router_mode,
             )
             res["split"], res["seed"] = split, seed
             per_split.append(res)
@@ -112,7 +127,11 @@ def main() -> None:
         "interpretation": (
             "Learned routing is scored on the same frozen routing-blind pool as "
             "every baseline, trained on training nodes only. Added Node-MoE gate "
-            "[X, |AX-X|, |A2X-X|] and uniform ensemble (Ens-Avg)."
+            "[X, |AX-X|, |A2X-X|] and uniform ensemble (Ens-Avg). "
+            + ("Router mode 'x_only' removes all graph propagation from both the "
+               "gate and the expert, so implicit routing through a frozen expert "
+               "(EMNLP 2023) cannot explain a null result."
+               if args.router_mode == "x_only" else "")
         ),
     }
     path = out_dir / "fixed_expert.json"

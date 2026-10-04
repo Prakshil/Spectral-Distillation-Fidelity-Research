@@ -1,0 +1,63 @@
+{
+  "config": {
+    "dataset": "yelpchi",
+    "data_path": null,
+    "max_nodes": 14840,
+    "splits": 1,
+    "seeds": 1,
+    "epochs": 40,
+    "router_frac": 0.35,
+    "expert": "logistic",
+    "router_mode": "x_only",
+    "out": "logs",
+    "device": "cpu"
+  },
+  "graph": {
+    "n_nodes": 14681,
+    "d_features": 32,
+    "n_edges": 402234.0,
+    "positive_ratio": 0.1501941284653634
+  },
+  "results": {
+    "mean_accuracy": {
+      "single_global": 0.8554692821141534,
+      "learned_router": 0.8579212641329519,
+      "feature_kmeans": 0.8586023702492849,
+      "oracle": 0.8447078054760931,
+      "random": 0.8502928756300232,
+      "ensemble_uniform": 0.8553330608908868
+    },
+    "learned_minus_no_routing": 0.002451982018798482,
+    "learned_minus_random": 0.007628388502928685,
+    "learned_minus_ensemble": 0.0025882032420651013,
+    "ensemble_minus_no_routing": -0.00013622122326661934,
+    "router_vs_kmeans_agreement": 0.5073223894830052,
+    "n_runs": 1,
+    "n_runs_learned_beats_no_routing": 1,
+    "n_runs_learned_beats_ensemble": 1,
+    "per_run": [
+      {
+        "accuracy": {
+          "single_global": 0.8554692821141534,
+          "learned_router": 0.8579212641329519,
+          "feature_kmeans": 0.8586023702492849,
+          "oracle": 0.8447078054760931,
+          "random": 0.8502928756300232,
+          "ensemble_uniform": 0.8553330608908868
+        },
+        "learned_minus_no_routing": 0.002451982018798482,
+        "learned_minus_random": 0.007628388502928685,
+        "learned_minus_ensemble": 0.0025882032420651013,
+        "ensemble_minus_no_routing": -0.00013622122326661934,
+        "router_vs_kmeans_agreement": 0.5073223894830052,
+        "router_feature_mode": "x_only",
+        "final_train_loss": 1.0986049175262451,
+        "n_fit_nodes": 4771,
+        "n_router_nodes": 2569,
+        "split": 0,
+        "seed": 0
+      }
+    ]
+  },
+  "interpretation": "Learned routing is scored on the same frozen routing-blind pool as every baseline, trained on training nodes only. Added Node-MoE gate [X, |AX-X|, |A2X-X|] and uniform ensemble (Ens-Avg). Router mode 'x_only' removes all graph propagation from both the gate and the expert, so implicit routing through a frozen expert (EMNLP 2023) cannot explain a null result."
+}

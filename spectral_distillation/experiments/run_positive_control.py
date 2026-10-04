@@ -142,6 +142,31 @@ def main() -> None:
         learned_acc["oracle"],
     )
 
+    # Same arm with a propagation-free gate (x_only). The latent groups here are
+    # recoverable from raw features alone, so this must still recover the routing
+    # gain -- that is what makes it a valid control for the real-data x_only arm.
+    # If it failed here, the real-data null would be uninformative rather than
+    # informative.
+    x_only_runs = []
+    for split in range(args.splits):
+        for seed in range(args.seeds):
+            train, test = train_test_split(y, split, seed)
+            x_only_runs.append(evaluate_learned_routing(
+                X, y, W_norm, pool, train, test, oracle,
+                expert_factory=build_expert_factory("logistic", graph, args.device),
+                seed=seed, epochs=args.epochs, feature_mode="x_only",
+            ))
+    x_only_acc = {
+        cond: float(np.mean([r["accuracy"][cond] for r in x_only_runs]))
+        for cond in x_only_runs[0]["accuracy"]
+    }
+    log.info(
+        "learned_router (x_only gate): global=%.4f learned=%.4f (%+.4f) oracle=%.4f",
+        x_only_acc["single_global"], x_only_acc["learned_router"],
+        x_only_acc["learned_router"] - x_only_acc["single_global"],
+        x_only_acc["oracle"],
+    )
+
     payload = {
         "config": vars(args),
         "graph": {
@@ -161,6 +186,17 @@ def main() -> None:
             "n_runs": len(learned_runs),
             "n_runs_learned_beats_no_routing": int(sum(
                 r["learned_minus_no_routing"] > 0 for r in learned_runs
+            )),
+        },
+        "learned_router_x_only": {
+            "mean_accuracy": x_only_acc,
+            "learned_minus_no_routing": x_only_acc["learned_router"] - x_only_acc["single_global"],
+            "router_vs_kmeans_agreement": float(
+                np.mean([r["router_vs_kmeans_agreement"] for r in x_only_runs])
+            ),
+            "n_runs": len(x_only_runs),
+            "n_runs_learned_beats_no_routing": int(sum(
+                r["learned_minus_no_routing"] > 0 for r in x_only_runs
             )),
         },
         "per_split_win_counts": win_counts,

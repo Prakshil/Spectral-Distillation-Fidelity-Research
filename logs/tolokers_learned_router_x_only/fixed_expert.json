@@ -1,0 +1,105 @@
+{
+  "config": {
+    "dataset": "tolokers",
+    "data_path": null,
+    "max_nodes": null,
+    "splits": 3,
+    "seeds": 1,
+    "epochs": 100,
+    "router_frac": 0.35,
+    "expert": "logistic",
+    "router_mode": "x_only",
+    "out": "logs",
+    "device": "cpu"
+  },
+  "graph": {
+    "n_nodes": 11758,
+    "d_features": 10,
+    "n_edges": 519000.0,
+    "positive_ratio": 0.21823439360435448
+  },
+  "results": {
+    "mean_accuracy": {
+      "single_global": 0.7825593921868799,
+      "learned_router": 0.7820491013210864,
+      "feature_kmeans": 0.7820491013210864,
+      "oracle": 0.7815388104552928,
+      "random": 0.7816522084254691,
+      "ensemble_uniform": 0.7817656063956454
+    },
+    "learned_minus_no_routing": -0.0005102908657934613,
+    "learned_minus_random": 0.0003968928956172846,
+    "learned_minus_ensemble": 0.00028349492544099686,
+    "ensemble_minus_no_routing": -0.0007937857912344581,
+    "router_vs_kmeans_agreement": 0.4729829336054885,
+    "n_runs": 3,
+    "n_runs_learned_beats_no_routing": 1,
+    "n_runs_learned_beats_ensemble": 2,
+    "per_run": [
+      {
+        "accuracy": {
+          "single_global": 0.7827861881272326,
+          "learned_router": 0.782275897261439,
+          "feature_kmeans": 0.782275897261439,
+          "oracle": 0.7812553155298521,
+          "random": 0.781595509440381,
+          "ensemble_uniform": 0.7817656063956455
+        },
+        "learned_minus_no_routing": -0.0005102908657935723,
+        "learned_minus_random": 0.0006803878210579484,
+        "learned_minus_ensemble": 0.0005102908657934613,
+        "ensemble_minus_no_routing": -0.0010205817315870336,
+        "router_vs_kmeans_agreement": 0.49855417588025175,
+        "router_feature_mode": "x_only",
+        "final_train_loss": 1.0986387729644775,
+        "n_fit_nodes": 3821,
+        "n_router_nodes": 2058,
+        "split": 0,
+        "seed": 0
+      },
+      {
+        "accuracy": {
+          "single_global": 0.7834665759482905,
+          "learned_router": 0.7821058003061745,
+          "feature_kmeans": 0.7821058003061745,
+          "oracle": 0.781595509440381,
+          "random": 0.781595509440381,
+          "ensemble_uniform": 0.7817656063956455
+        },
+        "learned_minus_no_routing": -0.0013607756421160078,
+        "learned_minus_random": 0.0005102908657934613,
+        "learned_minus_ensemble": 0.0003401939105289742,
+        "ensemble_minus_no_routing": -0.001700969552644982,
+        "router_vs_kmeans_agreement": 0.450416737540398,
+        "router_feature_mode": "x_only",
+        "final_train_loss": 1.098646640777588,
+        "n_fit_nodes": 3821,
+        "n_router_nodes": 2058,
+        "split": 1,
+        "seed": 0
+      },
+      {
+        "accuracy": {
+          "single_global": 0.7814254124851165,
+          "learned_router": 0.7817656063956455,
+          "feature_kmeans": 0.7817656063956455,
+          "oracle": 0.7817656063956455,
+          "random": 0.7817656063956455,
+          "ensemble_uniform": 0.7817656063956455
+        },
+        "learned_minus_no_routing": 0.0003401939105289742,
+        "learned_minus_random": 0.0,
+        "learned_minus_ensemble": 0.0,
+        "ensemble_minus_no_routing": 0.0003401939105289742,
+        "router_vs_kmeans_agreement": 0.46997788739581564,
+        "router_feature_mode": "x_only",
+        "final_train_loss": 1.098646879196167,
+        "n_fit_nodes": 3821,
+        "n_router_nodes": 2058,
+        "split": 2,
+        "seed": 0
+      }
+    ]
+  },
+  "interpretation": "Learned routing is scored on the same frozen routing-blind pool as every baseline, trained on training nodes only. Added Node-MoE gate [X, |AX-X|, |A2X-X|] and uniform ensemble (Ens-Avg). Router mode 'x_only' removes all graph propagation from both the gate and the expert, so implicit routing through a frozen expert (EMNLP 2023) cannot explain a null result."
+}

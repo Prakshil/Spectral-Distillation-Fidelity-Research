@@ -5,6 +5,16 @@
 > Written so that someone with **zero** background in machine learning, graphs, or signal
 > processing can follow along. Technical terms are defined *the first time they appear*.
 
+> **PARTIALLY SUPERSEDED (2026-10-04).** Sections 6–7 report the **synthetic
+> PC-1c-R planted control** under the **self-routing Protocol A**. Protocol A is
+> permutation-invariant and grants free credit to label-homogeneous partitions,
+> so its oracle numbers are self-routing artifacts and are **retracted** for real
+> graphs. The planted-control numbers remain a valid **D4 instrument check**. On
+> **real graphs** under the fixed-expert Protocol B, no router beats a single
+> global model (0/234) and the oracle is *negative*. The one supported positive
+> is that spectral distortion predicts routing **stability**. Current numbers:
+> `docs/fixed_expert_protocol.md`, `docs/real_attention_results.md`.
+
 ---
 
 ## Table of contents
@@ -431,12 +441,23 @@ GPU: 32 s vs 102 s CPU, eigenvalues bit-identical.)
 
 ## 7. What the results mean
 
-**Overall verdict: yes — the results are going in the right direction.** The evidence
-is mutually consistent and theory-aligned:
+**On the planted PC-1c-R control (Protocol A), the instrument works.** The
+evidence below is mutually consistent and theory-aligned *for the control*:
 
-1. **The router is real and label-free.** D1–D4 all Supported; label-free captures
-   ~87% of the perfect oracle's routing advantage with no labels, and survives the
-   frozen-gate intervention (its power is in *per-node choices*, not expert count).
+1. **On the planted control the router recovers the signal.** D1–D4 all hold;
+   label-free captures ~87% of the oracle's advantage on the planted control, and
+   survives the frozen-gate intervention. **This does not transfer to real
+   graphs**: under the fixed-expert Protocol B, no label-free or learned router
+   beats one global model (0/234), and the oracle is negative.
+
+**On real graphs (Protocol B), the honest verdict is a null plus one positive:**
+
+- Structural and learned routers do **not** beat no-routing on the fraud graphs,
+  and the label-free real-attention router degenerates to a single expert
+  (`docs/fixed_expert_protocol.md`, `docs/real_attention_results.md`).
+- The supported result is that **spectral distortion + connectivity survival
+  predict routing *stability*** (Spearman +0.78…+0.99); the accuracy claim is not
+  supported.
 2. **The mechanism is structural.** Dilution kills the label-free gain while the oracle
    stays flat → the label-free router reads graph structure, exactly the channel that
    compression can destroy.
@@ -508,9 +529,9 @@ synthetic control; now make it work on *real* inputs.
 `
 ### Phase 5 — Publication materials (~1 week)
 
-1. **Method section** (`docs/method_section.md`, currently a placeholder): write Parts
+1. **Method section** (`docs/method_section.md`, drafted): write Parts
    5–8 of the guide as the paper's method, embedding the verified numbers from §6.
-2. **Theorem proofs** (`docs/theorem_proofs.md`, currently a placeholder): full proof
+2. **Theorem proofs** (`docs/theorem_proofs.md`, drafted): full proof
    chain for Theorem 1 (`I(π*;Y) − I(π̃;Y) ≤ C·SD·H(Y)` — routing-signal decay), Theorem 2
    (`(1−2ε)^k` routing-error decay), Corollary 3 (edge-removal monotonicity). A Lean
    formalization sketch for Corollary 3 lives in the guide's Appendix B.
@@ -570,4 +591,4 @@ reviewers.
 *Sources: committed `logs/**/*.json`, `docs/reproducibility.md`,
 `SPECTRAL_DISTILLATION_IMPLEMENTATION_GUIDE.md`, and the implementation in
 `spectral_distillation/src/` + `experiments/`. All measurements: NVIDIA RTX 4060
-Laptop GPU, n=10,000, 83 tests passing.*
+Laptop GPU, n=10,000, 173 tests passing.*

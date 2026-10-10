@@ -26,12 +26,17 @@ The decisive claim: the label-free router succeeding ≈ attention really encode
 
 | Rule | Question | Result (top-k=32) | Verdict |
 |---|---|---|---|
-| D1 | Does routing signal exist in the real graph? | oracle > uniform, +0.0063, p=0.002 | PASS |
-| D2 | Can a label-free router find it? | label-free > random, +0.0138, p=0.002 | PASS ← key result |
+| D1 | Does routing signal exist in the real graph? | oracle > uniform, +0.0063, p=0.002 | PASS (label-homophily oracle only) |
+| D2 | Can a label-free router find it? | recorded +0.0138, but **null at matched usage** (−0.0002, p≈0.56) | ✗ **FAIL (usage artifact, §6)** |
 | D3 | Is it more than random capacity? | oracle > random, +0.0208 | PASS |
 | D4 | Is the instrument trustworthy? | positive control, +0.253, p=0.031 | PASS |
 
-**Final verdict: SUPPORTED** — real attention encodes label-free-detectable routing structure.
+**Final verdict (revised): PARTIALLY SUPPORTED** — real attention carries a
+*sentence-homophily* signal detectable only by the **label-augmented oracle**
+(D1, D3), and the instrument is valid (D4). The **label-free router does NOT
+route**: it degenerates to one expert holding 99% of nodes and its apparent gain
+vanishes under a fair usage-matched control. The "router survives sparsity"
+framing is **withdrawn** (`docs/real_attention_results.md` §6–7).
 
 ## 4. Robustness (what happens when we turn the dials)
 
@@ -39,12 +44,19 @@ The decisive claim: the label-free router succeeding ≈ attention really encode
 
 | Setting | D1 (signal exists) | D2 (label-free works) | Verdict |
 |---|---|---|---|
-| top-k = 16 (very sparse) | FAIL | PASS | Not supported (D1 only) |
-| top-k = 32 (default) | PASS | PASS | **Supported** |
-| top-k = 64 (dense) | PASS | PASS | **Supported** |
-| top-k = 32, different seed | PASS | PASS | **Supported** |
+| top-k = 16 (very sparse) | FAIL | FAIL (artifact) | Not supported |
+| top-k = 32 (default) | PASS (oracle only) | FAIL (artifact) | Partially supported |
+| top-k = 64 (dense) | PASS (oracle only) | FAIL (artifact) | Partially supported |
+| top-k = 32, different seed | PASS (oracle only) | FAIL (artifact) | Partially supported |
 
-**Key finding:** the label-free router works at **every** density. The single failure is the *oracle* (the label-informed cheat) at top-k=16. Cause: with too few connections per word, the oracle's simple "are my neighbors like me?" trick loses confidence (like a pollster asking too few people). This was re-tested with an adaptive (quantile-based) oracle — it fails there too. **Conclusion: the instrument degrades at sparse top-k, not the signal** — the label-free router still finds the structure.
+**Key finding (revised):** the label-free router does **not** route at any
+density — its reported D2 gain at every k is a usage-imbalance artifact and
+disappears (−0.0002, p≈0.56) once `random` is matched to the router's own usage
+(`docs/real_attention_results.md` §6). The only genuine signal is the
+**label-homophily oracle** at top-k ≥ 32; it fails at top-k = 16 because too few
+same-sentence edges survive neighbour-averaging (an oracle-instrument limit, not
+a label-free-router result). The honest statement: **the homophily oracle
+survives at k≥32; the label-free router does not route at any k.**
 
 ## 5. The dilution ladder (the part we had to explain honestly)
 
@@ -56,14 +68,14 @@ Dilution ladder = gradually scramble graph edges toward same-class wiring to tes
 
 ## 6. Bottom line (3 bullets for a meeting)
 
-1. The project's core claim was **verified on real model data for the first time**: a label-free router recovers sentence-structure from genuine LLM attention (p=0.002, strong effect size), stable across densities (k=32/64) and seeds.
-2. One precise caveat: the *measuring instrument* (oracle) fails at sparse top-k=16; the label-free router does not — so the weakness is the tool's density sensitivity, not a loss of signal.
+1. **Not supported (retracted).** The label-free router does **not** route on real attention; its apparent gain is a usage-imbalance artifact (null, −0.0002, p≈0.56, at matched usage). The "router survives sparsity" claim is withdrawn.
+2. **What survives:** the label-homophily **oracle** detects a sentence-homophily signal at top-k ≥ 32 (D1, D3), the instrument (D4) is valid, and the *positive* project result is that spectral distortion predicts routing **stability** (`docs/real_attention_results.md` §9.1).
 3. The dilution-ladder anomaly was investigated and shown to be a test artifact; reported honestly rather than overclaimed.
 
 ## 7. Reproduce / artifacts
 
 - Full report: `docs/real_attention_results.md`
 - Result JSONs: `logs/real_attention/*.json`, `logs/rk16|rk64|rk32_s7|rk16_adapt/...`
-- Tests: `python -m pytest` (92 pass)
+- Tests: `python -m pytest` (173 pass)
 - Model: `HuggingFaceTB/SmolLM2-1.7B`; corpus: Gutenberg "The Time Machine"
 - Runtime note: full run ~49 min on RTX 4060; verdict-only ~5 min with `--skip-dilution`

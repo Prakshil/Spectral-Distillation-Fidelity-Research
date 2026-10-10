@@ -27,6 +27,9 @@ make figures          # all paper figures
 - `SPECTRAL_DISTILLATION_IMPLEMENTATION_GUIDE.md` — this repo's implementation spec
 - `docs/Insights.md` — plain-English walkthrough of the model, the results, and next steps (no background needed)
 - `docs/reproducibility.md` — implementation status, verified results, your next steps, further phases
+- `docs/method_section.md` — paper-style method draft (Phase 5)
+- `docs/theorem_proofs.md` — full proof chain + honest caveats draft (Phase 5)
+- `docs/literature_positioning.md` — positioning vs MoG / GOKU / MORGAN and the router-evaluation lineage
 
 ## Hardware
 
@@ -35,7 +38,9 @@ make figures          # all paper figures
 
 ## Status
 
-**Phase 1 (diagnostics + theory), Phase 2 (sparsifiers + comparison), and Phase 3 (router protocol: label-free GNN router, D1-D4 decision rules, PC-1c-R planted control, dilution ladder, ablations, figures) are implemented and tested — 83 tests pass.**
+**Phase 1 (diagnostics + theory), Phase 2 (sparsifiers + comparison), and Phase 3 (router protocol: label-free GNN router, D1-D4 decision rules, PC-1c-R planted control, dilution ladder, ablations, figures) are implemented and tested — 173 tests pass.**
+
+> **Headline result (honest, Protocol B).** On the planted **PC-1c-R control** the D1–D4 instrument is valid and routing helps (see "Phase 3 findings"). On **real graphs** (fraud benchmarks and real LLM attention) under the fixed-expert protocol, **no label-free or learned router beats training one global model** (0/234 candidate/expert/graph cells), and the oracle is *negative* (9/9). The one supported positive is that spectral distortion + connectivity survival **predict routing *stability*** (Spearman +0.78…+0.99). Protocol-A self-routing oracle numbers are **retracted**. See `docs/fixed_expert_protocol.md` and `docs/real_attention_results.md`.
 
 ## System requirements
 
@@ -47,7 +52,7 @@ make figures          # all paper figures
 
 ```bash
 pip install -e ".[dev]"          # or: make install
-python -m pytest                 # 83 tests: theory bounds, sparsifiers, router protocol, statistics
+python -m pytest                 # 173 tests: theory bounds, sparsifiers, router protocol, statistics
 
 # Phase 1-2
 python -m spectral_distillation.experiments.run_diagnostic     # golden 4-node + ERP SD/fragility preview
@@ -73,6 +78,13 @@ python -m spectral_distillation.experiments.reproduce_figures   # render all Pha
 - Caution: top-k effective resistance is a *lower bound* on true R and only accurate near full rank — the dispatcher uses exact R for `n <= 2000`.
 
 ### Phase 3 findings
+
+> **Scope.** Everything in this subsection is the **synthetic PC-1c-R planted
+> control** scored under the (later-retracted) self-routing Protocol A. It is the
+> **D4 instrument check** — proof that the harness detects a planted routing
+> signal — *not* a real-data routing win. Protocol-A oracle effect sizes are
+> void on real graphs; see `docs/fixed_expert_protocol.md` for the honest
+> fixed-expert (Protocol B) numbers.
 
 - Planted PC-1c-R control with 3 orthogonal feature bases creates a genuine expert-transfer gap: single global LR ≈ 0.555, random routing ≈ 0.514, oracle ≈ 0.865.
 - Label-free KMeans on {hx, spectral_ratio, log_degree, clustering} reproduces true regimes at ~89.5% contingency; a RouterGNN (KL-divergence imitation) also trains but the crisp KMeans assignment is the actual gate used.

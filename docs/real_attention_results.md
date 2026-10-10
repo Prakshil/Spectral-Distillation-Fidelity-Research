@@ -90,7 +90,7 @@ carry this caveat rather than the raw dilution curve.
   per-cell/per-rung tqdm progress with ETA added to `run_protocol`.
 - Runtime profile at k=32 full: model load 6 s, export 18 s, assignments 148 s (Laplacian eig +
   KMeans + RouterGNN), main protocol ~20-25 min (120 logistic-refit cells), dilution ladder ~35 min.
-- Tests: 92 pass (`python -m pytest`).
+- Tests: 173 pass (`python -m pytest`).
 
 ## 5. Density-aware oracle sweep (step 1 follow-up; closes the k=16 question)
 

@@ -28,7 +28,7 @@ Companion documents:
 | Phase 4 | Real ERP attention data + LLM attention export (Llama-3.1-8B) feeding the pipeline | Partially (real-attention + synthetic ERP-fraud runs done; **real DGL Amazon fraud graph run at `docs/real_fraud_results.md`**) |
 | Phase 5 | Publication materials from verified results | Partially drafted (`docs/*`) |
 
-**Tests:** 142 pass (`python -m pytest` on CPU, 2 cosmetic warnings).
+**Tests:** 173 pass (`python -m pytest` on CPU, cosmetic warnings only).
 
 **Lint:** `pyflakes` clean on `src/`, `experiments/`, and `tests/`. (`ruff`/`ty` are not installed locally; the Makefile targets remain for CI.)
 
@@ -70,6 +70,7 @@ Companion documents:
 | `run_sparsify_ladder.py` | Retention-ladder on any real graph: ER (effective-resistance) vs budget-matched random/degree distillation, D1â€“D3 vs retention. `--resume` keeps completed points; `--label-free-strategy/--order-feature` pick the router | `logs/{dataset}_fraud_ladder*/ladder_results.jsonl` + `ladder_summary.json` (see `docs/sparsify_ladder_results.md`, `docs/yelpchi_third_graph.md`) |
 | `dilution_curve.py` | Label-free vs oracle gain across the dilution ladder | `logs/dilution/dilution_curve.{csv,json}` + PNG |
 | `run_spectral_k_sweep.py` | Sweeps `--spectral-k` for the D2 label-free router on all three real graphs; one shared eigendecomposition per graph | `logs/{dataset}_spectral_k_sweep/sweep.json` |
+| `run_k_confirmation.py` | Out-of-fold `k` selection: picks `k` on 9/10 splits, scores the winner on the held-out split, under both self-routing and Protocol B | `logs/{dataset}_k_confirmation/confirmation.json` |
 | `run_sd_measurement.py` | Real spectral distortion across the retention ladder, spectra only (no protocol cells). Reports both the legacy index-wise metric and `rank_matched_distortion` | `logs/{dataset}_sd_measurement/sd_results.json` |
 | `ablation.py` | Oracle-bucket Î´-sweep + router-feature ablation (single / leave-one-out) | `logs/ablation/ablation.{csv,json}` + PNG |
 | `reproduce_figures.py` | Renders all Phase 3 figures from cached logs | PNGs under `logs/{protocol,dilution,ablation}/` |
@@ -211,7 +212,7 @@ Oracle-bucket Î´-sweep (on the homophily-range 3-block SBM, block homophily 0.
 ```bash
 pip install -e ".[dev]"          # or: make dev-install
 
-python -m pytest                 # 83 tests
+python -m pytest                 # 173 tests
 python -m spectral_distillation.experiments.run_protocol        # D1-D4 + frozen gates
 python -m spectral_distillation.experiments.dilution_curve      # dilution ladder
 python -m spectral_distillation.experiments.ablation            # oracle Î´ + feature ablation
@@ -291,7 +292,7 @@ Every claim in Â§3 maps to a committed artifact:
 | D1â€“D4 supported, frozen-gate ordering, stats | `logs/protocol/protocol_results.json` |
 | Dilution decay (0.231 â†’ 0.008) vs flat oracle (0.260), 10k GPU | `logs/dilution/dilution_curve.json` |
 | Feature ablation ordering + oracle Î´ plateau | `logs/ablation/ablation.json` |
-| 83-test pass | `python -m pytest` |
+| 173-test pass | `python -m pytest` |
 
 ---
 
@@ -390,8 +391,22 @@ eigendecomposition is k-independent, so it is computed once and reused; artifact
   anti-correlated the score, the *better* the routing outcome. On Amazon rho rises with k
   (+0.346 at k=128) while D2 stays flat at zero. Selecting k by maximising rho would pick the
   worst k on YelpChi. The proxy must not be used to tune `k`.
-- Caveat: k was selected on the same 10x3 protocol that reports it, so k=128 is a candidate
-  awaiting a confirmatory split, not a validated result.
+- **Confirmed out-of-fold (no longer reporting-selected).** `experiments/run_k_confirmation.py`
+  picks `k` on nine of ten splits and scores the winner on the held-out split
+  (`logs/{amazon,tolokers,yelpchi}_k_confirmation/confirmation.json`). The selector recovers
+  `k=128` on **10/10** folds for both Tolokers and YelpChi under self-routing (held-out D2
+  +0.00863 and +0.00650, matching the in-sample numbers exactly) and on **10/10** YelpChi folds
+  even under the honest fixed-expert protocol. The *choice* of `k=128` is therefore stable, not a
+  selection artifact. On Amazon the out-of-fold winner is `k=2` (10/10, +0.00057) and `k=128` is
+  null, as in-sample — the k-sweep never claimed a 128 win there.
+- **But the win is still a protocol artifact.** A stable winner is not a win: under the honest
+  fixed-expert protocol scored against a *genuine* no-routing global model, every `k` has
+  `D2_vs_no_routing < 0` on all three graphs (YelpChi k=128: +0.00159 vs random but −0.00519 vs
+  no-routing; Amazon best k=4: +0.00966 vs random but −0.04197 vs no-routing). The no-routing
+  global itself scores +0.05163 / +0.00024 / +0.00678 over random on Amazon / Tolokers / YelpChi,
+  so "routing beats random" is satisfied by routing nothing. The corrected caveat therefore
+  *strengthens* the null: `k=128` is a stable choice whose gain does not survive an honest
+  reference.
 
 ### Resolved: real spectral distortion
 
@@ -437,12 +452,13 @@ so import order decided whether the loader ran at all. Fixed by preloading it in
 
 ### Phase 5 â€” Publication materials
 
-- `docs/method_section.md` (currently a placeholder): expand Parts 5â€“8 of the guide into the
+- `docs/method_section.md` (drafted): expand Parts 5â€“8 of the guide into the
   method with the verified numbers from Â§3 embedded.
-- `docs/theorem_proofs.md` (currently a placeholder): full proof chain for
+- `docs/theorem_proofs.md` (drafted): full proof chain for
   Theorem 1 (routing-signal decay, `I(Ï€*;Y) âˆ’ I(Ï€Ìƒ;Y) â‰¤ CÂ·SDÂ·H(Y)`), Theorem 2 ((1âˆ’2Îµ)^k
   routing-error decay), and Corollary 3 (edge-removal monotonicity, Lean-formalization sketch in
   guide Appendix B).
+- `docs/literature_positioning.md` (drafted): related work and the honest differences vs MoG / GOKU / MORGAN.
 - Target the Figures/Tables spec (guide Â§10.2): Fig 3â€“6 and Tables 1â€“3 come from
   `compare_methods.py`, `run_protocol.py`, `dilution_curve.py`, `ablation.py` outputs.
 - Optionally add table/row exports in `reproduce_figures.py` for Tables 1â€“3 (LaTeX/CSV).

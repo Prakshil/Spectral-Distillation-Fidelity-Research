@@ -304,8 +304,10 @@ Caveats kept honest:
 - GNN experts were run on all three graphs (Amazon, Tolokers, capped YelpChi), so
   the message-passing result is not an Amazon-only artifact. It still fails to beat
   no-routing anywhere.
-- `eig_nb_sim_k128` was selected on reported results and still does not survive
-  fixed-expert scoring, but remains reporting-selected.
+- `eig_nb_sim_k128` is confirmed *stable* out-of-fold (selected on 10/10 held-out folds by
+  `experiments/run_k_confirmation.py`) yet still does not survive fixed-expert scoring against a
+  genuine no-routing model — the choice of `k` is not the artifact, the win is. See
+  `docs/reproducibility.md`, "Resolved: spectral-k sweep".
 - Real routing baselines (RouterGNN, Ada-Routing) are not implemented here, so
   this is a negative result against *structural-score* routers and a label-trained
   MLP gate, not against the published methods. Node-MoE's own expert construction

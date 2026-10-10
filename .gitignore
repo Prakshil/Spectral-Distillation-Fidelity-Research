@@ -27,6 +27,7 @@ data/erp_attention/corpus_large.txt
 
 # Logs and run artifacts
 logs/
+logs_smoke/
 *.log
 wandb/
 

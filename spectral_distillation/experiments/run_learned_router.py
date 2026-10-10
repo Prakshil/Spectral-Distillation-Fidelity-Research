@@ -76,7 +76,6 @@ def main() -> None:
     factory = build_expert_factory(args.expert, graph, args.device)
 
     per_split = []
-    t1 = time.perf_counter()
     for split in range(args.splits):
         for seed in range(args.seeds):
             train, test = train_test_split(y, split, seed)

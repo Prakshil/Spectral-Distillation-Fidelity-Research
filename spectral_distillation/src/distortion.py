@@ -5,8 +5,6 @@ from __future__ import annotations
 import numpy as np
 from scipy.linalg import eigvalsh
 
-from spectral_distillation.src.spectral import min_eigengap
-
 
 def compute_spectral_distortion(
     L_a: np.ndarray,

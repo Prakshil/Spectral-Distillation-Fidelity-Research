@@ -703,12 +703,12 @@ def test_learned_router_never_sees_test_labels():
     )
     from spectral_distillation.src.laplacian import normalize_adjacency
     from spectral_distillation.src.learned_router import (
-        build_router_targets, evaluate_learned_routing, split_fit_router,
+        build_router_targets, split_fit_router,
         train_router,
     )
     from spectral_distillation.src.mixture import fit_experts, train_test_split
     from spectral_distillation.src.positive_control import (
-        generate_positive_control, oracle_from_groups,
+        generate_positive_control,
     )
 
     graph = generate_positive_control(n=600, seed=1)
@@ -1319,9 +1319,6 @@ def test_self_routing_credits_label_aligned_partitions_not_random_ones():
     X, y = graph["features"], graph["y"]
     n = X.shape[0]
     rng = np.random.default_rng(0)
-    from spectral_distillation.experiments.run_fixed_expert_protocol import (
-        feature_kmeans_routing,
-    )
 
     k = int(y.max()) + 1
 

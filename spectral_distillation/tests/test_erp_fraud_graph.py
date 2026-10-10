@@ -1,7 +1,6 @@
 """Tests for the scalable synthetic ERP-fraud graph generator."""
 
 import numpy as np
-import pytest
 
 from spectral_distillation.src.synthetic import (
     _ROLE_INVOICE,

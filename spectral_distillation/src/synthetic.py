@@ -188,7 +188,6 @@ def generate_erp_fraud_graph(
     n_suppliers = max(1, int(0.20 * n_nodes))
     n_invoices = max(1, int(0.35 * n_nodes))
     n_shell = max(1, int(0.05 * n_nodes))
-    n_customers = max(1, n_nodes - n_suppliers - n_invoices - n_shell)
 
     roles = np.zeros(n_nodes, dtype=int)
     roles[:n_suppliers] = _ROLE_SUPPLIER

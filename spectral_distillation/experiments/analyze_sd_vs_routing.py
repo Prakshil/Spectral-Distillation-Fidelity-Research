@@ -19,7 +19,7 @@ import os
 import sys
 
 import numpy as np
-from scipy.stats import pearsonr, spearmanr
+from scipy.stats import spearmanr
 
 COLLAPSE = "router_collapse_seeds"
 

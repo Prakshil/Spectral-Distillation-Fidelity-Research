@@ -26,7 +26,6 @@ from spectral_distillation.experiments.run_fixed_expert_protocol import (
     feature_kmeans_routing,
     single_global_condition,
 )
-from spectral_distillation.src.mixture import mixture_accuracy, train_test_split
 from spectral_distillation.src.positive_control import (
     generate_positive_control,
     oracle_from_groups,

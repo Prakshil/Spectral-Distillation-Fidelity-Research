@@ -66,7 +66,6 @@ def test_oracle_filter_can_exclude_everything():
 def test_spectral_beats_threshold_fiedler_preservation_at_budget():
     budget = 4
     W_sp_spec = spectral_sparsify(A_FULL, budget, seed=0)
-    L_full = compute_laplacian(A_FULL)
     L_spec = compute_laplacian(W_sp_spec)
     e_spec = np.sort(np.linalg.eigvalsh(L_spec))
     assert count_zero_eigenvalues(e_spec) == 1

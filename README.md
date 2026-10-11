@@ -38,7 +38,7 @@ make figures          # all paper figures
 
 ## Status
 
-**Phase 1 (diagnostics + theory), Phase 2 (sparsifiers + comparison), and Phase 3 (router protocol: label-free GNN router, D1-D4 decision rules, PC-1c-R planted control, dilution ladder, ablations, figures) are implemented and tested — 173 tests pass.**
+**Phase 1 (diagnostics + theory), Phase 2 (sparsifiers + comparison), Phase 3 (router protocol: label-free GNN router, D1-D4 decision rules, PC-1c-R planted control, dilution ladder, ablations, figures), the fair published-router audit (`RouterGNN` / `AD-GNN` / MLP gate under Protocol B), and the learnability lever (`β`-sweep + abstaining selective router) are implemented and tested — 214 tests pass.**
 
 > **Headline result (honest, Protocol B).** On the planted **PC-1c-R control** the D1–D4 instrument is valid and routing helps (see "Phase 3 findings"). On **real graphs** (fraud benchmarks and real LLM attention) under the fixed-expert protocol, **no label-free or learned router beats training one global model** (0/234 candidate/expert/graph cells), and the oracle is *negative* (9/9). The one supported positive is that spectral distortion + connectivity survival **predict routing *stability*** (Spearman +0.78…+0.99). Protocol-A self-routing oracle numbers are **retracted**. See `docs/fixed_expert_protocol.md` and `docs/real_attention_results.md`.
 
@@ -52,7 +52,7 @@ make figures          # all paper figures
 
 ```bash
 pip install -e ".[dev]"          # or: make install
-python -m pytest                 # 173 tests: theory bounds, sparsifiers, router protocol, statistics
+python -m pytest                 # 214 tests: theory bounds, sparsifiers, router protocol, statistics
 
 # Phase 1-2
 python -m spectral_distillation.experiments.run_diagnostic     # golden 4-node + ERP SD/fragility preview

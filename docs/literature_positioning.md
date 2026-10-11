@@ -177,6 +177,16 @@ the operationalization, not the inequality.
    model, the oracle can be *negative*, and the one surviving positive is that
    SD/low-frequency distortion + connectivity survival **predict routing
    stability** (Spearman +0.78…+0.99; `docs/real_attention_results.md` §9.1).
+5. **A learnability lever that locates the null.** A single planted knob
+   interpolates the label function from "one rule fits every group" to "each group
+   has its own rule" (`docs/learnability_lever.md`). Routing gain *exists* above
+   β ≈ 0.2 and is *deployable* (a held-out selective router wins) by β ≈ 0.3,
+   robust above β ≈ 0.5. On
+   the real fraud pools the selective router correctly **abstains** (held-out gain
+   +0.0007 Amazon, −0.0017 Tolokers). This converts "no router ever won" into a
+   bounded statement — the real tasks sit below the routing threshold — and, to
+   our knowledge, no prior work reports a router that both measures and declines
+   unroutable pools.
 
 ## 10. Honest gaps versus the literature
 
@@ -205,7 +215,11 @@ the operationalization, not the inequality.
   full-power 0/26.
 - **The accuracy claim under Protocol B is null**; only the stability claim
   (§9.1) is defensible, and it carries a connectivity confound on the SmolLM2
-  graph (isolated-node fraction correlates −0.996 with stability).
+  graph (isolated-node fraction correlates −0.996 with stability). The null is
+  *bounded* by the learnability lever (§9.5): routing becomes deployable only
+  above planted separability β ≈ 0.3 (existence from β ≈ 0.2), and the real pools
+  sit below it — but the lever is synthetic, so it locates the boundary rather
+  than placing any real graph on it.
 - **The Lean formalization is a sketch**, not a compiled Mathlib contribution
   (Appendix B of the implementation guide).
 

@@ -139,6 +139,42 @@ flipped from graph to graph: noise, not signal.
 Taken together: the check that could have produced a win did produce one, and the
 three real graphs still produced none.
 
+### The learnability lever: when *should* routing win?
+
+The synthetic test above is all-or-nothing: either routing wins or it does not.
+But "routing never wins on these graphs" is only meaningful if we know *where*
+routing would start to win. So we built a single dial that slides a task from
+"routing is impossible" to "routing is trivial," keeping the graph and the data
+shape fixed.
+
+At the zero end, every region obeys the *same* rule, so one model for everything
+is perfect and routing can add nothing. At the top end, each region obeys its own
+rule — the synthetic case above. Turning the dial in between, we measured both
+whether routing *could* help (the cheating oracle) and whether a real router
+*actually* did.
+
+What we found:
+
+- Routing first becomes **possible** when the dial reaches about **0.2**. Below
+  that, even the cheating oracle gains nothing.
+- Routing becomes **reliably worth doing** a little higher, around **0.3–0.5**.
+  Below that, a router trained on labels is too uncertain to commit.
+- On the two real fraud graphs, a router that is allowed to *decline* correctly
+  declines: its held-out check says routing would not help, and it sends
+  everything to the single global model. That is the same null result as before,
+  but now it is a decision the router reached, not a failure to find a win.
+
+So the negative result is not "our router could not find a win anywhere." It is
+"there is a threshold of how region-specific the rules must be for routing to pay
+off, the real fraud graphs sit below it, and a router that can measure this
+notices and stands down."
+
+A side observation: making the graph *less* clustered (mixing edges across
+regions) barely changed the routing gain. In this setup the routing signal comes
+from the *label/feature* structure, not from which nodes are connected — so
+"these graphs are too heterophilous" is not the reason routing fails; the regions
+just are not different enough.
+
 ### What this does *not* mean
 
 It does **not** mean routing is useless in general. It means that *on these fraud
@@ -181,6 +217,11 @@ Done and reproducible:
   broken harness.
 - A label-trained router that recovers +0.18 of +0.19 on the positive control and
   nothing on the real graphs.
+- A **learnability lever** (`docs/learnability_lever.md`) that locates where
+  routing starts to pay off: it becomes *possible* at β ≈ 0.2 and *reliably worth
+  doing* by β ≈ 0.5, and a selective router that abstains below the threshold
+  correctly declines on the real fraud pools (held-out gain +0.0007 on Amazon,
+  −0.0017 on Tolokers).
 
 Still to do before submission:
 

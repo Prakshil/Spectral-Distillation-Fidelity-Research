@@ -28,7 +28,7 @@ Companion documents:
 | Phase 4 | Real ERP attention data + LLM attention export (Llama-3.1-8B) feeding the pipeline | Partially (real-attention + synthetic ERP-fraud runs done; **real DGL Amazon fraud graph run at `docs/real_fraud_results.md`**) |
 | Phase 5 | Publication materials from verified results | Partially drafted (`docs/*`) |
 
-**Tests:** 173 pass (`python -m pytest` on CPU, cosmetic warnings only).
+**Tests:** 214 pass (`python -m pytest` on CPU, cosmetic warnings only).
 
 **Lint:** `pyflakes` clean on `src/`, `experiments/`, and `tests/`. (`ruff`/`ty` are not installed locally; the Makefile targets remain for CI.)
 
@@ -56,6 +56,7 @@ Companion documents:
 | `learned_router.py` | RouterGNN-lite: MLP router over cached `[X, AX]`, supervised by training labels on a held-out router split; frozen routing-blind expert pool |
 | `published_routers.py` | Published learned routers under Protocol B: RouterGNN (message-passing, label-supervised) + AD-GNN (per-node propagation depth via a label-free signal-preservation factor) |
 | `positive_control.py` | Positive control: non-separable mixture of linear rules, oracle routing from the latent partition |
+| `learnability_lever.py` | One knob interpolates the label function from globally-separable (β=0) to the positive control (β=1); + `learnability_conditioned_router` (route iff held-out router-val gain > margin) |
 | `planted_control.py` | PC-1c-R positive control: 3 orthogonal feature bases, dilution ladder |
 | `router_protocol.py` | The oracle / label-free / random / uniform protocol, D1â€“D4 decision rules, frozen-model intervention, statistics |
 | `evaluation.py` | Splits, seeds, paired statistical tests (Wilcoxon exact, paired-t, Holm, CI, effect size) |
@@ -77,6 +78,7 @@ Companion documents:
 | `reproduce_figures.py` | Renders all Phase 3 figures from cached logs | PNGs under `logs/{protocol,dilution,ablation}/` |
 | `run_fixed_expert_protocol.py` | Protocol B: one frozen routing-blind expert pool, 26 routings, logistic/MLP/GNN heads (`--expert`) | `logs/{dataset}_fixed_expert*/fixed_expert.json` |
 | `run_positive_control.py` | Positive control: same protocol on a non-separable mixture of linear rules, where routing provably helps; also scores RouterGNN-lite | `logs/positive_control/fixed_expert.json` |
+| `run_learnability_lever.py` | Sweeps the planted `separability` (and homophily) lever to locate where routing becomes possible/deployable; probes real pools with the abstaining selective router | `logs/learnability_lever/lever.json` |
 | `run_learned_router.py` | RouterGNN-lite vs no-routing / k-means / random / oracle on a frozen pool, real graphs (`--dataset amazon\|tolokers\|yelpchi`) | `logs/{dataset}_learned_router*/fixed_expert.json` |
 | `run_published_routers.py` | RouterGNN + AD-GNN vs the same frozen pool/baselines, on fraud and heterophily graphs (`--dataset amazon\|tolokers\|yelpchi\|actor\|chameleon\|squirrel`) | `logs/{dataset}_published_routers/fixed_expert.json` |
 | `run_sd_vs_routing.py` | Spectral distortion vs label-free routing stability across a retention ladder on fraud **and** real LLM attention (`--dataset llm`); same-seed multi-router stability, collapse detection | `logs/sd_vs_routing/{dataset}/sd_vs_routing.json` |
@@ -103,7 +105,7 @@ reproducible; `per_layer` gives one column per transformer layer and is required
 for any downstream accuracy arm. A 29-way task from 3 features is near-chance
 regardless of routing.
 
-### 2.3 Tests (`spectral_distillation/tests/`, 173 tests)
+### 2.3 Tests (`spectral_distillation/tests/`, 214 tests)
 
 | File | Coverage |
 |------|----------|
@@ -207,6 +209,27 @@ Oracle-bucket Î´-sweep (on the homophily-range 3-block SBM, block homophily 0.
 - GPU/CPU differences on the RouterGNN can shift epoch-level behavior; the crisp KMeans gate is
   deterministic and is the operational gate.
 
+### 3.7 Phase B â€” learnability lever (`logs/learnability_lever/lever.json`)
+
+A planted `separability` knob interpolates the label function from "one rule fits
+every group" (routing worth nothing) to the positive control (routing worth a
+lot), on a block-diagonal graph with feature-separated groups
+(`src/learnability_lever.py`, `experiments/run_learnability_lever.py`,
+`docs/learnability_lever.md`). n=3000, 5 splits, logistic experts:
+
+- routing gain **exists** (label-informed oracle beats global) from **β ≈ 0.2**;
+- routing is **deployable** (a held-out selective router decides to route and
+  wins) from **β ≈ 0.3**, and monotone/robust above **β ≈ 0.5** (the 0.3–0.4 band
+  is noisy: route rates 4/5 then 1/5);
+- on the real pools the selective router **abstains** â€” held-out gain +0.0007
+  (Amazon, n=8639) and −0.0017 (Tolokers, n=11758) â€” matching the Protocol-B null
+  as a *decision*, not a failure to find a win.
+
+The homophily knob (`cross_edge_p`) does not reduce routing gain in this
+construction: the signal is carried by the label/feature structure, not the
+edges. The lever is synthetic and locates the boundary; it does not place any
+real graph at a specific β.
+
 ---
 
 ## 4. How to reproduce everything
@@ -214,7 +237,7 @@ Oracle-bucket Î´-sweep (on the homophily-range 3-block SBM, block homophily 0.
 ```bash
 pip install -e ".[dev]"          # or: make dev-install
 
-python -m pytest                 # 173 tests
+python -m pytest                 # 214 tests
 python -m spectral_distillation.experiments.run_protocol        # D1-D4 + frozen gates
 python -m spectral_distillation.experiments.dilution_curve      # dilution ladder
 python -m spectral_distillation.experiments.ablation            # oracle Î´ + feature ablation
@@ -294,7 +317,7 @@ Every claim in Â§3 maps to a committed artifact:
 | D1â€“D4 supported, frozen-gate ordering, stats | `logs/protocol/protocol_results.json` |
 | Dilution decay (0.231 â†’ 0.008) vs flat oracle (0.260), 10k GPU | `logs/dilution/dilution_curve.json` |
 | Feature ablation ordering + oracle Î´ plateau | `logs/ablation/ablation.json` |
-| 173-test pass | `python -m pytest` |
+| 214-test pass | `python -m pytest` |
 
 ---
 

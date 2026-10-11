@@ -24,9 +24,20 @@ nodes and frozen; a gate is then trained on the disjoint other half against
 single global model fitted on the same fit half. This is the protocol that
 produced the repo's null, so the comparison is like-for-like.
 
-If Node-MoE wins under (1) but not (2), the gain is co-adaptation / ensemble
-capacity rather than genuine per-node expert selection -- the central claim of
-the evaluation-critique line.
+If Node-MoE wins under (1) but not (2), the gain comes from joint training rather
+than from a per-node routing signal that survives honest evaluation. Test (3)
+separates the two candidate explanations: an unrouted equal-weight ensemble shows
+whether the gain is merely *ensemble capacity* (it is not -- the uniform ensemble
+matches a single global model) or a gate-expert *co-adaptation* effect that
+accounts for the residual.
+
+**3. Unrouted uniform-ensemble control** (``NodeMoEHead(..., routing="uniform")``).
+The decisive control for the co-adaptation story: train the *same* differentiated
+experts end-to-end with the *same* loss and epochs, but combine them by a fixed
+equal-weight mean (``1/K``) instead of the learned gate. Because only the
+combination rule differs, ``joint - uniform`` is the causal contribution of the
+gate itself. A tie says the "routing" contributed nothing beyond having K
+spectral experts and averaging them.
 
 Writes ``logs/<dataset>_node_moe/node_moe.json``.
 """
@@ -138,6 +149,16 @@ def main() -> None:
             ).fit_graph(X, y)
             joint_acc = _score_single(joint, X, y, test)
 
+            # --- Unrouted uniform-ensemble control: same experts, no gate ---
+            uniform = NodeMoEHead(
+                W_norm, X.shape[1], train, filter_types, K=args.K,
+                routing="uniform",
+                epochs=args.joint_epochs, lr=args.lr,
+                weight_decay=args.weight_decay, gamma_smooth=args.gamma_smooth,
+                seed=seed, device=args.device,
+            ).fit_graph(X, y)
+            uniform_acc = _score_single(uniform, X, y, test)
+
             global_cheb = ChebNetIIHead(
                 W_norm, X.shape[1], train, K=args.K, filter_type="low_pass",
                 epochs=args.expert_epochs, lr=args.lr,
@@ -157,17 +178,20 @@ def main() -> None:
                 "protocol_b_gaps": {k: v for k, v in pb.items() if k != "accuracy"},
                 "joint": {
                     "node_moe_joint": joint_acc,
+                    "node_moe_uniform_ensemble": uniform_acc,
                     "global_chebnetii": cheb_acc,
                     "global_mlp": mlp_acc,
                 },
             })
             log.info(
                 "split %d/%d seed %d | B: gate=%.4f global=%.4f (%+.4f) oracle=%.4f "
-                "ens=%.4f | joint=%.4f globalCheb=%.4f globalMLP=%.4f",
+                "ens=%.4f | joint=%.4f uniformEns=%.4f (gate%+.4f) globalCheb=%.4f "
+                "globalMLP=%.4f",
                 split + 1, args.splits, seed,
                 pb["accuracy"]["node_moe_gate"], pb["accuracy"]["single_global"],
                 pb["gate_minus_no_routing"], pb["accuracy"]["oracle"],
-                pb["accuracy"]["ensemble_uniform"], joint_acc, cheb_acc, mlp_acc,
+                pb["accuracy"]["ensemble_uniform"], joint_acc, uniform_acc,
+                joint_acc - uniform_acc, cheb_acc, mlp_acc,
             )
 
     # ------------------------------------------------------------------ #
@@ -216,8 +240,23 @@ def main() -> None:
         "joint_vs_global_mlp": _paired(col("joint", "node_moe_joint"),
                                        col("joint", "global_mlp"),
                                        "joint_vs_global_mlp"),
+        # The control: gate minus unrouted equal-weight ensemble of the same experts.
+        "gate_effect_joint_vs_uniform_ensemble": _paired(
+            col("joint", "node_moe_joint"),
+            col("joint", "node_moe_uniform_ensemble"),
+            "gate_effect_joint_minus_uniform_ensemble",
+        ),
+        "uniform_ensemble_vs_global_chebnetii": _paired(
+            col("joint", "node_moe_uniform_ensemble"),
+            col("joint", "global_chebnetii"),
+            "uniform_ensemble_vs_global_cheb",
+        ),
         "n_runs_joint_beats_global_chebnetii": int(
             sum(r["joint"]["node_moe_joint"] - r["joint"]["global_chebnetii"] > 0
+                for r in per_run)
+        ),
+        "n_runs_joint_beats_uniform_ensemble": int(
+            sum(r["joint"]["node_moe_joint"] - r["joint"]["node_moe_uniform_ensemble"] > 0
                 for r in per_run)
         ),
         "n_runs": n,
@@ -241,7 +280,10 @@ def main() -> None:
             "routing-blind and the gate is cross-fit on disjoint nodes. faithful_joint "
             "is the paper's own end-to-end training. A win in faithful_joint but not "
             "protocol_b means the gain is co-adaptation / ensemble capacity, not "
-            "genuine routing."
+            "genuine routing. gate_effect_joint_vs_uniform_ensemble is the causal "
+            "control: it compares the gated model against the same experts combined by "
+            "a fixed equal-weight mean, so a near-zero difference means the learned gate "
+            "contributes nothing beyond the expert pool and averaging."
         ),
     }
     path = out_dir / "node_moe.json"
@@ -261,6 +303,13 @@ def main() -> None:
         jt_mean["node_moe_joint"], jt_mean["global_chebnetii"],
         faithful_stats["joint_vs_global_chebnetii"]["mean_diff"], jt_mean["global_mlp"],
         faithful_stats["n_runs_joint_beats_global_chebnetii"], n,
+    )
+    log.info(
+        "Gate effect: joint=%.4f uniformEns=%.4f (%+.4f) | gate beat unrouted ensemble "
+        "in %d/%d runs",
+        jt_mean["node_moe_joint"], jt_mean["node_moe_uniform_ensemble"],
+        faithful_stats["gate_effect_joint_vs_uniform_ensemble"]["mean_diff"],
+        faithful_stats["n_runs_joint_beats_uniform_ensemble"], n,
     )
     log.info("wrote %s", path)
 

@@ -367,8 +367,31 @@ same fit half):
 Under the honest protocol the gate's edge is at most +0.005 and is within noise on
 Amazon and YelpChi (2/5 runs). The pattern is the paper's central claim: a
 positive result under faithful *joint* training (+0.04) almost entirely collapses
-under routing-blind fixed-expert scoring (+0.005). The residual gain is
-co-adaptation and ensemble capacity, not per-node expert selection.
+under routing-blind fixed-expert scoring (+0.005).
+
+**Unrouted uniform-ensemble control.** The obvious objection to the "capacity"
+reading is that *any* pool of K experts would help, gate or not. The control
+removes the gate entirely: `NodeMoEHead(..., routing="uniform")` trains the same
+differentiated experts with the same loss, epochs and optimiser, but combines them
+by a fixed equal-weight mean `1/K`. Because only the combination rule differs,
+`joint - uniform` is the causal contribution of the gate itself.
+
+| graph | joint (gate) | uniform ensemble | gate - uniform | gate wins | uniform - global Cheb |
+|---|---|---|---|---|---|
+| Amazon | 0.9418 | 0.9404 | +0.0014 (p=.63) | 3/5 | -0.0002 |
+| Tolokers | 0.7089 | 0.6632 | **+0.0457 (p=.06)** | 5/5 | -0.0032 |
+| YelpChi | 0.7491 | 0.7089 | +0.0401 (p=.31) | 4/5 | +0.0011 |
+
+Two facts follow. First, the unrouted ensemble is statistically indistinguishable
+from a *single* global ChebNetII on every graph (rightmost column, within +-0.003):
+K spectral experts with no router add nothing over one spectral expert, so the
+joint gain is **not** ensemble capacity. Second, the gate does carry a real
+joint-training gain on Tolokers (+0.046, 5/5, dz=1.9) and YelpChi (+0.040, 4/5) but
+none on Amazon (+0.001). Because that gain appears only when gate and experts are
+co-trained and vanishes under the routing-blind Protocol B (+0.005), it is a
+train-time co-adaptation effect, not a per-node routing signal that survives
+honest evaluation. The earlier "capacity" wording is corrected here: the control
+refutes capacity and localises the residual to gate-expert co-adaptation.
 
 Caveats: the global-MLP baseline is unusually strong (0.97 on Amazon), which is
 the repo's existing split/feature pipeline, not new here; it is reported so it

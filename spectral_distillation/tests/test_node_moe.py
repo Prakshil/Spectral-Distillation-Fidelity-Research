@@ -207,6 +207,51 @@ def test_node_moe_head_is_deterministic():
 
 
 # --------------------------------------------------------------------------- #
+# Unrouted uniform-ensemble control
+# --------------------------------------------------------------------------- #
+
+def test_uniform_routing_has_no_gate_but_gate_routing_does():
+    W, X, y = _sbm()
+    W_norm = normalize_adjacency(W)
+    train = np.zeros(y.size, dtype=bool)
+    train[::2] = True
+    common = dict(filter_types=differentiated_filter_types(3), K=2, epochs=20, seed=0)
+    gated = NodeMoEHead(W_norm, X.shape[1], train, routing="gate", **common).fit_graph(X, y)
+    uniform = NodeMoEHead(W_norm, X.shape[1], train, routing="uniform", **common).fit_graph(X, y)
+    assert hasattr(gated._model, "gate")
+    assert not hasattr(uniform._model, "gate")
+
+
+def test_uniform_routing_averages_experts_by_fixed_equal_weights():
+    W, X, y = _sbm()
+    W_norm = normalize_adjacency(W)
+    train = np.zeros(y.size, dtype=bool)
+    train[::2] = True
+    head = NodeMoEHead(W_norm, X.shape[1], train, routing="uniform",
+                       filter_types=differentiated_filter_types(3), K=2,
+                       epochs=20, seed=0).fit_graph(X, y)
+    mix, g, expert_logits = head._forward(X)
+    assert g is None
+    # Equal-weight mean, not a learned combination.
+    assert torch.allclose(mix, expert_logits.mean(dim=1), atol=1e-6)
+
+
+def test_uniform_routing_rejects_gate_weights_and_bad_mode():
+    W, X, y = _sbm()
+    W_norm = normalize_adjacency(W)
+    train = np.zeros(y.size, dtype=bool)
+    train[::2] = True
+    uniform = NodeMoEHead(W_norm, X.shape[1], train, routing="uniform",
+                          filter_types=differentiated_filter_types(3),
+                          K=2, epochs=10, seed=0).fit_graph(X, y)
+    with np.testing.assert_raises(ValueError):
+        uniform.gate_weights(X)
+    with np.testing.assert_raises(ValueError):
+        NodeMoEHead(W_norm, X.shape[1], train, routing="nope",
+                    filter_types=differentiated_filter_types(3))
+
+
+# --------------------------------------------------------------------------- #
 # Protocol B
 # --------------------------------------------------------------------------- #
 

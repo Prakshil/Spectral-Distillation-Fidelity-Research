@@ -431,6 +431,13 @@ class NodeMoEHead:
     Trained end-to-end on the training split with the task loss plus the filter
     smoothing loss, matching Node-MoE's own training. Exposes the shared expert
     hooks so it can also be scored by :func:`mixture_accuracy`.
+
+    ``routing="uniform"`` removes the gate entirely and combines the same
+    differentiated experts by a fixed equal-weight mean (``1/K`` per expert).
+    Every other aspect of training is identical -- same experts, same loss, same
+    epochs -- so ``gate`` vs ``uniform`` isolates exactly what the learned gate
+    contributes over an unrouted multi-expert ensemble with the same expert
+    capacity. If they tie, the routing signal contributed nothing.
     """
 
     def __init__(
@@ -440,6 +447,7 @@ class NodeMoEHead:
         train_idx: np.ndarray,
         filter_types: list[str],
         K: int = 2,
+        routing: str = "gate",
         gate_hidden: int = 32,
         gate_dropout: float = 0.1,
         epochs: int = 300,
@@ -449,6 +457,8 @@ class NodeMoEHead:
         seed: int = 0,
         device: str = "cpu",
     ) -> None:
+        if routing not in ("gate", "uniform"):
+            raise ValueError(f"routing must be 'gate' or 'uniform', got {routing!r}")
         self.W_norm = W_norm
         self.n_features = n_features
         train_idx = np.asarray(train_idx)
@@ -458,6 +468,7 @@ class NodeMoEHead:
         )
         self.filter_types = list(filter_types)
         self.K = K
+        self.routing = routing
         self.gate_hidden = gate_hidden
         self.gate_dropout = gate_dropout
         self.epochs = epochs
@@ -491,14 +502,21 @@ class NodeMoEHead:
                 for ft in self.filter_types
             ]
         )
-        gate = NodeMoEGate(
-            3 * self.n_features, len(self.filter_types),
-            hidden_dim=self.gate_hidden, dropout=self.gate_dropout,
-        )
         holder = nn.Module()
         holder.experts = experts
-        holder.gate = gate
+        if self.routing == "gate":
+            holder.gate = NodeMoEGate(
+                3 * self.n_features, len(self.filter_types),
+                hidden_dim=self.gate_hidden, dropout=self.gate_dropout,
+            )
         return holder
+
+    def _mix(self, expert_logits: torch.Tensor, gfeats, Wt):
+        """Combine expert logits by the learned gate or a fixed 1/K mean."""
+        if self.routing == "gate":
+            g = self._model.gate(gfeats, Wt)
+            return (g * expert_logits).sum(dim=1), g
+        return expert_logits.mean(dim=1), None
 
     def fit_graph(self, X: np.ndarray, y: np.ndarray) -> "NodeMoEHead":
         classes = np.unique(y[self.train_idx])
@@ -529,8 +547,7 @@ class NodeMoEHead:
             expert_logits = torch.stack(
                 [e(basis) for e in self._model.experts], dim=1
             )
-            g = self._model.gate(gfeats, Wt)
-            mix = (g * expert_logits).sum(dim=1)
+            mix, _ = self._mix(expert_logits, gfeats, Wt)
             loss = loss_fn(mix[idx], yt[idx])
             if self.gamma_smooth > 0:
                 loss = loss + self.gamma_smooth * _smoothing_loss(
@@ -541,13 +558,12 @@ class NodeMoEHead:
         self._model.eval()
         return self
 
-    def _forward(self, X: np.ndarray) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    def _forward(self, X: np.ndarray) -> tuple[torch.Tensor, torch.Tensor | None, torch.Tensor]:
         assert self._model is not None, "fit_graph must be called before prediction"
         basis, gfeats = self._features(X)
         Wt = self._W()
         expert_logits = torch.stack([e(basis) for e in self._model.experts], dim=1)
-        g = self._model.gate(gfeats, Wt)
-        mix = (g * expert_logits).sum(dim=1)
+        mix, g = self._mix(expert_logits, gfeats, Wt)
         return mix, g, expert_logits
 
     def _mix_logits(self, X: np.ndarray, idx: np.ndarray) -> np.ndarray:
@@ -567,6 +583,8 @@ class NodeMoEHead:
         return 1.0 / (1.0 + np.exp(-self._mix_logits(X, idx)))[:, None]
 
     def gate_weights(self, X: np.ndarray) -> np.ndarray:
+        if self.routing != "gate":
+            raise ValueError("gate_weights is only defined for routing='gate'")
         with torch.no_grad():
             _, g, _ = self._forward(X)
             return g.cpu().numpy()

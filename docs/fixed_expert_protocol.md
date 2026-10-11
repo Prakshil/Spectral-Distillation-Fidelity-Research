@@ -398,6 +398,70 @@ the repo's existing split/feature pipeline, not new here; it is reported so it
 cannot be mistaken for a tuning choice. YelpChi is node-capped at 14840. Protocol
 B uses 3 experts and K=2.
 
+### On Node-MoE's own benchmarks (heterophily)
+
+The fraud graphs above are the critique's original test-bed, and they invite one
+escape hatch: fraud topologies are noisy and weakly heterophilic, so a routing
+gain might exist on the *heterophilic web/actor* graphs Node-MoE actually reports
+SOTA on. To close it we run the identical harness on **Node-MoE's own headline
+suite -- Actor, Chameleon, Squirrel** (5-way; loaded by
+`src/heterophily.py`). Nothing else changes: same 3 differentiated ChebNetII
+experts, same `K=2`, same loss, same 5 splits x 1 seed, same Protocol B.
+
+Node-MoE is competitive *within noise* on its own turf even under its favourable
+joint protocol. **Faithful replication** (mean accuracy):
+
+| graph | Node-MoE (joint) | global ChebNetII | global MLP (features only) |
+|---|---|---|---|
+| Chameleon (n=2277) | 0.4327 | 0.4153 | **0.4520** |
+| Actor (n=7600) | 0.3433 | **0.3446** | 0.3240 |
+| Squirrel (n=5201) | 0.3034 | 0.2999 | **0.3103** |
+
+Joint - global ChebNetII is +0.0174 (4/5, p=.31), **-0.0013** (3/5, p=1.0) and
++0.0035 (2/5, p=.81) -- i.e. Node-MoE does not reliably beat a single global
+ChebNetII on the datasets it was designed for. A graph-free MLP matches or beats
+it on two of the three.
+
+**Unrouted uniform-ensemble control** -- the decisive result, and it is *stronger*
+here than on the fraud graphs:
+
+| graph | joint (gate) | uniform ensemble | gate - uniform | gate wins | uniform - global Cheb |
+|---|---|---|---|---|---|
+| Chameleon | 0.4327 | **0.4615** | -0.0288 (p=.13, dz=-1.2) | 0/5 | +0.0462 (p=.06, dz=3.9) |
+| Actor | 0.3433 | **0.3548** | -0.0115 (p=.13, dz=-1.5) | 1/5 | +0.0102 (p=.06, dz=2.8) |
+| Squirrel | 0.3034 | **0.3340** | -0.0306 (p=.06, dz=-3.9) | 0/5 | +0.0341 (p=.06, dz=3.6) |
+
+The unrouted equal-weight ensemble beats the gated joint model on **every** graph
+(-0.011 to -0.031; the gate wins 0/5, 1/5, 0/5). So on Node-MoE's home benchmarks
+the learned gate is actively *worse* than simply averaging the same experts. The
+ensemble does beat a single global ChebNetII here (+0.010 to +0.046, all 5/5 with
+dz~3) -- so there *is* a small real benefit to having K spectral experts on these
+graphs, but it comes from the pooling, not from any routing decision.
+
+**Honest fixed-expert Protocol B** (frozen pool, cross-fit gate):
+
+| graph | Node-MoE gate | no-routing | gate - no-routing | gate wins | oracle | Ens-Avg |
+|---|---|---|---|---|---|---|
+| Chameleon | 0.4114 | 0.3902 | +0.0212 (p=.06) | 5/5 | 0.4121 | 0.3998 |
+| Actor | 0.3388 | 0.3358 | +0.0030 (p=.06) | 5/5 | 0.3438 | 0.3400 |
+| Squirrel | 0.2953 | 0.2896 | +0.0057 (p=.31) | 3/5 | 0.2986 | 0.2925 |
+
+Same pattern as the fraud graphs: the cross-fit gate's edge over a single global
+model is at most +0.02 (Chameleon) and <= +0.006 elsewhere, while the oracle that
+*knows the labels* buys almost nothing over the gate -- evidence that the
+homophily buckets carry little routing signal on these graphs too. Combined with
+the uniform-ensemble result, the honest reading is: the joint-training "gain" is
+co-adaptation between the gate and the experts, and it does not survive as a
+per-node routing signal.
+
+Caveats: these are the **legacy** Chameleon/Squirrel graphs (duplicate-node
+leakage under the published Geom-GCN splits, Platonov et al., ICLR 2023); we avoid
+that by using the repo's own class-stratified 50/50 split for every dataset, so
+the absolute accuracies are lower than published and are **not** comparable to the
+literature -- only the within-run joint/uniform/global/Protocol-B contrasts are.
+The 5-way switch is handled by `n_classes` in `src/node_moe.py`, which leaves the
+binary path byte-identical.
+
 ## Positive control: can the protocol detect a win at all?
 
 A 0/234 result is only meaningful if the harness would have reported a win when one

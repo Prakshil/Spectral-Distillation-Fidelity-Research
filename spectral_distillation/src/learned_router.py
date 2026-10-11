@@ -214,9 +214,9 @@ def uniform_ensemble_accuracy(
 ) -> float:
     """Uniform soft-voting ensemble over the frozen expert pool (Ens-Avg).
 
-    Averages each expert's *class-1 probability* and takes the argmax, so an
-    expert that is mildly confident contributes 0.6 rather than a hard vote. This
-    is the control the central claim needs: if averaging the same frozen pool
+    Averages each expert's predicted class *probability* and takes the argmax, so
+    an expert that is mildly confident contributes 0.6 rather than a hard vote.
+    This is the control the central claim needs: if averaging the same frozen pool
     matches learned routing, then the routing signal never paid for itself.
 
     Averaging probabilities rather than labels is the whole point. An earlier
@@ -226,8 +226,12 @@ def uniform_ensemble_accuracy(
     Requires every head to expose probabilities -- ``predict_proba`` (sklearn) or
     ``predict_proba_nodes`` (:class:`~spectral_distillation.src.gnn_expert.GNNExpertHead`).
     Heads with neither are skipped rather than silently down-weighted to a hard
-    vote, so a missing hook can never masquerade as a legitimate ensemble. All
-    tasks here are binary fraud detection, so one column per expert suffices.
+    vote, so a missing hook can never masquerade as a legitimate ensemble.
+
+    Binary heads emit a single ``P(y=1)`` column, which is expanded to
+    ``[1-p, p]`` so the argmax is bit-identical to the old ``> 0.5`` rule;
+    multiclass heads emit one column per class. Experts whose column count differs
+    from the pool majority are dropped (never averaged into a shape mismatch).
     """
     idx = np.flatnonzero(test_mask)
     if idx.size == 0:
@@ -242,12 +246,15 @@ def uniform_ensemble_accuracy(
             p = np.asarray(head.predict_proba(X[idx]), dtype=float)
         else:
             continue
-        if p.ndim == 2 and p.shape[1] >= 2:
-            p = p[:, 1]  # sklearn binary: column 1 is P(y=1)
-        probas.append(p.reshape(-1))
+        p = p.reshape(idx.size, -1)
+        if p.shape[1] == 1:  # binary P(y=1) -> full 2-column distribution
+            p = np.concatenate([1.0 - p, p], axis=1)
+        probas.append(p)
     if not probas:
         return 0.0
-    ens = (np.mean(np.stack(probas, axis=0), axis=0) > 0.5).astype(int)
+    n_cols = max(p.shape[1] for p in probas)
+    probas = [p for p in probas if p.shape[1] == n_cols]
+    ens = np.mean(np.stack(probas, axis=0), axis=0).argmax(axis=1)
     return float(np.count_nonzero(ens == y[idx]) / idx.size)
 
 

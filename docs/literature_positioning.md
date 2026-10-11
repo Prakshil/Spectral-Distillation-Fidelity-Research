@@ -186,8 +186,12 @@ the operationalization, not the inequality.
   reproduced in full** (`src/node_moe.py`, `experiments/run_node_moe.py`) and
   still does not win under fixed-expert Protocol B (edge <= +0.005; 2/5 Amazon,
   5/5 Tolokers, 2/5 YelpChi), and is beaten by a feature-only MLP on every graph
-  (`docs/fixed_expert_protocol.md`, "Node-MoE under this protocol"). Implementing
-  the remaining routers is the largest open item.
+  (`docs/fixed_expert_protocol.md`, "Node-MoE under this protocol"). The critique
+  is **no longer fraud-only**: the identical harness now runs on Node-MoE's own
+  heterophily suite (Actor/Chameleon/Squirrel, `src/heterophily.py`), where its
+  joint gain over a single global ChebNetII is within noise and an *unrouted*
+  equal-weight ensemble beats its gate on all three. Implementing the remaining
+  routers (RouterGNN, Ada-Routing) is the largest open item.
 - **The k=128 / YelpChi and k=32 real-attention rows are reduced-power** (fewer
   splits/seeds or node-capped) and are marked as such; the honest headline is
   full-power 0/26.
@@ -207,7 +211,7 @@ the operationalization, not the inequality.
 | Liang et al., GOKU | ICML 2025, PMLR v267, arXiv:2506.16110 | spectrum-preserving rewiring (closest spectral) |
 | MORGAN | AAAI 2026, doi:10.1609/aaai.v40i28.39553 | eigengraph-as-expert MoE (closest conceptual) |
 | SS-AdaMoE | Entropy 28(3):355, 2026 | spatio-spectral MoE |
-| Node-MoE | arXiv:2406.03464 | reproduced (experts + gate); null under Protocol B |
+| Node-MoE | arXiv:2406.03464 | reproduced (experts + gate); null under Protocol B on fraud **and** its own heterophily suite |
 | GNNMoE | arXiv:2502.08083 | entropy-routed MoE |
 | Roller et al. | NeurIPS 2021 | random-routing floor |
 | Dikkala et al. | 2023 | learned-router recovery |

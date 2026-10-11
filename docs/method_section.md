@@ -191,6 +191,16 @@ ChebNetII (+0.001…+0.043) but loses to a feature-only MLP by 0.03–0.12 on ev
 graph, and under Protocol B its edge over no-routing is at most +0.005. See
 `docs/fixed_expert_protocol.md`, "Node-MoE under this protocol".
 
+`heterophily.py` loads Node-MoE's own heterophily suite (Actor / Chameleon /
+Squirrel, 5-way) so the critique is not confined to fraud graphs. That requires a
+class-count parameter: `n_classes` on the ChebNetII/Node-MoE heads keeps
+`n_classes <= 2` on the original single-logit BCE path (binary numbers unchanged)
+and switches to `C` logits + cross-entropy above it. On those three datasets the
+joint gain over a single global ChebNetII is within noise (−0.001…+0.017) and an
+unrouted equal-weight ensemble of the same experts **beats** the gate on all
+three (−0.011…−0.031). See `docs/fixed_expert_protocol.md`, "On Node-MoE's own
+benchmarks".
+
 ## 9. Code map
 
 ```
@@ -201,6 +211,7 @@ src/spectral_position.py, attention_entropy.py   routing features
 src/mixture.py, evaluation.py            protocol engine (fixed-expert)
 src/learned_router.py, gnn_router.py, gnn_expert.py   learned arms
 src/node_moe.py                          Node-MoE (ChebNetII experts + gate)
+src/heterophily.py                       Actor/Chameleon/Squirrel loaders
 src/positive_control.py                  D4 instrument check
 experiments/run_fixed_expert_protocol.py, run_sd_vs_routing.py,
             run_llm_protocol_b.py, run_sparsify_ladder.py,
@@ -218,6 +229,10 @@ experiments/run_fixed_expert_protocol.py, run_sd_vs_routing.py,
   (9/9). RouterGNN and Ada-Routing are not yet reproduced, so for those the
   negative is against structural-score routers and a label-trained MLP gate.
   Node-MoE is reproduced in full (`node_moe.py`) and is also null under Protocol B,
-  so the negative now includes the strongest published node-wise graph MoE.
+  so the negative now includes the strongest published node-wise graph MoE. The
+  same harness now also runs on Node-MoE's own heterophily suite
+  (`heterophily.py`, Actor/Chameleon/Squirrel), where its joint gain over a single
+  global ChebNetII is within noise and an unrouted ensemble beats its gate on all
+  three — so the null is not an artifact of the fraud-topology choice.
 - Protocol-A (self-routing) oracle numbers are retracted; only Protocol-B
   numbers are quoted (`docs/reproducibility.md` banner).

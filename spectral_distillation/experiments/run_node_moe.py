@@ -39,6 +39,16 @@ combination rule differs, ``joint - uniform`` is the causal contribution of the
 gate itself. A tie says the "routing" contributed nothing beyond having K
 spectral experts and averaging them.
 
+Datasets
+--------
+Fraud graphs (``amazon``, ``tolokers``, ``yelpchi``; binary) are the critique's
+original test-bed. The heterophily suite **Actor / Chameleon / Squirrel**
+(5-way) is Node-MoE's own headline benchmark, loaded via
+:mod:`spectral_distillation.src.heterophily`; running the identical harness there
+closes the "fraud topologies are unrepresentative" escape hatch. Chameleon and
+Squirrel are the legacy graphs with the duplicate-node caveat, so the repo's own
+class-stratified split is used (not the published Geom-GCN splits).
+
 Writes ``logs/<dataset>_node_moe/node_moe.json``.
 """
 
@@ -65,6 +75,7 @@ from spectral_distillation.src.node_moe import (
     differentiated_filter_types,
     evaluate_node_moe_protocol_b,
 )
+from spectral_distillation.src.heterophily import load_heterophily
 from spectral_distillation.src.real_fraud import load_real_fraud
 from spectral_distillation.src.router_protocol import oracle_bucket_assignment
 from spectral_distillation.src.utils import ensure_dir, get_logger, set_seed
@@ -72,6 +83,11 @@ from spectral_distillation.src.utils import ensure_dir, get_logger, set_seed
 # Matches oracle_bucket_assignment's (n, 3) channels, so the oracle and random
 # baselines line up with the expert pool column-for-column.
 N_EXPERTS = 3
+
+# Node-MoE's own headline benchmarks (5-way heterophily). Loading these closes
+# the "fraud graphs are unrepresentative" escape hatch from the critique.
+HETEROPHILY_DATASETS = ("actor", "chameleon", "squirrel")
+FRAUD_DATASETS = ("amazon", "tolokers", "yelpchi")
 
 
 def _score_single(model, X: np.ndarray, y: np.ndarray, test_mask: np.ndarray) -> float:
@@ -92,7 +108,8 @@ def _paired(a: dict[int, float], b: dict[int, float], name: str) -> dict:
 
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--dataset", default="amazon", choices=["amazon", "tolokers", "yelpchi"])
+    p.add_argument("--dataset", default="amazon",
+                   choices=list(FRAUD_DATASETS) + list(HETEROPHILY_DATASETS))
     p.add_argument("--data-path", default=None)
     p.add_argument("--max-nodes", type=int, default=None)
     p.add_argument("--splits", type=int, default=3)
@@ -117,9 +134,20 @@ def main() -> None:
     out_dir = ensure_dir(Path(args.out) / f"{args.dataset}_node_moe")
 
     t0 = time.perf_counter()
-    graph = load_real_fraud(args.dataset, args.data_path, max_nodes=args.max_nodes or None)
+    if args.dataset in HETEROPHILY_DATASETS:
+        if args.max_nodes:
+            raise ValueError("--max-nodes is not supported for heterophily datasets")
+        graph = load_heterophily(args.dataset, root=args.data_path)
+    else:
+        graph = load_real_fraud(
+            args.dataset, args.data_path, max_nodes=args.max_nodes or None
+        )
     W, X, y = graph["W"], graph["features"], graph["y"]
-    log.info("loaded %s n=%d (%.1fs)", args.dataset, W.shape[0], time.perf_counter() - t0)
+    n_classes = int(graph.get("n_classes", int(np.max(y)) + 1))
+    log.info(
+        "loaded %s n=%d d=%d classes=%d (%.1fs)",
+        args.dataset, W.shape[0], X.shape[1], n_classes, time.perf_counter() - t0,
+    )
 
     W_norm = normalize_adjacency(W)
     oracle = oracle_bucket_assignment(W, y, adaptive=True)
@@ -137,7 +165,7 @@ def main() -> None:
                 X, y, W_norm, fit, router, test, filter_types, oracle,
                 K=args.K, epochs=args.expert_epochs, gate_epochs=args.gate_epochs,
                 lr=args.lr, weight_decay=args.weight_decay,
-                gate_lr=args.lr, seed=seed, device=args.device,
+                gate_lr=args.lr, seed=seed, device=args.device, n_classes=n_classes,
             )
 
             # --- Faithful joint replication (the paper's own protocol) ---
@@ -145,7 +173,7 @@ def main() -> None:
                 W_norm, X.shape[1], train, filter_types, K=args.K,
                 epochs=args.joint_epochs, lr=args.lr,
                 weight_decay=args.weight_decay, gamma_smooth=args.gamma_smooth,
-                seed=seed, device=args.device,
+                seed=seed, device=args.device, n_classes=n_classes,
             ).fit_graph(X, y)
             joint_acc = _score_single(joint, X, y, test)
 
@@ -155,7 +183,7 @@ def main() -> None:
                 routing="uniform",
                 epochs=args.joint_epochs, lr=args.lr,
                 weight_decay=args.weight_decay, gamma_smooth=args.gamma_smooth,
-                seed=seed, device=args.device,
+                seed=seed, device=args.device, n_classes=n_classes,
             ).fit_graph(X, y)
             uniform_acc = _score_single(uniform, X, y, test)
 
@@ -163,6 +191,7 @@ def main() -> None:
                 W_norm, X.shape[1], train, K=args.K, filter_type="low_pass",
                 epochs=args.expert_epochs, lr=args.lr,
                 weight_decay=args.weight_decay, seed=seed, device=args.device,
+                n_classes=n_classes,
             ).fit_graph(X, y)
             cheb_acc = _score_single(global_cheb, X, y, test)
 
@@ -268,7 +297,12 @@ def main() -> None:
             "n_nodes": int(X.shape[0]),
             "d_features": int(X.shape[1]),
             "n_edges": float(W.sum() / 2.0),
-            "positive_ratio": float(y.mean()),
+            "n_classes": n_classes,
+            # Label mean is a class prior only for binary targets; report the
+            # explicit class counts whenever the loader provides them.
+            "positive_ratio": float(y.mean()) if n_classes <= 2 else None,
+            **({"class_counts": graph["class_counts"]}
+               if "class_counts" in graph else {}),
         },
         "filters": filter_types,
         "protocol_b": protocol_b_stats,
@@ -278,12 +312,15 @@ def main() -> None:
             "protocol_b scores Node-MoE's differentiated ChebNetII pool under the "
             "same honest fixed-expert protocol as the repo's 0/234 null: the pool is "
             "routing-blind and the gate is cross-fit on disjoint nodes. faithful_joint "
-            "is the paper's own end-to-end training. A win in faithful_joint but not "
-            "protocol_b means the gain is co-adaptation / ensemble capacity, not "
-            "genuine routing. gate_effect_joint_vs_uniform_ensemble is the causal "
-            "control: it compares the gated model against the same experts combined by "
-            "a fixed equal-weight mean, so a near-zero difference means the learned gate "
-            "contributes nothing beyond the expert pool and averaging."
+            "is the paper's own end-to-end training. uniform_ensemble_vs_global_chebnetii "
+            "refutes (or confirms) ensemble capacity: an unrouted equal-weight average of "
+            "the same experts matching a single global ChebNetII means extra expert "
+            "capacity is not the source. gate_effect_joint_vs_uniform_ensemble is the "
+            "causal control: the gated model minus the same experts averaged, so a "
+            "positive value localises the gain to gate-expert co-adaptation -- which "
+            "collapses under protocol_b's cross-fit gate. A win in faithful_joint but not "
+            "protocol_b therefore means the gain is not a routing signal that survives "
+            "honest evaluation."
         ),
     }
     path = out_dir / "node_moe.json"

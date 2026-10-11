@@ -45,9 +45,18 @@ Two ways the published method is tested
    expert pool, cross-fit the gate, and ask whether *any* routing beats one
    global model. This is the same protocol that produced the repo's 0/234 null.
 
-If Node-MoE wins under (1) but not (2), the gain is co-adaptation / ensemble
-capacity rather than genuine per-node expert selection -- the central claim of
-the evaluation-critique line.
+If Node-MoE wins under (1) but not (2), the gain is real but not routing: an
+unrouted uniform average of the same experts matches a single global ChebNetII
+(the capacity control refutes that the gain is ensemble capacity), so whatever is
+left is *gate-expert co-adaptation* that collapses when the gate is cross-fit --
+the central claim of the evaluation-critique line.
+
+Datasets
+--------
+The heads are class-agnostic: ``n_classes <= 2`` keeps the original single-logit
+BCE path byte-for-byte, while ``n_classes > 2`` switches to C logits with
+cross-entropy. This lets the same code run on the binary fraud graphs **and** the
+5-way actor/web heterophily graphs Node-MoE reports SOTA on.
 """
 
 from __future__ import annotations
@@ -65,6 +74,14 @@ from spectral_distillation.src.learned_router import (
     build_router_targets,
     uniform_ensemble_accuracy,
 )
+
+def _softmax_rows(logits: np.ndarray) -> np.ndarray:
+    """Row-wise softmax with the max-subtraction trick (numerically stable)."""
+    z = np.asarray(logits, dtype=float)
+    z = z - z.max(axis=1, keepdims=True)
+    e = np.exp(z)
+    return e / e.sum(axis=1, keepdims=True)
+
 
 # Ordered by how distinct each target shape is; ``differentiated_filter_types``
 # takes the first ``m``. low/high are the canonical homophily/heterophily pair,
@@ -230,17 +247,21 @@ class ChebNetIIModule(nn.Module):
         filter_type: str,
         skip: bool = True,
         hidden_dim: int = 0,
+        n_classes: int = 2,
     ) -> None:
         super().__init__()
         self.filter = ChebNetIIFilter(K, filter_type)
         self.skip = skip
         in_dim = 2 * n_features if skip else n_features
         self.hidden_dim = hidden_dim
+        self.n_classes = int(n_classes)
+        # Binary keeps the single-logit + BCE path; multiclass uses C logits + CE.
+        out_dim = 1 if self.n_classes <= 2 else self.n_classes
         if hidden_dim > 0:
             self.lin = nn.Linear(in_dim, hidden_dim)
-            self.out = nn.Linear(hidden_dim, 1)
+            self.out = nn.Linear(hidden_dim, out_dim)
         else:
-            self.out = nn.Linear(in_dim, 1)
+            self.out = nn.Linear(in_dim, out_dim)
 
     def forward(self, basis: list[torch.Tensor]) -> torch.Tensor:
         filtered = self.filter(basis)
@@ -248,7 +269,8 @@ class ChebNetIIModule(nn.Module):
         h = torch.cat([x, filtered], dim=-1) if self.skip else filtered
         if self.hidden_dim > 0:
             h = F.relu(self.lin(h))
-        return self.out(h).squeeze(-1)
+        logits = self.out(h)
+        return logits.squeeze(-1) if self.n_classes <= 2 else logits
 
 
 class ChebNetIIHead:
@@ -274,6 +296,7 @@ class ChebNetIIHead:
         weight_decay: float = 1e-3,
         seed: int = 0,
         device: str = "cpu",
+        n_classes: int = 2,
     ) -> None:
         self.W_norm = W_norm
         self.n_features = n_features
@@ -285,6 +308,7 @@ class ChebNetIIHead:
         self.K = K
         self.filter_type = filter_type
         self.hidden_dim = hidden_dim
+        self.n_classes = int(n_classes)
         self.epochs = epochs
         self.lr = lr
         self.weight_decay = weight_decay
@@ -315,18 +339,23 @@ class ChebNetIIHead:
 
         torch.manual_seed(self.seed)
         self._model = ChebNetIIModule(
-            self.n_features, self.K, self.filter_type, hidden_dim=self.hidden_dim
+            self.n_features, self.K, self.filter_type, hidden_dim=self.hidden_dim,
+            n_classes=self.n_classes,
         ).to(self.device)
         basis = self._basis_features(X)
-        yt = torch.as_tensor(np.asarray(y, dtype=np.float32), device=self.device)
         idx = torch.as_tensor(self.train_idx, dtype=torch.long, device=self.device)
 
-        pos = float(yt[idx].sum().item())
-        neg = float(idx.numel() - pos)
-        pos_weight = torch.tensor(
-            [neg / pos if pos > 0 else 1.0], device=self.device, dtype=torch.float32
-        )
-        loss_fn = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
+        if self.n_classes <= 2:
+            yt = torch.as_tensor(np.asarray(y, dtype=np.float32), device=self.device)
+            pos = float(yt[idx].sum().item())
+            neg = float(idx.numel() - pos)
+            pos_weight = torch.tensor(
+                [neg / pos if pos > 0 else 1.0], device=self.device, dtype=torch.float32
+            )
+            loss_fn = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
+        else:
+            yt = torch.as_tensor(np.asarray(y, dtype=np.int64), device=self.device)
+            loss_fn = nn.CrossEntropyLoss()
         opt = torch.optim.Adam(
             self._model.parameters(), lr=self.lr, weight_decay=self.weight_decay
         )
@@ -348,13 +377,19 @@ class ChebNetIIHead:
 
     def predict_nodes(self, X: np.ndarray, idx: np.ndarray) -> np.ndarray:
         if self._fallback is not None:
-            return self._fallback.predict(np.asarray(X)[idx])
-        return (self._logits_nodes(X, idx) > 0).astype(np.int64)
+            return self._fallback.predict(np.asarray(X)[idx]).astype(np.int64)
+        logits = self._logits_nodes(X, idx)
+        if self.n_classes <= 2:
+            return (logits > 0).astype(np.int64)
+        return logits.argmax(axis=1).astype(np.int64)
 
     def predict_proba_nodes(self, X: np.ndarray, idx: np.ndarray) -> np.ndarray:
         if self._fallback is not None:
             return np.asarray(self._fallback.predict_proba(np.asarray(X)[idx]), dtype=float)
-        return 1.0 / (1.0 + np.exp(-self._logits_nodes(X, idx)))[:, None]
+        logits = self._logits_nodes(X, idx)
+        if self.n_classes <= 2:
+            return 1.0 / (1.0 + np.exp(-logits))[:, None]
+        return _softmax_rows(logits)
 
 
 def cheb_head_factory(
@@ -368,6 +403,7 @@ def cheb_head_factory(
     weight_decay: float = 1e-3,
     seed: int = 0,
     device: str = "cpu",
+    n_classes: int = 2,
 ) -> Callable[[np.ndarray], ChebNetIIHead]:
     """Build an ``expert_factory`` for :func:`fit_experts` (fixed filter type)."""
 
@@ -376,6 +412,7 @@ def cheb_head_factory(
             W_norm=W_norm, n_features=n_features, train_idx=train_idx,
             K=K, filter_type=filter_type, hidden_dim=hidden_dim, epochs=epochs,
             lr=lr, weight_decay=weight_decay, seed=seed, device=device,
+            n_classes=n_classes,
         )
 
     return factory
@@ -456,11 +493,13 @@ class NodeMoEHead:
         gamma_smooth: float = 1e-3,
         seed: int = 0,
         device: str = "cpu",
+        n_classes: int = 2,
     ) -> None:
         if routing not in ("gate", "uniform"):
             raise ValueError(f"routing must be 'gate' or 'uniform', got {routing!r}")
         self.W_norm = W_norm
         self.n_features = n_features
+        self.n_classes = int(n_classes)
         train_idx = np.asarray(train_idx)
         self.train_idx = (
             np.flatnonzero(train_idx) if train_idx.dtype == bool
@@ -498,7 +537,7 @@ class NodeMoEHead:
     def _build_model(self) -> nn.Module:
         experts = nn.ModuleList(
             [
-                ChebNetIIModule(self.n_features, self.K, ft)
+                ChebNetIIModule(self.n_features, self.K, ft, n_classes=self.n_classes)
                 for ft in self.filter_types
             ]
         )
@@ -512,10 +551,17 @@ class NodeMoEHead:
         return holder
 
     def _mix(self, expert_logits: torch.Tensor, gfeats, Wt):
-        """Combine expert logits by the learned gate or a fixed 1/K mean."""
+        """Combine expert logits by the learned gate or a fixed 1/K mean.
+
+        Binary experts give ``(n, E)`` logits; multiclass experts give
+        ``(n, E, C)``. The gate weights ``(n, E)`` contract over the expert axis
+        either way.
+        """
         if self.routing == "gate":
             g = self._model.gate(gfeats, Wt)
-            return (g * expert_logits).sum(dim=1), g
+            if self.n_classes <= 2:
+                return (g * expert_logits).sum(dim=1), g
+            return torch.einsum("ne,nec->nc", g, expert_logits), g
         return expert_logits.mean(dim=1), None
 
     def fit_graph(self, X: np.ndarray, y: np.ndarray) -> "NodeMoEHead":
@@ -529,15 +575,19 @@ class NodeMoEHead:
         self._model = self._build_model().to(self.device)
         basis, gfeats = self._features(X)
         Wt = self._W()
-        yt = torch.as_tensor(np.asarray(y, dtype=np.float32), device=self.device)
         idx = torch.as_tensor(self.train_idx, dtype=torch.long, device=self.device)
 
-        pos = float(yt[idx].sum().item())
-        neg = float(idx.numel() - pos)
-        pos_weight = torch.tensor(
-            [neg / pos if pos > 0 else 1.0], device=self.device, dtype=torch.float32
-        )
-        loss_fn = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
+        if self.n_classes <= 2:
+            yt = torch.as_tensor(np.asarray(y, dtype=np.float32), device=self.device)
+            pos = float(yt[idx].sum().item())
+            neg = float(idx.numel() - pos)
+            pos_weight = torch.tensor(
+                [neg / pos if pos > 0 else 1.0], device=self.device, dtype=torch.float32
+            )
+            loss_fn = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
+        else:
+            yt = torch.as_tensor(np.asarray(y, dtype=np.int64), device=self.device)
+            loss_fn = nn.CrossEntropyLoss()
         opt = torch.optim.Adam(
             self._model.parameters(), lr=self.lr, weight_decay=self.weight_decay
         )
@@ -574,13 +624,19 @@ class NodeMoEHead:
 
     def predict_nodes(self, X: np.ndarray, idx: np.ndarray) -> np.ndarray:
         if self._fallback is not None:
-            return self._fallback.predict(np.asarray(X)[idx])
-        return (self._mix_logits(X, idx) > 0).astype(np.int64)
+            return self._fallback.predict(np.asarray(X)[idx]).astype(np.int64)
+        logits = self._mix_logits(X, idx)
+        if self.n_classes <= 2:
+            return (logits > 0).astype(np.int64)
+        return logits.argmax(axis=1).astype(np.int64)
 
     def predict_proba_nodes(self, X: np.ndarray, idx: np.ndarray) -> np.ndarray:
         if self._fallback is not None:
             return np.asarray(self._fallback.predict_proba(np.asarray(X)[idx]), dtype=float)
-        return 1.0 / (1.0 + np.exp(-self._mix_logits(X, idx)))[:, None]
+        logits = self._mix_logits(X, idx)
+        if self.n_classes <= 2:
+            return 1.0 / (1.0 + np.exp(-logits))[:, None]
+        return _softmax_rows(logits)
 
     def gate_weights(self, X: np.ndarray) -> np.ndarray:
         if self.routing != "gate":
@@ -590,7 +646,11 @@ class NodeMoEHead:
             return g.cpu().numpy()
 
     def expert_logits_nodes(self, X: np.ndarray, idx: np.ndarray) -> np.ndarray:
-        """Per-expert raw logits for ``idx``: shape ``(len(idx), n_experts)``."""
+        """Per-expert raw logits for ``idx``.
+
+        Shape ``(len(idx), n_experts)`` when binary, ``(len(idx), n_experts,
+        n_classes)`` when multiclass.
+        """
         with torch.no_grad():
             _, _, expert_logits = self._forward(X)
             sel = torch.as_tensor(np.asarray(idx, dtype=np.int64), device=self.device)
@@ -651,6 +711,7 @@ def build_differentiated_pool(
     weight_decay: float = 1e-3,
     seed: int = 0,
     device: str = "cpu",
+    n_classes: int = 2,
 ) -> list[ChebNetIIHead]:
     """Routing-blind pool: one ChebNetII expert per filter type, each on *all*
     fit nodes. Routing plays no role in fitting -- the diversity comes from the
@@ -663,6 +724,7 @@ def build_differentiated_pool(
             W_norm=W_norm, n_features=X.shape[1], train_idx=fit_idx,
             K=K, filter_type=ft, epochs=epochs, lr=lr,
             weight_decay=weight_decay, seed=seed, device=device,
+            n_classes=n_classes,
         )
         head.fit_graph(X, y)
         pool.append(head)
@@ -686,6 +748,7 @@ def evaluate_node_moe_protocol_b(
     gate_lr: float = 1e-2,
     seed: int = 0,
     device: str = "cpu",
+    n_classes: int = 2,
 ) -> dict:
     """Score Node-MoE routing under the honest fixed-expert (Protocol B) protocol.
 
@@ -702,12 +765,12 @@ def evaluate_node_moe_protocol_b(
     n_experts = len(filter_types)
     pool = build_differentiated_pool(
         W_norm, X, y, fit_mask, filter_types, K=K, epochs=epochs, lr=lr,
-        weight_decay=weight_decay, seed=seed, device=device,
+        weight_decay=weight_decay, seed=seed, device=device, n_classes=n_classes,
     )
     global_head = ChebNetIIHead(
         W_norm=W_norm, n_features=X.shape[1], train_idx=np.flatnonzero(fit_mask),
         K=K, filter_type="low_pass", epochs=epochs, lr=lr,
-        weight_decay=weight_decay, seed=seed, device=device,
+        weight_decay=weight_decay, seed=seed, device=device, n_classes=n_classes,
     )
     global_head.fit_graph(X, y)
 

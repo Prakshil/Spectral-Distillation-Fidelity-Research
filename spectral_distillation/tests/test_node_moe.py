@@ -28,8 +28,39 @@ from spectral_distillation.src.node_moe import (
     _smoothing_loss,
 )
 from spectral_distillation.src.router_protocol import oracle_bucket_assignment
+from spectral_distillation.src.learned_router import uniform_ensemble_accuracy
+from spectral_distillation.src.heterophily import _graph_from_arrays
 
 import torch  # noqa: E402  (after the pyarrow import-order guard)
+
+
+class _FakeProbaHead:
+    """Minimal head exposing only ``predict_proba_nodes`` for ensemble tests."""
+
+    def __init__(self, p):
+        self.p = np.asarray(p, dtype=float)
+
+    def predict_proba_nodes(self, X, idx):
+        return self.p[idx]
+
+
+def _sbm_multi(k=4, n_per=40, p_in=0.2, p_out=0.02, d=6, seed=0):
+    """k-community homophilic SBM with a per-class signal in the first k features."""
+    rng = np.random.default_rng(seed)
+    n = k * n_per
+    y = np.repeat(np.arange(k), n_per)
+    W = np.zeros((n, n))
+    for i in range(n):
+        for j in range(i + 1, n):
+            p = p_in if y[i] == y[j] else p_out
+            if rng.random() < p:
+                W[i, j] = W[j, i] = 1.0
+    W = np.maximum(W, W.T)
+    np.fill_diagonal(W, 0.0)
+    X = rng.normal(0.0, 0.3, size=(n, d))
+    for c in range(k):
+        X[y == c, c] += 2.0
+    return W, X, y
 
 
 def _sbm(n_per=60, p_in=0.15, p_out=0.02, d=4, seed=0):
@@ -290,3 +321,97 @@ def test_protocol_b_returns_all_conditions_and_reports_node_counts():
         assert np.isfinite(res["accuracy"][key])
     assert res["n_fit_nodes"] == int(fit.sum())
     assert res["n_router_nodes"] == int(router.sum())
+
+
+# --------------------------------------------------------------------------- #
+# Multiclass (heterophily) path
+# --------------------------------------------------------------------------- #
+
+def test_chebnetii_head_multiclass_fits_and_predicts_valid_labels():
+    W, X, y = _sbm_multi(k=4)
+    W_norm = normalize_adjacency(W)
+    train = np.zeros(y.size, dtype=bool)
+    train[::2] = True
+    head = ChebNetIIHead(W_norm, X.shape[1], train, K=2, filter_type="low_pass",
+                         epochs=200, seed=0, n_classes=4).fit_graph(X, y)
+    idx = np.flatnonzero(~train)
+    pred = head.predict_nodes(X, idx)
+    assert set(np.unique(pred)) <= set(range(4))
+    acc = float((pred == y[idx]).mean())
+    assert acc > 0.7, acc
+    proba = head.predict_proba_nodes(X, idx)
+    assert proba.shape == (idx.size, 4)
+    assert np.allclose(proba.sum(axis=1), 1.0, atol=1e-5)
+
+
+def test_node_moe_head_multiclass_shapes_and_competence():
+    W, X, y = _sbm_multi(k=4)
+    W_norm = normalize_adjacency(W)
+    train = np.zeros(y.size, dtype=bool)
+    train[::2] = True
+    head = NodeMoEHead(W_norm, X.shape[1], train,
+                       filter_types=differentiated_filter_types(3),
+                       K=2, epochs=80, seed=0, n_classes=4).fit_graph(X, y)
+    idx = np.flatnonzero(~train)
+    assert head.expert_logits_nodes(X, idx).shape == (idx.size, 3, 4)
+    pred = head.predict_nodes(X, idx)
+    assert set(np.unique(pred)) <= set(range(4))
+    assert float((pred == y[idx]).mean()) > 0.7
+    assert head.gate_weights(X).shape == (y.size, 3)
+
+
+def test_node_moe_head_multiclass_uniform_is_plain_expert_mean():
+    W, X, y = _sbm_multi(k=4)
+    W_norm = normalize_adjacency(W)
+    train = np.zeros(y.size, dtype=bool)
+    train[::2] = True
+    head = NodeMoEHead(W_norm, X.shape[1], train, routing="uniform",
+                       filter_types=differentiated_filter_types(3), K=2,
+                       epochs=20, seed=0, n_classes=4).fit_graph(X, y)
+    mix, g, expert_logits = head._forward(X)
+    assert g is None
+    assert expert_logits.shape[1:] == (3, 4)
+    assert torch.allclose(mix, expert_logits.mean(dim=1), atol=1e-6)
+
+
+def test_uniform_ensemble_accuracy_binary_matches_threshold_rule():
+    n = 40
+    rng = np.random.default_rng(0)
+    y = rng.integers(0, 2, size=n)
+    p1, p2 = rng.random((n, 1)), rng.random((n, 1))
+    got = uniform_ensemble_accuracy(None, y, [_FakeProbaHead(p1), _FakeProbaHead(p2)],
+                                    np.ones(n, dtype=bool))
+    avg = (p1[:, 0] + p2[:, 0]) / 2.0
+    expected = float(((avg > 0.5).astype(int) == y).mean())
+    assert abs(got - expected) < 1e-12
+
+
+def test_uniform_ensemble_accuracy_multiclass_is_probability_argmax():
+    n, k = 40, 4
+    rng = np.random.default_rng(1)
+    y = rng.integers(0, k, size=n)
+    ps = [rng.random((n, k)) for _ in range(3)]
+    got = uniform_ensemble_accuracy(None, y, [_FakeProbaHead(p) for p in ps],
+                                    np.ones(n, dtype=bool))
+    expected = float((np.mean(np.stack(ps), axis=0).argmax(1) == y).mean())
+    assert abs(got - expected) < 1e-12
+
+
+# --------------------------------------------------------------------------- #
+# Heterophily loader
+# --------------------------------------------------------------------------- #
+
+def test_heterophily_graph_from_arrays_builds_binary_symmetric_W():
+    x = np.eye(4)
+    y = np.array([0, 1, 2, 3])
+    edge_index = np.array([[0, 1, 2], [1, 2, 3]])  # directed 0->1, 1->2, 2->3
+    g = _graph_from_arrays(x, edge_index, y, "toy", "unit-test")
+    assert g["n_nodes"] == 4 and g["n_classes"] == 4
+    assert g["d_features"] == 4
+    W = g["W"]
+    assert np.allclose(W, W.T)
+    assert set(np.unique(W)) <= {0.0, 1.0}
+    assert W[0, 1] == 1.0 and W[1, 0] == 1.0  # undirected
+    assert W[0, 2] == 0.0
+    assert g["n_edges"] == 3
+    assert g["class_counts"] == {0: 1, 1: 1, 2: 1, 3: 1}

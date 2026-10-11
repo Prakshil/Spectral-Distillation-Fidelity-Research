@@ -1,0 +1,245 @@
+{
+  "config": {
+    "dataset": "squirrel",
+    "data_path": null,
+    "max_nodes": null,
+    "splits": 5,
+    "seeds": 1,
+    "router_frac": 0.35,
+    "K": 2,
+    "expert_epochs": 200,
+    "gate_epochs": 200,
+    "joint_epochs": 200,
+    "lr": 0.01,
+    "weight_decay": 0.001,
+    "gamma_smooth": 0.001,
+    "out": "logs",
+    "device": "cpu"
+  },
+  "graph": {
+    "n_nodes": 5201,
+    "d_features": 2089,
+    "n_edges": 198353.0,
+    "n_classes": 5,
+    "positive_ratio": null,
+    "class_counts": {
+      "0": 1042,
+      "1": 1040,
+      "2": 1039,
+      "3": 1040,
+      "4": 1040
+    }
+  },
+  "filters": [
+    "low_pass",
+    "high_pass",
+    "band_pass"
+  ],
+  "protocol_b": {
+    "mean_accuracy": {
+      "single_global": 0.28961538461538466,
+      "node_moe_gate": 0.2953076923076923,
+      "random": 0.29430769230769227,
+      "oracle": 0.2986153846153846,
+      "ensemble_uniform": 0.29246153846153844
+    },
+    "mean_gaps": {
+      "gate_minus_no_routing": 0.005692307692307686,
+      "gate_minus_random": 0.0009999999999999788,
+      "gate_minus_ensemble": 0.0028461538461538203,
+      "ensemble_minus_no_routing": 0.002846153846153865,
+      "oracle_minus_no_routing": 0.008999999999999998,
+      "n_fit_nodes": 1691.0,
+      "n_router_nodes": 910.0
+    },
+    "node_moe_gate_vs_no_routing": {
+      "mean_diff": 0.005692307692307686,
+      "p_wilcoxon": 0.3125,
+      "effect_size_dz": 0.5970072022877455,
+      "beats_reference": true
+    },
+    "ensemble_vs_no_routing": {
+      "mean_diff": 0.002846153846153865,
+      "p_wilcoxon": 0.375,
+      "effect_size_dz": 0.5950737585082946,
+      "beats_reference": true
+    },
+    "oracle_vs_no_routing": {
+      "mean_diff": 0.008999999999999998,
+      "p_wilcoxon": 0.125,
+      "effect_size_dz": 1.0542679926492977,
+      "beats_reference": true
+    },
+    "n_runs_gate_beats_no_routing": 3,
+    "n_runs_ensemble_beats_no_routing": 3,
+    "n_runs": 5
+  },
+  "faithful_joint": {
+    "mean_accuracy": {
+      "node_moe_joint": 0.3033846153846154,
+      "node_moe_uniform_ensemble": 0.33399999999999996,
+      "global_chebnetii": 0.29992307692307696,
+      "global_mlp": 0.3103076923076923
+    },
+    "joint_vs_global_chebnetii": {
+      "mean_diff": 0.0034615384615384716,
+      "p_wilcoxon": 0.8125,
+      "effect_size_dz": 0.5771128230479029,
+      "beats_reference": true
+    },
+    "joint_vs_global_mlp": {
+      "mean_diff": -0.006923076923076898,
+      "p_wilcoxon": 0.125,
+      "effect_size_dz": -1.361450296836109,
+      "beats_reference": false
+    },
+    "gate_effect_joint_vs_uniform_ensemble": {
+      "mean_diff": -0.03061538461538461,
+      "p_wilcoxon": 0.0625,
+      "effect_size_dz": -3.8737659844929495,
+      "beats_reference": false
+    },
+    "uniform_ensemble_vs_global_chebnetii": {
+      "mean_diff": 0.03407692307692308,
+      "p_wilcoxon": 0.0625,
+      "effect_size_dz": 3.5901352795353687,
+      "beats_reference": true
+    },
+    "n_runs_joint_beats_global_chebnetii": 2,
+    "n_runs_joint_beats_uniform_ensemble": 0,
+    "n_runs": 5
+  },
+  "per_run": [
+    {
+      "split": 0,
+      "seed": 0,
+      "protocol_b": {
+        "single_global": 0.28884615384615386,
+        "node_moe_gate": 0.28846153846153844,
+        "random": 0.28692307692307695,
+        "oracle": 0.28423076923076923,
+        "ensemble_uniform": 0.28884615384615386
+      },
+      "protocol_b_gaps": {
+        "gate_minus_no_routing": -0.00038461538461542766,
+        "gate_minus_random": 0.0015384615384614886,
+        "gate_minus_ensemble": -0.00038461538461542766,
+        "ensemble_minus_no_routing": 0.0,
+        "oracle_minus_no_routing": -0.004615384615384632,
+        "n_fit_nodes": 1691,
+        "n_router_nodes": 910
+      },
+      "joint": {
+        "node_moe_joint": 0.3080769230769231,
+        "node_moe_uniform_ensemble": 0.3353846153846154,
+        "global_chebnetii": 0.3088461538461538,
+        "global_mlp": 0.31346153846153846
+      }
+    },
+    {
+      "split": 1,
+      "seed": 0,
+      "protocol_b": {
+        "single_global": 0.28115384615384614,
+        "node_moe_gate": 0.30538461538461537,
+        "random": 0.2946153846153846,
+        "oracle": 0.3019230769230769,
+        "ensemble_uniform": 0.2923076923076923
+      },
+      "protocol_b_gaps": {
+        "gate_minus_no_routing": 0.024230769230769222,
+        "gate_minus_random": 0.010769230769230753,
+        "gate_minus_ensemble": 0.013076923076923042,
+        "ensemble_minus_no_routing": 0.01115384615384618,
+        "oracle_minus_no_routing": 0.020769230769230762,
+        "n_fit_nodes": 1691,
+        "n_router_nodes": 910
+      },
+      "joint": {
+        "node_moe_joint": 0.31038461538461537,
+        "node_moe_uniform_ensemble": 0.33884615384615385,
+        "global_chebnetii": 0.2988461538461539,
+        "global_mlp": 0.32384615384615384
+      }
+    },
+    {
+      "split": 2,
+      "seed": 0,
+      "protocol_b": {
+        "single_global": 0.29346153846153844,
+        "node_moe_gate": 0.29115384615384615,
+        "random": 0.29730769230769233,
+        "oracle": 0.3073076923076923,
+        "ensemble_uniform": 0.29384615384615387
+      },
+      "protocol_b_gaps": {
+        "gate_minus_no_routing": -0.0023076923076922884,
+        "gate_minus_random": -0.006153846153846176,
+        "gate_minus_ensemble": -0.002692307692307716,
+        "ensemble_minus_no_routing": 0.00038461538461542766,
+        "oracle_minus_no_routing": 0.013846153846153841,
+        "n_fit_nodes": 1691,
+        "n_router_nodes": 910
+      },
+      "joint": {
+        "node_moe_joint": 0.2953846153846154,
+        "node_moe_uniform_ensemble": 0.31653846153846155,
+        "global_chebnetii": 0.29730769230769233,
+        "global_mlp": 0.30038461538461536
+      }
+    },
+    {
+      "split": 3,
+      "seed": 0,
+      "protocol_b": {
+        "single_global": 0.29846153846153844,
+        "node_moe_gate": 0.3019230769230769,
+        "random": 0.30846153846153845,
+        "oracle": 0.30846153846153845,
+        "ensemble_uniform": 0.30346153846153845
+      },
+      "protocol_b_gaps": {
+        "gate_minus_no_routing": 0.0034615384615384603,
+        "gate_minus_random": -0.0065384615384615485,
+        "gate_minus_ensemble": -0.001538461538461544,
+        "ensemble_minus_no_routing": 0.0050000000000000044,
+        "oracle_minus_no_routing": 0.010000000000000009,
+        "n_fit_nodes": 1691,
+        "n_router_nodes": 910
+      },
+      "joint": {
+        "node_moe_joint": 0.30230769230769233,
+        "node_moe_uniform_ensemble": 0.3473076923076923,
+        "global_chebnetii": 0.3038461538461538,
+        "global_mlp": 0.30153846153846153
+      }
+    },
+    {
+      "split": 4,
+      "seed": 0,
+      "protocol_b": {
+        "single_global": 0.28615384615384615,
+        "node_moe_gate": 0.2896153846153846,
+        "random": 0.28423076923076923,
+        "oracle": 0.29115384615384615,
+        "ensemble_uniform": 0.28384615384615386
+      },
+      "protocol_b_gaps": {
+        "gate_minus_no_routing": 0.0034615384615384603,
+        "gate_minus_random": 0.005384615384615377,
+        "gate_minus_ensemble": 0.005769230769230749,
+        "ensemble_minus_no_routing": -0.0023076923076922884,
+        "oracle_minus_no_routing": 0.0050000000000000044,
+        "n_fit_nodes": 1691,
+        "n_router_nodes": 910
+      },
+      "joint": {
+        "node_moe_joint": 0.3007692307692308,
+        "node_moe_uniform_ensemble": 0.33192307692307693,
+        "global_chebnetii": 0.2907692307692308,
+        "global_mlp": 0.3123076923076923
+      }
+    }
+  ],
+  "interpretation": "protocol_b scores Node-MoE's differentiated ChebNetII pool under the same honest fixed-expert protocol as the repo's 0/234 null: the pool is routing-blind and the gate is cross-fit on disjoint nodes. faithful_joint is the paper's own end-to-end training. uniform_ensemble_vs_global_chebnetii refutes (or confirms) ensemble capacity: an unrouted equal-weight average of the same experts matching a single global ChebNetII means extra expert capacity is not the source. gate_effect_joint_vs_uniform_ensemble is the causal control: the gated model minus the same experts averaged, so a positive value localises the gain to gate-expert co-adaptation -- which collapses under protocol_b's cross-fit gate. A win in faithful_joint but not protocol_b therefore means the gain is not a routing signal that survives honest evaluation."
+}

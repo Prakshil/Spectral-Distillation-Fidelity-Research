@@ -54,6 +54,7 @@ Companion documents:
 | `gnn_router.py` | RouterGNN (label-free learned router, KL-divergence training) |
 | `gnn_expert.py` | Message-passing expert head over cached `[X, AX]`; `gnn_head_factory` |
 | `learned_router.py` | RouterGNN-lite: MLP router over cached `[X, AX]`, supervised by training labels on a held-out router split; frozen routing-blind expert pool |
+| `published_routers.py` | Published learned routers under Protocol B: RouterGNN (message-passing, label-supervised) + AD-GNN (per-node propagation depth via a label-free signal-preservation factor) |
 | `positive_control.py` | Positive control: non-separable mixture of linear rules, oracle routing from the latent partition |
 | `planted_control.py` | PC-1c-R positive control: 3 orthogonal feature bases, dilution ladder |
 | `router_protocol.py` | The oracle / label-free / random / uniform protocol, D1â€“D4 decision rules, frozen-model intervention, statistics |
@@ -77,6 +78,7 @@ Companion documents:
 | `run_fixed_expert_protocol.py` | Protocol B: one frozen routing-blind expert pool, 26 routings, logistic/MLP/GNN heads (`--expert`) | `logs/{dataset}_fixed_expert*/fixed_expert.json` |
 | `run_positive_control.py` | Positive control: same protocol on a non-separable mixture of linear rules, where routing provably helps; also scores RouterGNN-lite | `logs/positive_control/fixed_expert.json` |
 | `run_learned_router.py` | RouterGNN-lite vs no-routing / k-means / random / oracle on a frozen pool, real graphs (`--dataset amazon\|tolokers\|yelpchi`) | `logs/{dataset}_learned_router*/fixed_expert.json` |
+| `run_published_routers.py` | RouterGNN + AD-GNN vs the same frozen pool/baselines, on fraud and heterophily graphs (`--dataset amazon\|tolokers\|yelpchi\|actor\|chameleon\|squirrel`) | `logs/{dataset}_published_routers/fixed_expert.json` |
 | `run_sd_vs_routing.py` | Spectral distortion vs label-free routing stability across a retention ladder on fraud **and** real LLM attention (`--dataset llm`); same-seed multi-router stability, collapse detection | `logs/sd_vs_routing/{dataset}/sd_vs_routing.json` |
 | `analyze_sd_vs_routing.py` | Pooled/per-graph Spearman of low-frequency error and connectivity survival vs stability and oracle agreement | `logs/sd_vs_routing/summary.json` |
 | `run_llm_protocol_b.py` | Protocol B on real LLM attention: frozen routing-blind k-means pool, only the routing varies with sparsification. `--feature-mode per_layer` (24 features) | `logs/llm_protocol_b/llm_protocol_b.json` |

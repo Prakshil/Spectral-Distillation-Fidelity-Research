@@ -1,0 +1,117 @@
+{
+  "config": {
+    "dataset": "amazon",
+    "data_path": null,
+    "max_nodes": null,
+    "splits": 3,
+    "seeds": 1,
+    "epochs": 200,
+    "router_frac": 0.35,
+    "hidden_dim": 64,
+    "n_layers": 3,
+    "expert": "logistic",
+    "out": "logs",
+    "device": "cpu"
+  },
+  "graph": {
+    "n_nodes": 8639,
+    "d_features": 25,
+    "n_edges": 3298534.0,
+    "positive_ratio": 0.09503414747077207,
+    "n_classes": 2
+  },
+  "results": {
+    "mean_accuracy": {
+      "single_global": 0.9733796296296297,
+      "mlp_gate": 0.9731481481481481,
+      "router_gnn": 0.9094907407407407,
+      "ad_gnn": 0.9184413580246914,
+      "feature_kmeans": 0.9726851851851851,
+      "oracle": 0.9284722222222221,
+      "random": 0.9319444444444445,
+      "ensemble_uniform": 0.9682098765432099
+    },
+    "router_gnn_minus_no_routing": -0.063888888888889,
+    "ad_gnn_minus_no_routing": -0.05493827160493825,
+    "mlp_gate_minus_no_routing": -0.00023148148148155467,
+    "ensemble_minus_no_routing": -0.005169753086419759,
+    "router_gnn_vs_kmeans_agreement": 0.18474360458386388,
+    "ad_gnn_vs_kmeans_agreement": 0.07767102673920592,
+    "n_runs": 3,
+    "n_runs_router_gnn_beats_no_routing": 0,
+    "n_runs_ad_gnn_beats_no_routing": 0,
+    "n_runs_mlp_gate_beats_no_routing": 1,
+    "per_run": [
+      {
+        "accuracy": {
+          "single_global": 0.9743055555555555,
+          "mlp_gate": 0.9747685185185185,
+          "router_gnn": 0.8993055555555556,
+          "ad_gnn": 0.8986111111111111,
+          "feature_kmeans": 0.9731481481481481,
+          "oracle": 0.9180555555555555,
+          "random": 0.9171296296296296,
+          "ensemble_uniform": 0.9659722222222222
+        },
+        "router_gnn_minus_no_routing": -0.07499999999999996,
+        "ad_gnn_minus_no_routing": -0.0756944444444444,
+        "mlp_gate_minus_no_routing": 0.0004629629629629983,
+        "ensemble_minus_no_routing": -0.008333333333333304,
+        "router_gnn_vs_kmeans_agreement": 0.18474360458386388,
+        "ad_gnn_vs_kmeans_agreement": 0.07767102673920592,
+        "router_feature_mode": "nodemoe",
+        "n_fit_nodes": 2807,
+        "n_router_nodes": 1512,
+        "split": 0,
+        "seed": 0
+      },
+      {
+        "accuracy": {
+          "single_global": 0.9731481481481481,
+          "mlp_gate": 0.9722222222222222,
+          "router_gnn": 0.937037037037037,
+          "ad_gnn": 0.944212962962963,
+          "feature_kmeans": 0.9724537037037037,
+          "oracle": 0.9460648148148149,
+          "random": 0.9534722222222223,
+          "ensemble_uniform": 0.9650462962962963
+        },
+        "router_gnn_minus_no_routing": -0.036111111111111094,
+        "ad_gnn_minus_no_routing": -0.02893518518518512,
+        "mlp_gate_minus_no_routing": -0.0009259259259258856,
+        "ensemble_minus_no_routing": -0.008101851851851749,
+        "router_gnn_vs_kmeans_agreement": 0.18474360458386388,
+        "ad_gnn_vs_kmeans_agreement": 0.07767102673920592,
+        "router_feature_mode": "nodemoe",
+        "n_fit_nodes": 2807,
+        "n_router_nodes": 1512,
+        "split": 1,
+        "seed": 0
+      },
+      {
+        "accuracy": {
+          "single_global": 0.9726851851851852,
+          "mlp_gate": 0.9724537037037037,
+          "router_gnn": 0.8921296296296296,
+          "ad_gnn": 0.9125,
+          "feature_kmeans": 0.9724537037037037,
+          "oracle": 0.9212962962962963,
+          "random": 0.9252314814814815,
+          "ensemble_uniform": 0.9736111111111111
+        },
+        "router_gnn_minus_no_routing": -0.0805555555555556,
+        "ad_gnn_minus_no_routing": -0.06018518518518523,
+        "mlp_gate_minus_no_routing": -0.00023148148148155467,
+        "ensemble_minus_no_routing": 0.0009259259259258856,
+        "router_gnn_vs_kmeans_agreement": 0.18474360458386388,
+        "ad_gnn_vs_kmeans_agreement": 0.07767102673920592,
+        "router_feature_mode": "nodemoe",
+        "n_fit_nodes": 2807,
+        "n_router_nodes": 1512,
+        "split": 2,
+        "seed": 0
+      }
+    ]
+  },
+  "interpretation": "Published routers (RouterGNN message-passing, AD-GNN per-node depth via signal preservation) scored on the same frozen routing-blind k-means pool and splits as every baseline. RouterGNN shares the MLP gate's cross-fit supervision; AD-GNN is label-free."
+}

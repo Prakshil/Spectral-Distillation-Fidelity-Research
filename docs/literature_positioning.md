@@ -180,18 +180,24 @@ the operationalization, not the inequality.
 
 ## 10. Honest gaps versus the literature
 
-- **Published routers are only partly implemented.** RouterGNN and
-  Ada-Routing/AD-GNN are not reproduced, so for those the negative is against
-  structural-score routers and a label-trained MLP gate. **Node-MoE is now
-  reproduced in full** (`src/node_moe.py`, `experiments/run_node_moe.py`) and
-  still does not win under fixed-expert Protocol B (edge <= +0.005; 2/5 Amazon,
-  5/5 Tolokers, 2/5 YelpChi), and is beaten by a feature-only MLP on every graph
-  (`docs/fixed_expert_protocol.md`, "Node-MoE under this protocol"). The critique
-  is **no longer fraud-only**: the identical harness now runs on Node-MoE's own
-  heterophily suite (Actor/Chameleon/Squirrel, `src/heterophily.py`), where its
-  joint gain over a single global ChebNetII is within noise and an *unrouted*
-  equal-weight ensemble beats its gate on all three. Implementing the remaining
-  routers (RouterGNN, Ada-Routing) is the largest open item.
+- **Published routers were the last big gap and are now closed.** RouterGNN
+  (message-passing, label-supervised) and Ada-Routing/AD-GNN (per-node propagation
+  depth via a signal-preservation factor) are reproduced in `src/published_routers.py`
+  and scored under fixed-expert Protocol B on the fraud graphs *and* the heterophily
+  suite by `experiments/run_published_routers.py`. Both have negative mean deltas on
+  all six graphs and win only **1/16** runs (the same +0.0003 Tolokers split);
+  message passing in the router actively hurts — Amazon
+  −0.064 vs the MLP gate's −0.0002), and the oracle is below no-routing on every
+  row, so no router could have won. **Node-MoE is reproduced in full**
+  (`src/node_moe.py`, `experiments/run_node_moe.py`) and still does not win under
+  fixed-expert Protocol B (edge <= +0.005; 2/5 Amazon, 5/5 Tolokers, 2/5 YelpChi),
+  and is beaten by a feature-only MLP on every graph (`docs/fixed_expert_protocol.md`,
+  "Node-MoE under this protocol"). The critique is **no longer fraud-only**: the
+  identical harness runs on the heterophily suite (Actor/Chameleon/Squirrel,
+  `src/heterophily.py`), where Node-MoE's joint gain over a single global ChebNetII
+  is within noise and an *unrouted* equal-weight ensemble beats its gate on all
+  three. The negative is therefore not against strawmen, and the remaining
+  open items are structural (Lean, k=128 rows), not missing methods.
 - **The k=128 / YelpChi and k=32 real-attention rows are reduced-power** (fewer
   splits/seeds or node-capped) and are marked as such; the honest headline is
   full-power 0/26.

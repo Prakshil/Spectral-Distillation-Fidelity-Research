@@ -1,0 +1,71 @@
+{
+  "config": {
+    "dataset": "yelpchi",
+    "data_path": null,
+    "max_nodes": null,
+    "splits": 1,
+    "seeds": 1,
+    "epochs": 200,
+    "router_frac": 0.35,
+    "hidden_dim": 64,
+    "n_layers": 3,
+    "expert": "logistic",
+    "out": "logs",
+    "device": "cpu"
+  },
+  "graph": {
+    "n_nodes": 14840,
+    "d_features": 32,
+    "n_edges": 411194.0,
+    "positive_ratio": 0.14973045822102427,
+    "n_classes": 2
+  },
+  "results": {
+    "mean_accuracy": {
+      "single_global": 0.858355795148248,
+      "mlp_gate": 0.8498652291105121,
+      "router_gnn": 0.8535040431266846,
+      "ad_gnn": 0.8440700808625337,
+      "feature_kmeans": 0.859299191374663,
+      "oracle": 0.8393530997304582,
+      "random": 0.8475741239892183,
+      "ensemble_uniform": 0.8582210242587601
+    },
+    "router_gnn_minus_no_routing": -0.004851752021563405,
+    "ad_gnn_minus_no_routing": -0.014285714285714346,
+    "mlp_gate_minus_no_routing": -0.008490566037735903,
+    "ensemble_minus_no_routing": -0.00013477088948787852,
+    "router_gnn_vs_kmeans_agreement": 0.4021563342318059,
+    "ad_gnn_vs_kmeans_agreement": 0.2631401617250674,
+    "n_runs": 1,
+    "n_runs_router_gnn_beats_no_routing": 0,
+    "n_runs_ad_gnn_beats_no_routing": 0,
+    "n_runs_mlp_gate_beats_no_routing": 0,
+    "per_run": [
+      {
+        "accuracy": {
+          "single_global": 0.858355795148248,
+          "mlp_gate": 0.8498652291105121,
+          "router_gnn": 0.8535040431266846,
+          "ad_gnn": 0.8440700808625337,
+          "feature_kmeans": 0.859299191374663,
+          "oracle": 0.8393530997304582,
+          "random": 0.8475741239892183,
+          "ensemble_uniform": 0.8582210242587601
+        },
+        "router_gnn_minus_no_routing": -0.004851752021563405,
+        "ad_gnn_minus_no_routing": -0.014285714285714346,
+        "mlp_gate_minus_no_routing": -0.008490566037735903,
+        "ensemble_minus_no_routing": -0.00013477088948787852,
+        "router_gnn_vs_kmeans_agreement": 0.4021563342318059,
+        "ad_gnn_vs_kmeans_agreement": 0.2631401617250674,
+        "router_feature_mode": "nodemoe",
+        "n_fit_nodes": 4823,
+        "n_router_nodes": 2597,
+        "split": 0,
+        "seed": 0
+      }
+    ]
+  },
+  "interpretation": "Published routers (RouterGNN message-passing, AD-GNN per-node depth via signal preservation) scored on the same frozen routing-blind k-means pool and splits as every baseline. RouterGNN shares the MLP gate's cross-fit supervision; AD-GNN is label-free."
+}

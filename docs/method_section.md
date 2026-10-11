@@ -213,9 +213,12 @@ src/learned_router.py, gnn_router.py, gnn_expert.py   learned arms
 src/node_moe.py                          Node-MoE (ChebNetII experts + gate)
 src/heterophily.py                       Actor/Chameleon/Squirrel loaders
 src/positive_control.py                  D4 instrument check
+src/node_moe.py, src/heterophily.py     Node-MoE reproduction + its home benchmarks
+src/published_routers.py                published learned routers (RouterGNN, AD-GNN)
 experiments/run_fixed_expert_protocol.py, run_sd_vs_routing.py,
             run_llm_protocol_b.py, run_sparsify_ladder.py,
-            run_k_confirmation.py, run_node_moe.py    runners
+            run_k_confirmation.py, run_node_moe.py,
+            run_published_routers.py    runners
 ```
 
 ## 10. Scope (honest)
@@ -225,12 +228,15 @@ experiments/run_fixed_expert_protocol.py, run_sd_vs_routing.py,
   (Spearman +0.78…+0.99, `docs/real_attention_results.md` §9.1). The accuracy
   claim is a **null**.
 - Under the fixed-expert protocol, **no label-free or learned router beats one
-  global model** on the fraud graphs (0/234), and the oracle is *negative*
-  (9/9). RouterGNN and Ada-Routing are not yet reproduced, so for those the
-  negative is against structural-score routers and a label-trained MLP gate.
-  Node-MoE is reproduced in full (`node_moe.py`) and is also null under Protocol B,
-  so the negative now includes the strongest published node-wise graph MoE. The
-  same harness now also runs on Node-MoE's own heterophily suite
+  global model** on the fraud graphs (0/234) or on the heterophily suite, and the
+  oracle is *negative* (9/9 fraud). RouterGNN (message-passing router,
+  `published_routers.py`) and Ada-Routing/AD-GNN (per-node propagation depth via a
+  signal-preservation factor) are reproduced; their mean deltas are negative on
+  every graph and they win **1/16** runs (the same +0.0003 Tolokers split;
+  message passing in the router actively hurts — Amazon −0.064
+  vs the MLP gate's −0.0002). Node-MoE is reproduced in full (`node_moe.py`) and is
+  also null under Protocol B, so the negative includes the strongest published
+  node-wise graph MoE. The same harness runs on Node-MoE's own heterophily suite
   (`heterophily.py`, Actor/Chameleon/Squirrel), where its joint gain over a single
   global ChebNetII is within noise and an unrouted ensemble beats its gate on all
   three — so the null is not an artifact of the fraud-topology choice.

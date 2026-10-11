@@ -186,7 +186,7 @@ Still to do before submission:
 
 - ~~A fair head-to-head against the published learned routers (RouterGNN,
   Ada-Routing/AD-GNN)~~ — **done** (`src/published_routers.py`): both have
-  negative mean deltas on all six graphs (win 1/16 runs, all the same +0.0003
-  Tolokers split).
+  negative mean deltas on all six graphs (win 2/16 and 1/16 runs at the ±0.0005
+  noise scale).
 - More real datasets.
 - Removing a place where we chose a setting ("k") using the same data we report.

@@ -588,7 +588,10 @@ RouterGNN-lite run, re-emitted by the new runner:
   GraphSAGE-style router, now supervised by training labels instead of imitating a
   clustering. Gate features are held fixed at Node-MoE's `[X, |AX-X|, |A2X-X|]`,
   so the only difference from the MLP gate is the *architecture* — each layer
-  mixes a node's representation with its neighbours'.
+  mixes a node's representation with its neighbours'. It is trained with
+  hidden-layer LayerNorm and a conservative optimiser (lr 1e-3, weight-decay 1e-4,
+  grad-clip 1.0) so the comparison is a fair *architecture* contest rather than a
+  casualty of an unstable optimiser (see note (4)).
 * **AD-GNN / Ada-Routing**: per-node propagation depth via a *signal-preservation
   factor* (label-free): the cosine between a node's features and its 1- and 2-hop
   aggregated features, minimised over depth. Deep-preservation nodes route to the
@@ -599,32 +602,46 @@ Run: `python -m spectral_distillation.experiments.run_published_routers --datase
 
 | graph | n | C | no-routing | RouterGNN | AD-GNN | MLP gate | Ens-Avg | k-means | oracle |
 |---|---|---|---|---|---|---|---|---|---|
-| Amazon | 8639 | 2 | 0.9734 | 0.9095 (−0.0639) | 0.9184 (−0.0549) | 0.9731 (−0.0002) | 0.9682 | 0.9727 | 0.9285 |
-| Tolokers | 11758 | 2 | 0.7826 | 0.7817 (−0.0009) | 0.7818 (−0.0008) | 0.7819 (−0.0006) | 0.7818 | 0.7820 | 0.7815 |
-| YelpChi (capped) | 14840 | 2 | 0.8584 | 0.8535 (−0.0049) | 0.8441 (−0.0143) | 0.8499 (−0.0085) | 0.8582 | 0.8593 | 0.8394 |
-| Actor | 7600 | 5 | 0.3492 | 0.2988 (−0.0504) | 0.2922 (−0.0570) | 0.3067 (−0.0425) | 0.3228 | 0.3431 | 0.2948 |
-| Chameleon | 2277 | 5 | 0.4407 | 0.3781 (−0.0626) | 0.3732 (−0.0676) | 0.4074 (−0.0334) | 0.3992 | 0.4404 | 0.3116 |
-| Squirrel | 5201 | 5 | 0.3219 | 0.2917 (−0.0303) | 0.2217 (−0.1003) | 0.3073 (−0.0146) | 0.2955 | 0.3356 | 0.2510 |
+| Amazon | 8639 | 2 | 0.9734 | 0.9723 (−0.0011) | 0.9184 (−0.0549) | 0.9731 (−0.0002) | 0.9682 | 0.9727 | 0.9285 |
+| Tolokers | 11758 | 2 | 0.7826 | 0.7821 (−0.0005) | 0.7818 (−0.0008) | 0.7819 (−0.0006) | 0.7818 | 0.7820 | 0.7815 |
+| YelpChi (capped) | 14840 | 2 | 0.8584 | 0.8581 (−0.0003) | 0.8441 (−0.0143) | 0.8499 (−0.0085) | 0.8582 | 0.8593 | 0.8394 |
+| Actor | 7600 | 5 | 0.3492 | 0.3000 (−0.0492) | 0.2922 (−0.0570) | 0.3067 (−0.0425) | 0.3228 | 0.3431 | 0.2948 |
+| Chameleon | 2277 | 5 | 0.4407 | 0.3849 (−0.0559) | 0.3732 (−0.0676) | 0.4074 (−0.0334) | 0.3992 | 0.4404 | 0.3116 |
+| Squirrel | 5201 | 5 | 0.3219 | 0.2809 (−0.0410) | 0.2217 (−0.1003) | 0.3073 (−0.0146) | 0.2955 | 0.3356 | 0.2510 |
 
-Deltas are against no-routing. Every mean is negative on every graph (RouterGNN
-and AD-GNN lose 15 of 16 individual runs; the single positive run on each is the
-*same* +0.0003 Tolokers split, indistinguishable from noise). The MLP gate's win
-rates likewise stay at chance (1/3 Tolokers, 0/3 elsewhere). This matches the
-0/234 structural-score result: no router, learned or fixed, separates from a
-single global model on any of these pools.
+Deltas are against no-routing. Every mean is negative on every graph. Across the
+16 individual runs RouterGNN wins 2 (Amazon split 1, +0.0005; Tolokers split 3,
++0.0003), AD-GNN wins 1 (the same Tolokers split), and the MLP gate wins 2
+(Amazon split 1, Tolokers split 3) — every win is at the ±0.0005 noise scale and
+none survives a per-graph mean. This matches the 0/234 structural-score result: no
+router, learned or fixed, separates from a single global model on any of these
+pools.
 
-Three notes. **(1) Message passing in the router actively *hurts*.** On Amazon the
-MLP gate is within noise of no-routing (−0.0002) while the message-passing
-RouterGNN drops −0.064; on the heterophily graphs the GNN router is also the worst
-of the three routings. The GNN router does not even rediscover the pool it is
-scored against (agreement with the frozen k-means partition: 0.185–0.474, well
-below the MLP's 0.731/0.314/0.550), i.e. neighbour mixing destroys the small
-gate-expert alignment the per-row gate retains. **(2) AD-GNN is a mechanism
-mismatch**, exactly as the guide predicted: its depth quantiles map onto a
-feature-k-means pool with agreement only 0.078–0.365, and it is worst on the
-graphs with the most heterophilic structure (Squirrel −0.100, Amazon −0.055).
-**(3) The oracle stays below no-routing on every row**, so all three learned
-routers are bounded: no router could have won on these pools.
+Four notes. **(1) A fairly trained message-passing router buys nothing.** On the
+fraud graphs RouterGNN is statistically indistinguishable from both the per-row
+MLP gate and from no-routing (Amazon −0.0011 vs −0.0002; Tolokers −0.0005 vs
+−0.0006; YelpChi −0.0003 vs −0.0085, where the GNN is actually the *better* of the
+two). On the heterophily graphs both routings are solidly negative and the GNN is
+the worse of the two (−0.049/−0.056/−0.041 vs the MLP's −0.043/−0.033/−0.015), so
+neighbour mixing does not recover the small gate-expert alignment the per-row gate
+retains. The GNN router does not reliably rediscover the pool it is scored against
+(agreement with the frozen k-means partition 0.295–0.530 across graphs). **(2)
+AD-GNN is a mechanism mismatch**, exactly as the guide predicted: its depth
+quantiles map onto a feature-k-means pool with agreement only 0.078–0.365, and it
+is worst on the graphs with the most heterophilic structure (Squirrel −0.100,
+Amazon −0.055). **(3) The oracle stays below no-routing on every row**, so all
+three learned routers are bounded: no router could have won on these pools. **(4)
+The first pass exposed an optimiser artefact, not a modelling result.** The guide's
+default optimiser settings (lr 1e-2, no normalisation) *diverged* on the larger
+graphs: on Amazon the training loss rose (11.5 → 12.4, versus a ≈1.1 uniform
+baseline), the softmax saturated, and the router collapsed to a single channel —
+its agreement with k-means was exactly the pool's dominant channel fraction
+(0.185). Training with the LayerNorm/regularised settings above makes every run
+converge (loss falls, >1 channel used; logged as `gnn_fit_accuracy` /
+`gnn_channels_used`) and leaves the conclusion unchanged, which is the point: the
+null is not an artefact of an under-trained router. The committed Protocol-A
+router (`router_protocol.py`, label-free KL) keeps the un-normalised default
+bit-identically — LayerNorm is opt-in.
 
 Pinned by `test_message_passing_router_recovers_gain_on_positive_control`,
 `test_message_passing_router_never_sees_test_labels`, and
@@ -760,6 +777,6 @@ channels are closed — the router has no graph terms (`x_only`) and the graph e
 cannot aggregate from nodes it does not own (`ragged-edges`) — and the null survives
 both. The published learned routers are now reproduced too (`src/published_routers.py`):
 RouterGNN (message-passing) and Ada-Routing/AD-GNN (per-node propagation depth) have
-negative mean deltas on every graph and win **1/16** runs total (the same +0.0003
-Tolokers split; `docs/fixed_expert_protocol.md`, "## Published routers under this
-protocol").
+negative mean deltas on every graph and win **2/16** and **1/16** runs respectively
+(all at the +0.0005 noise scale; `docs/fixed_expert_protocol.md`, "## Published
+routers under this protocol").

@@ -138,11 +138,14 @@ def train_message_passing_router(
     hidden_dim: int = 64,
     n_layers: int = 3,
     epochs: int = 200,
-    lr: float = 1e-2,
+    lr: float = 1e-3,
+    weight_decay: float = 1e-4,
+    grad_clip: float = 1.0,
     dropout: float = 0.1,
     seed: int = 0,
     device: str = "cpu",
     feature_mode: str = "nodemoe",
+    layer_norm: bool = True,
 ):
     """Fit :class:`~spectral_distillation.src.gnn_router.RouterGNN` on router nodes.
 
@@ -151,6 +154,14 @@ def train_message_passing_router(
     unlabeled node contributes gradient and no test label can leak in. The only
     change versus the MLP gate is the architecture -- each layer mixes the node's
     representation with its neighbours' before projecting.
+
+    The raw GraphSAGE-style stack (``mixed = A h + h``, unbounded activations)
+    diverges on large graphs: logits saturate and the loss *rises* (e.g. Amazon,
+    lr=1e-2: 11.5 -> 12.4, constant assignment). We therefore train the router
+    with LayerNorm between hidden layers, a lower learning rate, weight decay and
+    gradient clipping -- the correct compliance checks so the reproduced RouterGNN
+    is a *trained* router and not a sabotaged one. ``layer_norm=False`` with the
+    high ``lr`` reproduces the diverging configuration.
     """
     from spectral_distillation.src.gnn_router import RouterGNN, _as_torch_W
 
@@ -162,6 +173,7 @@ def train_message_passing_router(
         n_layers=n_layers,
         n_experts=n_experts,
         dropout=dropout,
+        layer_norm=layer_norm,
     ).to(device)
 
     ht = torch.as_tensor(feats, dtype=torch.float32, device=device)
@@ -169,7 +181,7 @@ def train_message_passing_router(
     yt = torch.as_tensor(targets, dtype=torch.float32, device=device)
     router_t = torch.as_tensor(router_idx, dtype=torch.long, device=device)
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
     losses: list[float] = []
     model.train()
     for _ in range(epochs):
@@ -177,6 +189,8 @@ def train_message_passing_router(
         picked = model(ht, Wt)[router_t]
         loss = -(yt * torch.log(picked + 1e-8)).sum(dim=1).mean()
         loss.backward()
+        if grad_clip is not None and grad_clip > 0:
+            torch.nn.utils.clip_grad_norm_(model.parameters(), grad_clip)
         optimizer.step()
         losses.append(float(loss.detach().cpu()))
     return model, losses
@@ -224,6 +238,10 @@ def evaluate_published_routers(
     n_layers: int = 3,
     device: str = "cpu",
     feature_mode: str = "nodemoe",
+    gnn_lr: float = 1e-3,
+    gnn_weight_decay: float = 1e-4,
+    gnn_grad_clip: float = 1.0,
+    gnn_layer_norm: bool = True,
 ) -> dict:
     """Score RouterGNN and AD-GNN beside every baseline on one frozen pool/split.
 
@@ -231,7 +249,9 @@ def evaluate_published_routers(
     separate one-column fit for the no-routing reference, so the pool is identical
     across conditions and any difference is attributable to routing alone. Returns
     a dict of absolute accuracies plus paired deltas against the no-routing and
-    ensemble references.
+    ensemble references, plus router-health diagnostics (loss trajectory, fit
+    accuracy on the router split, distinct channels emitted) so a collapsed router
+    is never silently reported as a trained one.
     """
     from spectral_distillation.src.router_protocol import random_assignment
 
@@ -248,7 +268,7 @@ def evaluate_published_routers(
     targets = build_router_targets(y, experts, X, router_idx)
 
     # RouterGNN-lite (MLP gate) -- the existing learned baseline.
-    mlp_model, _ = train_router(
+    mlp_model, mlp_losses = train_router(
         X, W_norm, targets, router_idx, n_experts, epochs=epochs,
         seed=seed, device=device, feature_mode=feature_mode,
     )
@@ -257,10 +277,11 @@ def evaluate_published_routers(
     )
 
     # RouterGNN -- same supervision, message-passing architecture.
-    gnn_model, _ = train_message_passing_router(
+    gnn_model, gnn_losses = train_message_passing_router(
         X, W_norm, targets, router_idx, n_experts, hidden_dim=hidden_dim,
-        n_layers=n_layers, epochs=epochs, seed=seed, device=device,
-        feature_mode=feature_mode,
+        n_layers=n_layers, epochs=epochs, lr=gnn_lr, weight_decay=gnn_weight_decay,
+        grad_clip=gnn_grad_clip, seed=seed, device=device,
+        feature_mode=feature_mode, layer_norm=gnn_layer_norm,
     )
     gnn_assign = message_passing_router_assignment(
         gnn_model, X, W_norm, device=device, feature_mode=feature_mode
@@ -287,6 +308,10 @@ def evaluate_published_routers(
     def _delta(name: str) -> float:
         return float(acc[name] - acc["single_global"])
 
+    targ_mode = targets.argmax(axis=1)
+    gnn_mode = gnn_assign[router_idx].argmax(axis=1)
+    mlp_mode = mlp_assign[router_idx].argmax(axis=1)
+
     return {
         "accuracy": acc,
         "router_gnn_minus_no_routing": _delta("router_gnn"),
@@ -301,6 +326,15 @@ def evaluate_published_routers(
         "ad_gnn_vs_kmeans_agreement": float(
             (ada_assign.argmax(axis=1) == pool.argmax(axis=1)).mean()
         ),
+        "gnn_loss_first": float(gnn_losses[0]),
+        "gnn_loss_last": float(gnn_losses[-1]),
+        "gnn_fit_accuracy": float((gnn_mode == targ_mode).mean()),
+        "gnn_channels_used": int(len(np.unique(gnn_assign.argmax(axis=1)))),
+        "mlp_loss_first": float(mlp_losses[0]),
+        "mlp_loss_last": float(mlp_losses[-1]),
+        "mlp_fit_accuracy": float((mlp_mode == targ_mode).mean()),
+        "mlp_channels_used": int(len(np.unique(mlp_assign.argmax(axis=1)))),
+        "gnn_layer_norm": bool(gnn_layer_norm),
         "router_feature_mode": feature_mode,
         "n_fit_nodes": int(fit_mask.sum()),
         "n_router_nodes": int(router_mask.sum()),

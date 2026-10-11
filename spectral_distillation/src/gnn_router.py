@@ -46,6 +46,7 @@ class RouterGNN(nn.Module):
         n_layers: int = 3,
         n_experts: int = 3,
         dropout: float = 0.1,
+        layer_norm: bool = False,
     ) -> None:
         super().__init__()
         layers = []
@@ -57,6 +58,10 @@ class RouterGNN(nn.Module):
             )
         self.linears = nn.ModuleList(layers)
         self.dropout = nn.Dropout(dropout)
+        self.layer_norm = layer_norm
+        self.lns = nn.ModuleList(
+            [nn.LayerNorm(hidden_dim) for _ in range(max(n_layers - 1, 0))]
+        )
 
     def forward(self, x, W):
         if isinstance(W, torch.Tensor) and W.layout == torch.sparse_coo:
@@ -66,11 +71,13 @@ class RouterGNN(nn.Module):
             def agg(h):
                 return torch.mm(W, h)
         h = x
-        for layer in self.linears:
+        for i, layer in enumerate(self.linears):
             mixed = agg(h) + h
             h = layer(mixed)
             if layer is not self.linears[-1]:
                 h = F.relu(h)
+                if self.layer_norm:
+                    h = self.lns[i](h)
                 h = self.dropout(h)
         return F.softmax(h, dim=-1)
 

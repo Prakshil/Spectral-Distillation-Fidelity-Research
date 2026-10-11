@@ -232,9 +232,10 @@ experiments/run_fixed_expert_protocol.py, run_sd_vs_routing.py,
   oracle is *negative* (9/9 fraud). RouterGNN (message-passing router,
   `published_routers.py`) and Ada-Routing/AD-GNN (per-node propagation depth via a
   signal-preservation factor) are reproduced; their mean deltas are negative on
-  every graph and they win **1/16** runs (the same +0.0003 Tolokers split;
-  message passing in the router actively hurts — Amazon −0.064
-  vs the MLP gate's −0.0002). Node-MoE is reproduced in full (`node_moe.py`) and is
+  every graph and they win **2/16** and **1/16** runs (all at the ±0.0005 noise
+  scale; a fairly trained message-passing router buys nothing — Amazon −0.0011
+  vs the MLP gate's −0.0002, with an earlier divergent pass documented and
+  corrected). Node-MoE is reproduced in full (`node_moe.py`) and is
   also null under Protocol B, so the negative includes the strongest published
   node-wise graph MoE. The same harness runs on Node-MoE's own heterophily suite
   (`heterophily.py`, Actor/Chameleon/Squirrel), where its joint gain over a single

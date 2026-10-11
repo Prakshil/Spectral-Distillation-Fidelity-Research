@@ -185,9 +185,11 @@ the operationalization, not the inequality.
   depth via a signal-preservation factor) are reproduced in `src/published_routers.py`
   and scored under fixed-expert Protocol B on the fraud graphs *and* the heterophily
   suite by `experiments/run_published_routers.py`. Both have negative mean deltas on
-  all six graphs and win only **1/16** runs (the same +0.0003 Tolokers split);
-  message passing in the router actively hurts — Amazon
-  −0.064 vs the MLP gate's −0.0002), and the oracle is below no-routing on every
+  all six graphs and win only **2/16** (RouterGNN) and **1/16** (AD-GNN) runs at the
+  ±0.0005 noise scale; a fairly trained message-passing router buys nothing — Amazon
+  −0.0011 vs the MLP gate's −0.0002 (an earlier pass that diverged on the large
+  graphs is documented and corrected in `docs/fixed_expert_protocol.md`, note (4)),
+  and the oracle is below no-routing on every
   row, so no router could have won. **Node-MoE is reproduced in full**
   (`src/node_moe.py`, `experiments/run_node_moe.py`) and still does not win under
   fixed-expert Protocol B (edge <= +0.005; 2/5 Amazon, 5/5 Tolokers, 2/5 YelpChi),

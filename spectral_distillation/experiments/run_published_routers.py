@@ -66,6 +66,13 @@ def main() -> None:
     p.add_argument("--expert", default="logistic", choices=["logistic", "mlp"])
     p.add_argument("--out", default="logs")
     p.add_argument("--device", default="cpu")
+    p.add_argument("--gnn-lr", type=float, default=1e-3)
+    p.add_argument("--gnn-weight-decay", type=float, default=1e-4)
+    p.add_argument("--gnn-grad-clip", type=float, default=1.0)
+    p.add_argument(
+        "--no-gnn-layer-norm", action="store_true",
+        help="train the raw unnormalized RouterGNN stack (diverges on large graphs)",
+    )
     args = p.parse_args()
 
     log = get_logger("published_routers")
@@ -92,19 +99,27 @@ def main() -> None:
                 X, y, W_norm, pool, train, test, oracle, expert_factory=factory,
                 seed=seed, router_frac=args.router_frac, epochs=args.epochs,
                 hidden_dim=args.hidden_dim, n_layers=args.n_layers,
-                device=args.device,
+                device=args.device, gnn_lr=args.gnn_lr,
+                gnn_weight_decay=args.gnn_weight_decay,
+                gnn_grad_clip=args.gnn_grad_clip,
+                gnn_layer_norm=not args.no_gnn_layer_norm,
             )
             res["split"], res["seed"] = split, seed
             per_split.append(res)
             a = res["accuracy"]
             log.info(
                 "split %d/%d seed %d: global=%.4f mlp=%.4f (%+.4f) gnn=%.4f (%+.4f) "
-                "adagnn=%.4f (%+.4f) ens=%.4f kmeans=%.4f oracle=%.4f",
+                "adagnn=%.4f (%+.4f) ens=%.4f kmeans=%.4f oracle=%.4f | "
+                "gnn loss %.3f->%.3f fitacc=%.2f ch=%d | mlp loss %.3f->%.3f fitacc=%.2f",
                 split + 1, args.splits, seed, a["single_global"], a["mlp_gate"],
                 res["mlp_gate_minus_no_routing"], a["router_gnn"],
                 res["router_gnn_minus_no_routing"], a["ad_gnn"],
                 res["ad_gnn_minus_no_routing"], a["ensemble_uniform"],
                 a["feature_kmeans"], a["oracle"],
+                res["gnn_loss_first"], res["gnn_loss_last"],
+                res["gnn_fit_accuracy"], res["gnn_channels_used"],
+                res["mlp_loss_first"], res["mlp_loss_last"],
+                res["mlp_fit_accuracy"],
             )
 
     keys = list(per_split[0]["accuracy"])
@@ -135,6 +150,13 @@ def main() -> None:
             "ad_gnn_vs_kmeans_agreement": float(
                 np.mean([r["ad_gnn_vs_kmeans_agreement"] for r in per_split])
             ),
+            "gnn_loss_first": float(np.mean([r["gnn_loss_first"] for r in per_split])),
+            "gnn_loss_last": float(np.mean([r["gnn_loss_last"] for r in per_split])),
+            "gnn_fit_accuracy": float(np.mean([r["gnn_fit_accuracy"] for r in per_split])),
+            "gnn_channels_used": int(max(r["gnn_channels_used"] for r in per_split)),
+            "mlp_loss_first": float(np.mean([r["mlp_loss_first"] for r in per_split])),
+            "mlp_loss_last": float(np.mean([r["mlp_loss_last"] for r in per_split])),
+            "mlp_fit_accuracy": float(np.mean([r["mlp_fit_accuracy"] for r in per_split])),
             "n_runs": n,
             "n_runs_router_gnn_beats_no_routing": wins("router_gnn_minus_no_routing"),
             "n_runs_ad_gnn_beats_no_routing": wins("ad_gnn_minus_no_routing"),
@@ -145,7 +167,11 @@ def main() -> None:
             "Published routers (RouterGNN message-passing, AD-GNN per-node depth via "
             "signal preservation) scored on the same frozen routing-blind k-means "
             "pool and splits as every baseline. RouterGNN shares the MLP gate's "
-            "cross-fit supervision; AD-GNN is label-free."
+            "cross-fit supervision; AD-GNN is label-free. The message-passing router "
+            "is trained with LayerNorm, weight decay and gradient clipping (the raw "
+            "unnormalized stack diverges on large graphs); loss first->last, router "
+            "fit accuracy and distinct channels emitted are recorded per run so a "
+            "collapsed router is never silently reported as a trained one."
         ),
     }
     path = out_dir / "fixed_expert.json"

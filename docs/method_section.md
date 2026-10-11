@@ -182,6 +182,15 @@ experts are fitted on `fit_mask` and the router's supervision targets are
 computed on a disjoint `router_mask`, so the target means "which expert
 *generalizes* to this node", not "which cluster is this node".
 
+`node_moe.py` goes further and reproduces the *published* Node-MoE expert
+construction — ChebNetII experts with differentiated filter initialisation and a
+low-pass GNN gate — exposing it both as a joint end-to-end model (`NodeMoEHead`,
+the paper's own protocol) and as a routing-blind pool scored under fixed-expert
+Protocol B (`evaluate_node_moe_protocol_b`). The joint model does beat one global
+ChebNetII (+0.001…+0.043) but loses to a feature-only MLP by 0.03–0.12 on every
+graph, and under Protocol B its edge over no-routing is at most +0.005. See
+`docs/fixed_expert_protocol.md`, "Node-MoE under this protocol".
+
 ## 9. Code map
 
 ```
@@ -191,10 +200,11 @@ src/distortion.py                        SD diagnostics (the contribution's metr
 src/spectral_position.py, attention_entropy.py   routing features
 src/mixture.py, evaluation.py            protocol engine (fixed-expert)
 src/learned_router.py, gnn_router.py, gnn_expert.py   learned arms
+src/node_moe.py                          Node-MoE (ChebNetII experts + gate)
 src/positive_control.py                  D4 instrument check
 experiments/run_fixed_expert_protocol.py, run_sd_vs_routing.py,
             run_llm_protocol_b.py, run_sparsify_ladder.py,
-            run_k_confirmation.py                    runners
+            run_k_confirmation.py, run_node_moe.py    runners
 ```
 
 ## 10. Scope (honest)
@@ -205,8 +215,9 @@ experiments/run_fixed_expert_protocol.py, run_sd_vs_routing.py,
   claim is a **null**.
 - Under the fixed-expert protocol, **no label-free or learned router beats one
   global model** on the fraud graphs (0/234), and the oracle is *negative*
-  (9/9). Published routers (RouterGNN, Ada-Routing, Node-MoE experts) are not yet
-  reproduced; the negative is against structural-score routers and a
-  label-trained MLP gate.
+  (9/9). RouterGNN and Ada-Routing are not yet reproduced, so for those the
+  negative is against structural-score routers and a label-trained MLP gate.
+  Node-MoE is reproduced in full (`node_moe.py`) and is also null under Protocol B,
+  so the negative now includes the strongest published node-wise graph MoE.
 - Protocol-A (self-routing) oracle numbers are retracted; only Protocol-B
   numbers are quoted (`docs/reproducibility.md` banner).

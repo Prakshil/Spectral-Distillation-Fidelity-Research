@@ -81,9 +81,13 @@ available pre-training).
   Zhang et al. (2025), **GraphRouter** — adaptive per-node propagation and
   routing.
 - **Node-MoE** (arXiv:2406.03464) — gate features `[X, |AX−X|, |A²X−X|]` and
-  differentiated ChebNetII filter initialisation. Our learned-router baseline
-  reuses the *gate features* but not the expert construction (stated as a caveat
-  in `docs/fixed_expert_protocol.md`).
+  differentiated ChebNetII filter initialisation. Now reproduced in full
+  (`src/node_moe.py`: ChebNetII experts + low-pass GNN gate + filter-smoothing
+  loss) and scored under fixed-expert Protocol B by
+  `experiments/run_node_moe.py`; the gate's honest edge over no-routing is at
+  most +0.005 (2/5 Amazon, 5/5 Tolokers, 2/5 YelpChi), and a feature-only MLP
+  beats it on all three graphs. See `docs/fixed_expert_protocol.md`,
+  "Node-MoE under this protocol".
 - Wang et al., **GNNMoE — Mixture of Message-Passing Experts with Routing Entropy
   Regularization** (arXiv:2502.08083) — entropy-driven soft/top-k routing.
 - **MORGAN — To Bridge Mixture of Experts and Spectral GNN** (AAAI 2026,
@@ -176,11 +180,14 @@ the operationalization, not the inequality.
 
 ## 10. Honest gaps versus the literature
 
-- **Published routers are not yet implemented.** RouterGNN, Ada-Routing/AD-GNN,
-  and Node-MoE's expert construction are not reproduced; the negative is against
-  structural-score routers and a label-trained MLP gate, not against those
-  methods (`docs/fixed_expert_protocol.md`, caveats). This is the largest open
-  item.
+- **Published routers are only partly implemented.** RouterGNN and
+  Ada-Routing/AD-GNN are not reproduced, so for those the negative is against
+  structural-score routers and a label-trained MLP gate. **Node-MoE is now
+  reproduced in full** (`src/node_moe.py`, `experiments/run_node_moe.py`) and
+  still does not win under fixed-expert Protocol B (edge <= +0.005; 2/5 Amazon,
+  5/5 Tolokers, 2/5 YelpChi), and is beaten by a feature-only MLP on every graph
+  (`docs/fixed_expert_protocol.md`, "Node-MoE under this protocol"). Implementing
+  the remaining routers is the largest open item.
 - **The k=128 / YelpChi and k=32 real-attention rows are reduced-power** (fewer
   splits/seeds or node-capped) and are marked as such; the honest headline is
   full-power 0/26.
@@ -200,7 +207,7 @@ the operationalization, not the inequality.
 | Liang et al., GOKU | ICML 2025, PMLR v267, arXiv:2506.16110 | spectrum-preserving rewiring (closest spectral) |
 | MORGAN | AAAI 2026, doi:10.1609/aaai.v40i28.39553 | eigengraph-as-expert MoE (closest conceptual) |
 | SS-AdaMoE | Entropy 28(3):355, 2026 | spatio-spectral MoE |
-| Node-MoE | arXiv:2406.03464 | gate features reused |
+| Node-MoE | arXiv:2406.03464 | reproduced (experts + gate); null under Protocol B |
 | GNNMoE | arXiv:2502.08083 | entropy-routed MoE |
 | Roller et al. | NeurIPS 2021 | random-routing floor |
 | Dikkala et al. | 2023 | learned-router recovery |

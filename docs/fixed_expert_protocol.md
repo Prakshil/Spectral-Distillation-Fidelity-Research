@@ -310,14 +310,70 @@ Caveats kept honest:
   `docs/reproducibility.md`, "Resolved: spectral-k sweep".
 - Real routing baselines (RouterGNN, Ada-Routing) are not implemented here, so
   this is a negative result against *structural-score* routers and a label-trained
-  MLP gate, not against the published methods. Node-MoE's own expert construction
-  (differentiated ChebNetII filter initialisation) is not reproduced; the gate
-  features are, the experts are not.
+  MLP gate, not against every published method. Node-MoE's own expert construction
+  (differentiated ChebNetII filter initialisation) and its low-pass GNN gate *are*
+  now reproduced in `src/node_moe.py` and scored under this protocol by
+  `experiments/run_node_moe.py`; see "## Node-MoE under this protocol" below. The
+  gate does not win.
 - The `x_only` arm rules out implicit routing for *this* pipeline, not in general.
   A ragged-edge / subgraph-restricted fit would be a stronger control still.
 - YelpChi stays node-capped (14840 of 45954) for memory, so its learned-router arm
   runs 1 split × 1 seed and its GNN arm 3 × 1. Treat those two rows as
   reduced-power and do not compare their gaps to the full-scale cells.
+
+## Node-MoE under this protocol
+
+The strongest published node-wise graph MoE is **Node-MoE** (`arXiv:2406.03464`).
+Its distinguishing choice is the *expert construction*: each expert is a
+**ChebNetII** spectral filter, and the experts are initialised as deliberately
+*different* filter shapes (low-pass, high-pass, band-pass) before training; the
+gate is a small low-pass GNN over the neighbourhood-discrepancy descriptor
+`[X, |AX-X|, |A^2X-X|]`. Earlier versions of this doc quoted the gate features
+only and left the experts unreproduced. That gap is now closed.
+
+`src/node_moe.py` reproduces both: `ChebNetIIFilter` (learnable Chebyshev
+coefficients evaluated by Gauss-Chebyshev interpolation, so `gamma = g(nodes)`
+is the exact interpolant of a target shape), `NodeMoEGate`, and the joint
+`NodeMoEHead` trained end-to-end with Node-MoE's filter-smoothing loss
+`L = L_task + gamma * sum_o sum_i (f_o(x_i) - f_o(x_{i-1}))^2`.
+`experiments/run_node_moe.py` scores it two ways.
+
+**Faithful replication** (gate + experts trained jointly on all training nodes,
+the paper's own protocol) versus a single global ChebNetII and a single global
+MLP, mean accuracy over 5 splits x 1 seed:
+
+| graph | Node-MoE (joint) | global ChebNetII | global MLP (features only) |
+|---|---|---|---|
+| Amazon (n=8639) | 0.9418 | 0.9406 | **0.9727** |
+| Tolokers (n=11758) | 0.7089 | 0.6664 | **0.7818** |
+| YelpChi (n=14840) | 0.7491 | 0.7079 | **0.8669** |
+
+The joint model does beat a single global ChebNetII (+0.0012 Amazon, +0.0426
+Tolokers, +0.0412 YelpChi; 3/5, 5/5, 4/5 runs). But a *plain feature-only MLP*
+that never touches the graph beats Node-MoE by 0.03-0.12 on every graph. So the
+routing gain is real only relative to a weak spectral base; it does not make
+Node-MoE competitive with a non-graph model on these features.
+
+**Honest fixed-expert Protocol B** (routing-blind ChebNetII pool frozen on the
+fit half, gate cross-fit on a disjoint half, no-routing = one global model on the
+same fit half):
+
+| graph | Node-MoE gate | no-routing | gate - no-routing | gate wins | oracle | Ens-Avg |
+|---|---|---|---|---|---|---|
+| Amazon | 0.9401 | 0.9399 | **+0.0003** | 2/5 | 0.9393 | 0.9407 |
+| Tolokers | 0.6721 | 0.6672 | **+0.0049** | 5/5 | 0.6746 | 0.6682 |
+| YelpChi | 0.7100 | 0.7078 | **+0.0023** | 2/5 | 0.7096 | 0.7075 |
+
+Under the honest protocol the gate's edge is at most +0.005 and is within noise on
+Amazon and YelpChi (2/5 runs). The pattern is the paper's central claim: a
+positive result under faithful *joint* training (+0.04) almost entirely collapses
+under routing-blind fixed-expert scoring (+0.005). The residual gain is
+co-adaptation and ensemble capacity, not per-node expert selection.
+
+Caveats: the global-MLP baseline is unusually strong (0.97 on Amazon), which is
+the repo's existing split/feature pipeline, not new here; it is reported so it
+cannot be mistaken for a tuning choice. YelpChi is node-capped at 14840. Protocol
+B uses 3 experts and K=2.
 
 ## Positive control: can the protocol detect a win at all?
 

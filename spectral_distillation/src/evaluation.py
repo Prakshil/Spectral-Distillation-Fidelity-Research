@@ -232,6 +232,27 @@ def run_protocol(
     return ProtocolResults(comparisons=comparisons)
 
 
+def permute_within_strata(
+    values: np.ndarray, strata: np.ndarray, rng: np.random.Generator
+) -> np.ndarray:
+    """Permute rows of ``values`` within each stratum independently.
+
+    Preserves every stratum's membership set while destroying the node-to-row
+    alignment *inside* each stratum. This is the stricter null for a frozen gate
+    on graphs with known regimes: a global permutation can accidentally keep a
+    node in a routing channel that matches its regime, whereas a within-stratum
+    permutation matches the true regime sizes but scrambles which node gets
+    which learned assignment.
+    """
+    values = np.asarray(values, dtype=float)
+    strata = np.asarray(strata)
+    out = values.copy()
+    for s in np.unique(strata):
+        idx = np.flatnonzero(strata == s)
+        out[idx] = values[idx][rng.permutation(idx.size)]
+    return out
+
+
 def frozen_intervention(
     learned: np.ndarray,
     n_nodes: int,
@@ -241,6 +262,7 @@ def frozen_intervention(
     gate_settings: list[str] | None = None,
     n_permutations: int = 20,
     seed: int = 0,
+    strata: np.ndarray | None = None,
 ) -> dict[str, Any]:
     """Frozen-model gate intervention (guide 2.3.5).
 
@@ -249,7 +271,10 @@ def frozen_intervention(
 
     Gate settings:
     - ``learned``: the label-free router's learned assignment
-    - ``node_shuffled``: permutation baseline (n_permutations draws)
+    - ``node_shuffled``: global permutation baseline (``n_permutations`` draws)
+    - ``within_regime_shuffled``: permutation baseline that only reshuffles the
+      learned assignment *within* each stratum (requires ``strata``; falls back
+      to a global shuffle when ``strata`` is ``None``)
     - ``global_mean``: every node gets the mean assignment of learned
     - ``equal``: uniform 1/K mixing
     - ``oracle_onehot``: oracle one-hot assignment (only if supplied)
@@ -285,5 +310,19 @@ def frozen_intervention(
         out["node_shuffled_mean"] = float(perms.mean())
         out["node_shuffled_std"] = float(perms.std())
         out["node_shuffled_samples"] = perms.tolist()
+
+    if "within_regime_shuffled" in gate_settings:
+        shuffles = []
+        for _ in range(n_permutations):
+            if strata is None:
+                perm = rng.permutation(n)
+                shuffled = learned[perm]
+            else:
+                shuffled = permute_within_strata(learned, strata, rng)
+            shuffles.append(float(run_expert_fn(shuffled)))
+        shuffles = np.asarray(shuffles)
+        out["within_regime_shuffled_mean"] = float(shuffles.mean())
+        out["within_regime_shuffled_std"] = float(shuffles.std())
+        out["within_regime_shuffled_samples"] = shuffles.tolist()
 
     return out

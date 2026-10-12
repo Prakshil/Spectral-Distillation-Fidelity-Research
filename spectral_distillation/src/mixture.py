@@ -47,19 +47,55 @@ def mlp_head(train_idx: np.ndarray | None = None) -> MLPClassifier:
 EXPERT_FACTORIES = {"logistic": expert_head, "mlp": mlp_head}
 
 
+def mlp_head_width(width: int, seed: int = 0) -> Callable:
+    """Return an MLP expert factory with a fixed hidden width.
+
+    Used by the per-expert-capacity ablation (Phase 6 WS3): the routing win must
+    be shown to survive at small and large expert capacity, not only at the
+    single width (64) the main protocol happens to use.
+    """
+
+    def build(train_idx: np.ndarray | None = None) -> MLPClassifier:
+        return MLPClassifier(
+            hidden_layer_sizes=(int(width),),
+            activation="relu",
+            alpha=1e-3,
+            max_iter=400,
+            random_state=seed,
+            early_stopping=False,
+        )
+
+    return build
+
+
+def dendrite_expert_factories(widths, seed: int = 0) -> list[Callable]:
+    """One factory per expert, with a *different* hidden width each ("dendrites").
+
+    This is the architecture ablation that deliberately breaks the
+    identical-experts assumption: experts still share the training budget and
+    feature set but have heterogeneous capacity, so a routing win cannot be
+    explained away by a single favorable width.
+    """
+    return [mlp_head_width(int(w), seed=seed + k) for k, w in enumerate(widths)]
+
+
 def fit_experts(
     X: np.ndarray,
     y: np.ndarray,
     assignment: np.ndarray,
     train_mask: np.ndarray,
     expert_factory: Callable[[np.ndarray], object] = expert_head,
+    expert_factories: list[Callable] | None = None,
 ) -> list[object | None]:
     """Fit K expert heads, each on its own routed train subset.
 
     A shortage of routes yields a majority-class dummy head (never ``None``
     unless the masked set is empty) so the mixture stays well defined even
     under heavy dilution. ``expert_factory`` builds each head; it defaults to
-    the linear ``expert_head`` so existing callers reproduce exactly.
+    the linear ``expert_head`` so existing callers reproduce exactly. Passing
+    ``expert_factories`` (one per expert, in channel order) overrides
+    ``expert_factory`` and is how the heterogeneous-capacity ablation builds
+    experts with different widths.
 
     Each factory is called as ``expert_factory(train_mask_k)`` so a head that
     needs the full graph (see :mod:`spectral_distillation.src.gnn_expert`) can
@@ -82,7 +118,8 @@ def fit_experts(
             dummy.fit(X[masked], y[masked])
             experts.append(dummy)
             continue
-        head = expert_factory(masked)
+        factory = expert_factories[k] if expert_factories is not None else expert_factory
+        head = factory(masked)
         if hasattr(head, "fit_graph"):
             head.fit_graph(X, y)
         else:

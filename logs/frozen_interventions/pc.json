@@ -1,0 +1,404 @@
+{
+  "config": {
+    "config": "configs/default.yaml",
+    "graph": "pc",
+    "n": 2000,
+    "n_patches": 50,
+    "capacities": [
+      8,
+      32,
+      64,
+      128
+    ],
+    "router_epochs": 200,
+    "hidden_dim": 64,
+    "n_layers": 3,
+    "router_seed": 0,
+    "random_seed": 1,
+    "split_seed": 0,
+    "frozen_perms": 10,
+    "out": "logs",
+    "device": "cpu"
+  },
+  "graph": {
+    "name": "pc",
+    "n_nodes": 2000,
+    "n_classes": 5,
+    "regime_ratio": [
+      0.4,
+      0.4,
+      0.2
+    ]
+  },
+  "assignments_usage": {
+    "oracle": [
+      800,
+      800,
+      400
+    ],
+    "label_free": [
+      798,
+      400,
+      802
+    ],
+    "random": [
+      803,
+      818,
+      379
+    ],
+    "uniform": [
+      2000,
+      0,
+      0
+    ]
+  },
+  "results": {
+    "logistic": {
+      "learned": 0.862,
+      "oracle_onehot": 0.86,
+      "equal": 0.632,
+      "global_mean": 0.632,
+      "node_shuffled_mean": 0.6074999999999999,
+      "node_shuffled_std": 0.009330058949438644,
+      "node_shuffled_samples": [
+        0.629,
+        0.599,
+        0.611,
+        0.605,
+        0.601,
+        0.615,
+        0.607,
+        0.612,
+        0.595,
+        0.601
+      ],
+      "within_regime_shuffled_mean": 0.8586,
+      "within_regime_shuffled_std": 0.0017435595774162708,
+      "within_regime_shuffled_samples": [
+        0.859,
+        0.857,
+        0.862,
+        0.858,
+        0.857,
+        0.856,
+        0.859,
+        0.859,
+        0.861,
+        0.858
+      ],
+      "ordering": {
+        "learned_gt_node_shuffled": true,
+        "learned_gt_global_mean": true,
+        "learned_gt_equal": true,
+        "holds": true,
+        "oracle_ge_learned": false,
+        "oracle_minus_learned": -0.0020000000000000018,
+        "within_regime_gap": 0.0033999999999999586
+      }
+    },
+    "mlp8": {
+      "learned": 0.843,
+      "oracle_onehot": 0.844,
+      "equal": 0.657,
+      "global_mean": 0.657,
+      "node_shuffled_mean": 0.5856,
+      "node_shuffled_std": 0.03234872485894922,
+      "node_shuffled_samples": [
+        0.596,
+        0.549,
+        0.615,
+        0.592,
+        0.599,
+        0.599,
+        0.595,
+        0.617,
+        0.59,
+        0.504
+      ],
+      "within_regime_shuffled_mean": 0.8438000000000001,
+      "within_regime_shuffled_std": 0.0012489995996796807,
+      "within_regime_shuffled_samples": [
+        0.844,
+        0.842,
+        0.845,
+        0.843,
+        0.845,
+        0.844,
+        0.846,
+        0.843,
+        0.844,
+        0.842
+      ],
+      "ordering": {
+        "learned_gt_node_shuffled": true,
+        "learned_gt_global_mean": true,
+        "learned_gt_equal": true,
+        "holds": true,
+        "oracle_ge_learned": true,
+        "oracle_minus_learned": 0.0010000000000000009,
+        "within_regime_gap": -0.0008000000000001339
+      }
+    },
+    "mlp32": {
+      "learned": 0.853,
+      "oracle_onehot": 0.852,
+      "equal": 0.736,
+      "global_mean": 0.736,
+      "node_shuffled_mean": 0.65,
+      "node_shuffled_std": 0.013834738884417023,
+      "node_shuffled_samples": [
+        0.67,
+        0.639,
+        0.653,
+        0.63,
+        0.659,
+        0.665,
+        0.642,
+        0.661,
+        0.653,
+        0.628
+      ],
+      "within_regime_shuffled_mean": 0.8543,
+      "within_regime_shuffled_std": 0.0023259406699226034,
+      "within_regime_shuffled_samples": [
+        0.854,
+        0.855,
+        0.854,
+        0.858,
+        0.856,
+        0.853,
+        0.856,
+        0.851,
+        0.856,
+        0.85
+      ],
+      "ordering": {
+        "learned_gt_node_shuffled": true,
+        "learned_gt_global_mean": true,
+        "learned_gt_equal": true,
+        "holds": true,
+        "oracle_ge_learned": false,
+        "oracle_minus_learned": -0.0010000000000000009,
+        "within_regime_gap": -0.0012999999999999678
+      }
+    },
+    "mlp64": {
+      "learned": 0.849,
+      "oracle_onehot": 0.848,
+      "equal": 0.716,
+      "global_mean": 0.716,
+      "node_shuffled_mean": 0.6639,
+      "node_shuffled_std": 0.010290286682109502,
+      "node_shuffled_samples": [
+        0.675,
+        0.65,
+        0.679,
+        0.664,
+        0.671,
+        0.677,
+        0.655,
+        0.653,
+        0.66,
+        0.655
+      ],
+      "within_regime_shuffled_mean": 0.8459999999999999,
+      "within_regime_shuffled_std": 0.0014142135623730961,
+      "within_regime_shuffled_samples": [
+        0.847,
+        0.848,
+        0.844,
+        0.847,
+        0.844,
+        0.847,
+        0.844,
+        0.847,
+        0.846,
+        0.846
+      ],
+      "ordering": {
+        "learned_gt_node_shuffled": true,
+        "learned_gt_global_mean": true,
+        "learned_gt_equal": true,
+        "holds": true,
+        "oracle_ge_learned": false,
+        "oracle_minus_learned": -0.0010000000000000009,
+        "within_regime_gap": 0.0030000000000001137
+      }
+    },
+    "mlp128": {
+      "learned": 0.845,
+      "oracle_onehot": 0.843,
+      "equal": 0.711,
+      "global_mean": 0.711,
+      "node_shuffled_mean": 0.6775000000000001,
+      "node_shuffled_std": 0.010660675400742663,
+      "node_shuffled_samples": [
+        0.686,
+        0.658,
+        0.672,
+        0.687,
+        0.686,
+        0.688,
+        0.676,
+        0.665,
+        0.689,
+        0.668
+      ],
+      "within_regime_shuffled_mean": 0.8431999999999998,
+      "within_regime_shuffled_std": 0.001989974874213242,
+      "within_regime_shuffled_samples": [
+        0.843,
+        0.842,
+        0.846,
+        0.847,
+        0.841,
+        0.843,
+        0.845,
+        0.842,
+        0.842,
+        0.841
+      ],
+      "ordering": {
+        "learned_gt_node_shuffled": true,
+        "learned_gt_global_mean": true,
+        "learned_gt_equal": true,
+        "holds": true,
+        "oracle_ge_learned": false,
+        "oracle_minus_learned": -0.0020000000000000018,
+        "within_regime_gap": 0.0018000000000001348
+      }
+    },
+    "dendrite": {
+      "learned": 0.85,
+      "oracle_onehot": 0.852,
+      "equal": 0.657,
+      "global_mean": 0.726,
+      "node_shuffled_mean": 0.6367,
+      "node_shuffled_std": 0.027885659396901474,
+      "node_shuffled_samples": [
+        0.657,
+        0.628,
+        0.66,
+        0.627,
+        0.655,
+        0.647,
+        0.654,
+        0.642,
+        0.637,
+        0.56
+      ],
+      "within_regime_shuffled_mean": 0.8478,
+      "within_regime_shuffled_std": 0.002039607805437116,
+      "within_regime_shuffled_samples": [
+        0.849,
+        0.845,
+        0.847,
+        0.852,
+        0.846,
+        0.85,
+        0.847,
+        0.847,
+        0.849,
+        0.846
+      ],
+      "ordering": {
+        "learned_gt_node_shuffled": true,
+        "learned_gt_global_mean": true,
+        "learned_gt_equal": true,
+        "holds": true,
+        "oracle_ge_learned": true,
+        "oracle_minus_learned": 0.0020000000000000018,
+        "within_regime_gap": 0.0021999999999999797
+      }
+    }
+  },
+  "summary": {
+    "holds_all": true,
+    "ordering": {
+      "logistic": {
+        "learned_gt_node_shuffled": true,
+        "learned_gt_global_mean": true,
+        "learned_gt_equal": true,
+        "holds": true,
+        "oracle_ge_learned": false,
+        "oracle_minus_learned": -0.0020000000000000018,
+        "within_regime_gap": 0.0033999999999999586
+      },
+      "mlp8": {
+        "learned_gt_node_shuffled": true,
+        "learned_gt_global_mean": true,
+        "learned_gt_equal": true,
+        "holds": true,
+        "oracle_ge_learned": true,
+        "oracle_minus_learned": 0.0010000000000000009,
+        "within_regime_gap": -0.0008000000000001339
+      },
+      "mlp32": {
+        "learned_gt_node_shuffled": true,
+        "learned_gt_global_mean": true,
+        "learned_gt_equal": true,
+        "holds": true,
+        "oracle_ge_learned": false,
+        "oracle_minus_learned": -0.0010000000000000009,
+        "within_regime_gap": -0.0012999999999999678
+      },
+      "mlp64": {
+        "learned_gt_node_shuffled": true,
+        "learned_gt_global_mean": true,
+        "learned_gt_equal": true,
+        "holds": true,
+        "oracle_ge_learned": false,
+        "oracle_minus_learned": -0.0010000000000000009,
+        "within_regime_gap": 0.0030000000000001137
+      },
+      "mlp128": {
+        "learned_gt_node_shuffled": true,
+        "learned_gt_global_mean": true,
+        "learned_gt_equal": true,
+        "holds": true,
+        "oracle_ge_learned": false,
+        "oracle_minus_learned": -0.0020000000000000018,
+        "within_regime_gap": 0.0018000000000001348
+      },
+      "dendrite": {
+        "learned_gt_node_shuffled": true,
+        "learned_gt_global_mean": true,
+        "learned_gt_equal": true,
+        "holds": true,
+        "oracle_ge_learned": true,
+        "oracle_minus_learned": 0.0020000000000000018,
+        "within_regime_gap": 0.0021999999999999797
+      }
+    },
+    "capacity_curve": {
+      "8": {
+        "learned": 0.843,
+        "oracle_onehot": 0.844,
+        "node_shuffled_mean": 0.5856,
+        "within_regime_shuffled_mean": 0.8438000000000001,
+        "holds": true
+      },
+      "32": {
+        "learned": 0.853,
+        "oracle_onehot": 0.852,
+        "node_shuffled_mean": 0.65,
+        "within_regime_shuffled_mean": 0.8543,
+        "holds": true
+      },
+      "64": {
+        "learned": 0.849,
+        "oracle_onehot": 0.848,
+        "node_shuffled_mean": 0.6639,
+        "within_regime_shuffled_mean": 0.8459999999999999,
+        "holds": true
+      },
+      "128": {
+        "learned": 0.845,
+        "oracle_onehot": 0.843,
+        "node_shuffled_mean": 0.6775000000000001,
+        "within_regime_shuffled_mean": 0.8431999999999998,
+        "holds": true
+      }
+    }
+  }
+}

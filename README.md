@@ -52,7 +52,7 @@ make figures          # all paper figures
 
 ```bash
 pip install -e ".[dev]"          # or: make install
-python -m pytest                 # 221 tests: theory bounds, sparsifiers, router protocol, statistics
+python -m pytest                 # 233 tests: theory bounds, sparsifiers, router protocol, statistics
 
 # Phase 1-2
 python -m spectral_distillation.experiments.run_diagnostic     # golden 4-node + ERP SD/fragility preview
@@ -60,14 +60,14 @@ python -m spectral_distillation.experiments.compare_methods     # SD bands vs bu
 
 # Phase 3 (router protocol)
 python -m spectral_distillation.experiments.run_protocol        # D1-D4 findings matrix + frozen-gate interventions
+python -m spectral_distillation.experiments.frozen_interventions --graph pc   # WS3: expert-architecture/capacity ablations
 python -m spectral_distillation.experiments.dilution_curve      # label-free/oracle gain vs dilution ladder
 python -m spectral_distillation.experiments.ablation            # oracle-filter threshold + router-feature ablation
 python -m spectral_distillation.experiments.reproduce_figures   # render all Phase 3 figures from logs
 ```
 
-- `make test-theory` runs the theory-bound test file only. The Makefile targets run on `cuda` by default (runners auto-fallback to `cpu` when CUDA is absent).
-- Runners accept `--n`, `--n-patches`, `--splits`, `--seeds`, `--router-epochs`, `--device`, `--config`, `--out` (see each module's argparse help). Use small `--n` (600-2000) for CPU smoke runs; the defaults target the full 10k-node PC-1c-R control on a GPU.
-- Outputs: `logs/protocol/protocol_results.json`, `logs/dilution/dilution_curve.{csv,json}`, `logs/ablation/ablation.{csv,json}`, `logs/compare_methods/{results,bands}.{csv,json}` + `bands_vs_*.png`, plus PNGs under `logs/protocol/`, `logs/dilution/`, `logs/ablation/`.
+- `make test-theory` runs the theory-bound test file only. The Makefile targets run on `cuda` by default (runners auto-fallback to `cpu` when CUDA is absent).- Runners accept `--n`, `--n-patches`, `--splits`, `--seeds`, `--router-epochs`, `--device`, `--config`, `--out` (see each module's argparse help). Use small `--n` (600-2000) for CPU smoke runs; the defaults target the full 10k-node PC-1c-R control on a GPU.
+- Outputs: `logs/protocol/protocol_results.json`, `logs/dilution/dilution_curve.{csv,json}`, `logs/ablation/ablation.{csv,json}`, `logs/compare_methods/{results,bands}.{csv,json}` + `bands_vs_*_n*.png`, `logs/frozen_interventions/{pc,erp_fraud}.json`, plus Phase 3 figures under `logs/protocol/`, `logs/dilution/`, `logs/ablation/`.
 - Config defaults live in `configs/default.yaml` (`router_protocol:`, `planted_control:`, `experiments:` sections).
 
 ### Verified findings so far
@@ -90,6 +90,7 @@ python -m spectral_distillation.experiments.reproduce_figures   # render all Pha
 - Label-free KMeans on {hx, spectral_ratio, log_degree, clustering} reproduces true regimes at ~89.5% contingency; a RouterGNN (KL-divergence imitation) also trains but the crisp KMeans assignment is the actual gate used.
 - Decision rules D1–D4 all **Supported** on 10k nodes (10 splits × 3 seeds): label-free gain ≈ 0.20-0.24, oracle gain ≈ 0.24-0.30, Wilcoxon p < 0.01 after Holm correction.
 - Frozen-gate intervention: learned router > node-shuffled permutations > uniform/global_mean; oracle one-hot ≈ upper bound.
+- Frozen-gate ablations (Phase 6 / WS3): the ordering holds for **all** expert architectures — logistic, mlp{8,32,64,128}, and heterogeneous dendrite — on both pc and erp_fraud (n = 2000); the within-regime permutation is near-identity (gap ≤ 0.002), confirming the crisp router is a regime detector. See `docs/robustness_scaling.md` Part 3.
 - Dilution ladder: label-free gain decays monotonically as regime nodes are rewritten to homogeneous low-pass wiring; oracle gain (true regime id) stays constant — consistent with the claim that dilution erases the structural signal the label-free router reads.
 - Oracle-bucket threshold sweep shows a stable plateau for δ ∈ [0.1, 0.5] on the homophily-range SBM, degrading at extreme widths.
 - Router-feature ablation: all four fields contribute; hx and spectral_ratio are the strongest individual features; leave-one-out gains near the full-set gain confirm redundancy.

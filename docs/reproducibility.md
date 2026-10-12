@@ -472,8 +472,13 @@ so import order decided whether the loader ran at all. Fixed by preloading it in
 `spectral_distillation/src/__init__.py`, the earliest hook in the package. Regression tests are in
 `tests/test_real_fraud.py`.
 
-- Finish `configs/erp_fraud.yaml` runs on real ERP graphs; use homophily-bucket oracle on real
-  labels (already implemented â€” same path used for benchmarks).
+- **DONE (config-sized ERP-fraud run):** `run_protocol.py --graph erp_fraud
+  --config configs/erp_fraud.yaml` at n=10,000 (10Ã—3) gives D1/D2/D3 = +0.2054 /
+  +0.2118 / +0.2118, D4 frozen gate 0.8806 vs shuffled 0.6657Â±0.0025 (all
+  Supported); the n=3,000 run is retained for scale comparison. See
+  `docs/erp_fraud_results.md`, `logs/erp_fraud_protocol/`. There is no real ERP
+  dataset in the repo, so "real labels" are covered by the fraud benchmarks
+  (homophily-bucket oracle, already implemented â€” same path used for benchmarks).
 
 ### Phase 5 â€” Publication materials
 

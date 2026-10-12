@@ -417,9 +417,10 @@ threshold — good robustness evidence.
 - Golden 4-node example matches theory: **SD = 1.0** (isolated node = total signal
   loss), ‖ΔL‖_F = 0.8832, fragility ≈ 2.06, `Σ w_e·R_eff = n − 1` exactly.
 - Spectral sparsification is **monotone in budget** and **beats naive thresholding**
-  whenever the graph stays connected.
-- Naive thresholding **collapses at n ≥ 256** on ERP graphs (drops thin bridges);
-  spectral selection keeps the Fiedler value alive at the same budget.
+  on an equal-edge-mass budget/ε grid (74.2% of 120 points), but does **not** dominate
+  random/degree heuristics (best single method at 23.3% of points); see
+  `docs/robustness_scaling.md`. The earlier "collapses at n ≥ 256" point estimate was
+  confounded by spectral's inverse-propensity weight rescale.
 - ERP attention graphs are **ultra-fragile**: `min_eigengap ≈ 4e-3` — dropping a single
   unique bridge pushes SD to 1.0. This is exactly *why* naive compression fails on
   real graphs and why spectral methods are required.
@@ -465,9 +466,10 @@ evidence below is mutually consistent and theory-aligned *for the control*:
    the others are supporting. This is theoretically satisfying and actionable (if some
    dataset lacks homophily, expect the label-free router to fail — a *known* scope
    limit rather than a mystery).
-4. **The compression method is the right one.** Spectral sparsification preserves the
-   spectrum (so routers keep working) and provably beats thresholding, which silently
-   collapses fragile real graphs.
+4. **The compression method is sound.** Spectral sparsification preserves the
+   spectrum (so routers keep working) and reliably beats naive thresholding (74.2% of the
+   equal-edge-mass budget/ε grid), though raw random/degree heuristics stay competitive —
+   no universal dominance (`docs/robustness_scaling.md`).
 5. **The instrument is valid (D4 + δ-sweep).** Results are not an artifact of one magic
    threshold or a broken experimental setup.
 

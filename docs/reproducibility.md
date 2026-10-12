@@ -28,7 +28,7 @@ Companion documents:
 | Phase 4 | Real ERP attention data + LLM attention export (Llama-3.1-8B) feeding the pipeline | Partially (real-attention + synthetic ERP-fraud runs done; **real DGL Amazon fraud graph run at `docs/real_fraud_results.md`**) |
 | Phase 5 | Publication materials from verified results | Partially drafted (`docs/*`) |
 
-**Tests:** 214 pass (`python -m pytest` on CPU, cosmetic warnings only).
+**Tests:** 221 pass (`python -m pytest` on CPU, cosmetic warnings only).
 
 **Lint:** `pyflakes` clean on `src/`, `experiments/`, and `tests/`. (`ruff`/`ty` are not installed locally; the Makefile targets remain for CI.)
 
@@ -66,7 +66,7 @@ Companion documents:
 | Script | What it does | Output |
 |--------|--------------|--------|
 | `run_diagnostic.py` | Golden 4-node ERP verification + SD/fragility preview | `logs/diagnostic/diagnostic.json` |
-| `compare_methods.py` | SD vs budget for threshold / random / degree / spectral | `logs/compare_methods/results.{csv,json}` + PNGs |
+| `compare_methods.py` | Budget/ε **bands** for threshold / random / degree / spectral (SD + low-freq distortion, optional `--no-mass-match`) | `logs/compare_methods/results.{csv,json}`, `bands.{csv,json}` + `bands_vs_*.png` |
 | `run_protocol.py` | D1â€“D4 findings matrix + frozen-gate interventions (`--graph pc` default; `--graph erp_fraud` for the fraud-like graph) | `logs/protocol/protocol_results.json` (PC) / `logs/erp_fraud_protocol/protocol_results.json` (ERP-fraud) + PNG |
 | `run_real_fraud.py` | D1â€“D4 protocol on a **real public fraud graph** (`--dataset amazon\|tolokers\|yelpchi`) | `logs/{dataset}_fraud_protocol*/protocol_results.json` |
 | `run_sparsify_ladder.py` | Retention-ladder on any real graph: ER (effective-resistance) vs budget-matched random/degree distillation, D1â€“D3 vs retention. `--resume` keeps completed points; `--label-free-strategy/--order-feature` pick the router | `logs/{dataset}_fraud_ladder*/ladder_results.jsonl` + `ladder_summary.json` (see `docs/sparsify_ladder_results.md`, `docs/yelpchi_third_graph.md`) |
@@ -105,7 +105,7 @@ reproducible; `per_layer` gives one column per transformer layer and is required
 for any downstream accuracy arm. A 29-way task from 3 features is near-chance
 regardless of routing.
 
-### 2.3 Tests (`spectral_distillation/tests/`, 214 tests)
+### 2.3 Tests (`spectral_distillation/tests/`, 221 tests)
 
 | File | Coverage |
 |------|----------|
@@ -138,10 +138,10 @@ CPU-smoke runs use `n=800`; full-resolution runs target the 10k-node PC-1c-R con
 
 ### 3.2 Phase 2 â€” sparsifier comparison
 
-- Spectral sparsification is strictly monotone in budget and beats thresholding whenever the
-  graph stays connected.
-- Thresholding drops low-weight *bridge* edges and collapses entirely at `n â‰¥ 256` on ERP graphs,
-  whereas spectral search-space selection keeps the Fiedler value alive at the same budget.
+- On an equal-edge-mass budget/ε grid (120 points) spectral reliably beats **thresholding**
+  (74.2% of points) but does not dominate: raw random/degree stay competitive and spectral is
+  the single best method at 23.3% of points. Ranking is insensitive to ε. This supersedes the
+  earlier point estimate (`docs/robustness_scaling.md`).
 
 ### 3.3 Phase 3 â€” router protocol (D1â€“D4)
 
@@ -237,7 +237,7 @@ real graph at a specific β.
 ```bash
 pip install -e ".[dev]"          # or: make dev-install
 
-python -m pytest                 # 214 tests
+python -m pytest                 # 221 tests
 python -m spectral_distillation.experiments.run_protocol        # D1-D4 + frozen gates
 python -m spectral_distillation.experiments.dilution_curve      # dilution ladder
 python -m spectral_distillation.experiments.ablation            # oracle Î´ + feature ablation
@@ -313,11 +313,11 @@ Every claim in Â§3 maps to a committed artifact:
 | Claim | Artifact |
 |-------|----------|
 | SD = 1.0, â€–Î”Lâ€–_F = 0.8832, fragility 2.06, Î£ wÂ·R_eff = nâˆ’1 | `logs/diagnostic/diagnostic.json`, `test_theoretical_bounds.py` |
-| Monotone budget / spectral beats threshold, collapse at nâ‰¥256 | `logs/compare_methods/results.json` |
+| Equal-edge-mass budget/epsilon bands: spectral beats threshold (74.2%) but no method dominates | `logs/compare_methods/bands.json`, `docs/robustness_scaling.md` |
 | D1â€“D4 supported, frozen-gate ordering, stats | `logs/protocol/protocol_results.json` |
 | Dilution decay (0.231 â†’ 0.008) vs flat oracle (0.260), 10k GPU | `logs/dilution/dilution_curve.json` |
 | Feature ablation ordering + oracle Î´ plateau | `logs/ablation/ablation.json` |
-| 214-test pass | `python -m pytest` |
+| 221-test pass | `python -m pytest` |
 
 ---
 
@@ -495,9 +495,13 @@ so import order decided whether the loader ran at all. Fixed by preloading it in
 
 ### Phase 6 â€” Robustness and scaling
 
-- Systematic budget/Îµ sensitivity (bands around Table 2 instead of point runs).
-- Top-k R_eff accuracy study vs `n` (guide Â§9.4 note on lower bounds).
-- Extended frozen interventions (dentrites, expert-architecture ablations) to broaden D4 coverage.
+- **Done (WS1):** budget/ε sensitivity bands on an equal-edge-mass basis around Table 2
+  (`compare_methods.py`, `docs/robustness_scaling.md`): spectral beats threshold at 74.2% of
+  120 grid points but does not dominate — random/degree stay competitive; ranking is ε-flat.
+- **Pending (WS2):** top-k R_eff accuracy study vs `n` (guide §9.4 note on lower bounds) —
+  `scalability_reeff.py`.
+- **Pending (WS3):** extended frozen interventions — per-expert capacity (dendrite widths) and
+  expert-architecture ablations — to broaden D4 coverage (`frozen_interventions.py`).
 
 ---
 

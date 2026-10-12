@@ -69,6 +69,17 @@ experiments:
     epsilons: [0.02, 0.05, 0.1, 0.2, 0.4]
     seeds: [0, 1, 2]
     seed: 0
+  scalability_reeff:
+    ns: [100, 1000, 10000]
+    ks: [16, 32, 64, 128]
+    budget_factor: 4
+    epsilon: 0.1
+    exact_n_max: 3000
+    sd_n_max: 1000
+    n_blocks: 5
+    p_in: 0.5
+    p_out: 0.05
+    seed: 0
 
 # Logging
 logging:

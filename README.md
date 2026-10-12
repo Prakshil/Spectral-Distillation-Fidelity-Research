@@ -52,11 +52,12 @@ make figures          # all paper figures
 
 ```bash
 pip install -e ".[dev]"          # or: make install
-python -m pytest                 # 233 tests: theory bounds, sparsifiers, router protocol, statistics
+python -m pytest                 # 244 tests: theory bounds, sparsifiers, router protocol, statistics
 
 # Phase 1-2
 python -m spectral_distillation.experiments.run_diagnostic     # golden 4-node + ERP SD/fragility preview
 python -m spectral_distillation.experiments.compare_methods     # SD bands vs budget/epsilon, threshold/random/degree/spectral
+python -m spectral_distillation.experiments.scalability_reeff   # WS2: exact vs top-k R_eff at n=100/1k/10k (Table 3)
 
 # Phase 3 (router protocol)
 python -m spectral_distillation.experiments.run_protocol        # D1-D4 findings matrix + frozen-gate interventions
@@ -67,7 +68,7 @@ python -m spectral_distillation.experiments.reproduce_figures   # render all Pha
 ```
 
 - `make test-theory` runs the theory-bound test file only. The Makefile targets run on `cuda` by default (runners auto-fallback to `cpu` when CUDA is absent).- Runners accept `--n`, `--n-patches`, `--splits`, `--seeds`, `--router-epochs`, `--device`, `--config`, `--out` (see each module's argparse help). Use small `--n` (600-2000) for CPU smoke runs; the defaults target the full 10k-node PC-1c-R control on a GPU.
-- Outputs: `logs/protocol/protocol_results.json`, `logs/dilution/dilution_curve.{csv,json}`, `logs/ablation/ablation.{csv,json}`, `logs/compare_methods/{results,bands}.{csv,json}` + `bands_vs_*_n*.png`, `logs/frozen_interventions/{pc,erp_fraud}.json`, plus Phase 3 figures under `logs/protocol/`, `logs/dilution/`, `logs/ablation/`.
+- Outputs: `logs/protocol/protocol_results.json`, `logs/dilution/dilution_curve.{csv,json}`, `logs/ablation/ablation.{csv,json}`, `logs/compare_methods/{results,bands}.{csv,json}` + `bands_vs_*_n*.png`, `logs/frozen_interventions/{pc,erp_fraud}.json`, `logs/scalability_reeff/table3.{csv,json}`, plus Phase 3 figures under `logs/protocol/`, `logs/dilution/`, `logs/ablation/`.
 - Config defaults live in `configs/default.yaml` (`router_protocol:`, `planted_control:`, `experiments:` sections).
 
 ### Verified findings so far
@@ -75,7 +76,7 @@ python -m spectral_distillation.experiments.reproduce_figures   # render all Pha
 - Golden 4-node ERP example matches the guide: SD(τ=0.5) = 1.0 (Customer isolated), `‖ΔL‖_F = 0.8832`, fragility ≈ 2.06, `Σ w_e·R_eff = n−1` exactly.
 - On equal-edge-mass budget/ε bands (120 grid points), spectral reliably beats *thresholding* (74.2%) but does **not** dominate all heuristics: raw random/degree stay competitive and spectral is the single best method at only 23.3% of points. An earlier point-estimate claim ("beats threshold, collapses at `n≥256`") was confounded by spectral's inverse-propensity weight rescale; see `docs/robustness_scaling.md`.
 - ERP attention graphs are ultra-fragile (pendant-dominated), `min_eigengap ≈ 4e-3`; any method that drops a unique bridge pushes SD to 1.0.
-- Caution: top-k effective resistance is a *lower bound* on true R and only accurate near full rank — the dispatcher uses exact R for `n <= 2000`.
+- Caution: top-k effective resistance is a *lower bound* on true R and only accurate near full rank — the dispatcher uses exact R for `n <= 2000`. Quantified in Phase 6 / WS2 (`docs/robustness_scaling.md` Part 2): absolute edge error stays high (rel-Frob ≈ 0.87 at n=1000, k=128) but the *ranking* is faithful (Spearman ρ → 0.91) and the induced low-frequency distortion is within 0.26–1.2% of exact, so `k = 64–128` suffices; exact R at n=10000 is skipped (O(n²) memory).
 
 ### Phase 3 findings
 

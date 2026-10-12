@@ -27,6 +27,7 @@ def spectral_sparsify(
     seed: int | None = None,
     q_floor: float = 1e-8,
     resistance_matrix: np.ndarray | None = None,
+    resistance_edges: np.ndarray | None = None,
 ) -> np.ndarray:
     W = build_adjacency(A)
     rows, cols, weights = edges_from_weights(W)
@@ -38,11 +39,18 @@ def spectral_sparsify(
         return np.zeros_like(W)
 
     L = compute_laplacian(W)
-    if resistance_matrix is not None:
+    if resistance_edges is not None:
+        r = np.asarray(resistance_edges, dtype=float)
+        if r.size != n_edges:
+            raise ValueError(
+                f"resistance_edges has {r.size} entries but the graph has {n_edges} edges"
+            )
+    elif resistance_matrix is not None:
         R = np.asarray(resistance_matrix, dtype=float)
+        r = R[rows, cols]
     else:
         R = compute_effective_resistance(L, k=k_eig)
-    r = R[rows, cols]
+        r = R[rows, cols]
 
     logn = np.log(n) + 1e-12
     C = n_edges_budget / (n * logn)

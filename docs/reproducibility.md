@@ -28,7 +28,7 @@ Companion documents:
 | Phase 4 | Real ERP attention data + LLM attention export (Llama-3.1-8B) feeding the pipeline | Partially (real-attention + synthetic ERP-fraud runs done; **real DGL Amazon fraud graph run at `docs/real_fraud_results.md`**) |
 | Phase 5 | Publication materials from verified results | Partially drafted (`docs/*`) |
 
-**Tests:** 233 pass (`python -m pytest` on CPU, cosmetic warnings only).
+**Tests:** 244 pass (`python -m pytest` on CPU, cosmetic warnings only).
 
 **Lint:** `pyflakes` clean on `src/`, `experiments/`, and `tests/`. (`ruff`/`ty` are not installed locally; the Makefile targets remain for CI.)
 
@@ -69,6 +69,7 @@ Companion documents:
 | `compare_methods.py` | Budget/ε **bands** for threshold / random / degree / spectral (SD + low-freq distortion, optional `--no-mass-match`) | `logs/compare_methods/results.{csv,json}`, `bands.{csv,json}` + `bands_vs_*.png` |
 | `run_protocol.py` | D1â€“D4 findings matrix + frozen-gate interventions (`--graph pc` default; `--graph erp_fraud` for the fraud-like graph) | `logs/protocol/protocol_results.json` (PC) / `logs/erp_fraud_protocol/protocol_results.json` (ERP-fraud) + PNG |
 | `frozen_interventions.py` | WS3: expert-architecture (logistic / mlp{w} / dendrite) and per-expert-capacity ablations of the frozen-gate protocol, with a within-regime-permutation null | `logs/frozen_interventions/{pc,erp_fraud}.json` |
+| `scalability_reeff.py` | WS2: top-k vs exact effective resistance at n = 100 / 1,000 / 10,000 (edge-error, rank fidelity, induced distortion, timing) | `logs/scalability_reeff/table3.{csv,json}` |
 | `run_real_fraud.py` | D1â€“D4 protocol on a **real public fraud graph** (`--dataset amazon\|tolokers\|yelpchi`) | `logs/{dataset}_fraud_protocol*/protocol_results.json` |
 | `run_sparsify_ladder.py` | Retention-ladder on any real graph: ER (effective-resistance) vs budget-matched random/degree distillation, D1â€“D3 vs retention. `--resume` keeps completed points; `--label-free-strategy/--order-feature` pick the router | `logs/{dataset}_fraud_ladder*/ladder_results.jsonl` + `ladder_summary.json` (see `docs/sparsify_ladder_results.md`, `docs/yelpchi_third_graph.md`) |
 | `dilution_curve.py` | Label-free vs oracle gain across the dilution ladder | `logs/dilution/dilution_curve.{csv,json}` + PNG |
@@ -106,7 +107,7 @@ reproducible; `per_layer` gives one column per transformer layer and is required
 for any downstream accuracy arm. A 29-way task from 3 features is near-chance
 regardless of routing.
 
-### 2.3 Tests (`spectral_distillation/tests/`, 233 tests)
+### 2.3 Tests (`spectral_distillation/tests/`, 244 tests)
 
 | File | Coverage |
 |------|----------|
@@ -238,7 +239,7 @@ real graph at a specific β.
 ```bash
 pip install -e ".[dev]"          # or: make dev-install
 
-python -m pytest                 # 233 tests
+python -m pytest                 # 244 tests
 python -m spectral_distillation.experiments.run_protocol        # D1-D4 + frozen gates
 python -m spectral_distillation.experiments.dilution_curve      # dilution ladder
 python -m spectral_distillation.experiments.ablation            # oracle Î´ + feature ablation
@@ -316,10 +317,11 @@ Every claim in Â§3 maps to a committed artifact:
 | SD = 1.0, â€–Î”Lâ€–_F = 0.8832, fragility 2.06, Î£ wÂ·R_eff = nâˆ’1 | `logs/diagnostic/diagnostic.json`, `test_theoretical_bounds.py` |
 | Equal-edge-mass budget/epsilon bands: spectral beats threshold (74.2%) but no method dominates | `logs/compare_methods/bands.json`, `docs/robustness_scaling.md` |
 | Frozen-gate ablations: ordering holds across logistic / mlp{w} / dendrite at n=2000 (within-regime null near-identity) | `logs/frozen_interventions/{pc,erp_fraud}.json`, `docs/robustness_scaling.md` Part 3 |
+| Top-k R_eff: rank-faithful (ρ→0.91) though absolute edge error high; induced distortion ≤1.2% of exact | `logs/scalability_reeff/table3.json`, `docs/robustness_scaling.md` Part 2 |
 | D1â€“D4 supported, frozen-gate ordering, stats | `logs/protocol/protocol_results.json` |
 | Dilution decay (0.231 â†’ 0.008) vs flat oracle (0.260), 10k GPU | `logs/dilution/dilution_curve.json` |
 | Feature ablation ordering + oracle Î´ plateau | `logs/ablation/ablation.json` |
-| 233-test pass | `python -m pytest` |
+| 244-test pass | `python -m pytest` |
 
 ---
 
@@ -492,7 +494,7 @@ so import order decided whether the loader ran at all. Fixed by preloading it in
   guide Appendix B).
 - `docs/literature_positioning.md` (drafted): related work and the honest differences vs MoG / GOKU / MORGAN.
 - Target the Figures/Tables spec (guide Â§10.2): Fig 3â€“6 and Tables 1â€“3 come from
-  `compare_methods.py`, `run_protocol.py`, `dilution_curve.py`, `ablation.py` outputs.
+  `compare_methods.py`, `scalability_reeff.py`, `run_protocol.py`, `frozen_interventions.py`, `dilution_curve.py`, `ablation.py` outputs.
 - Optionally add table/row exports in `reproduce_figures.py` for Tables 1â€“3 (LaTeX/CSV).
 
 ### Phase 6 â€” Robustness and scaling
@@ -500,8 +502,7 @@ so import order decided whether the loader ran at all. Fixed by preloading it in
 - **Done (WS1):** budget/ε sensitivity bands on an equal-edge-mass basis around Table 2
   (`compare_methods.py`, `docs/robustness_scaling.md`): spectral beats threshold at 74.2% of
   120 grid points but does not dominate — random/degree stay competitive; ranking is ε-flat.
-- **Pending (WS2):** top-k R_eff accuracy study vs `n` (guide §9.4 note on lower bounds) —
-  `scalability_reeff.py`.
+- **Done (WS2):** top-k R_eff accuracy study vs n (guide §9.4 note on lower bounds) — `scalability_reeff.py`: absolute edge error stays high but rank fidelity (ρ→0.91) keeps induced distortion within 0.26–1.2% of exact; exact skipped at n=10,000. See `docs/robustness_scaling.md` Part 2.
 - **Done (WS3):** extended frozen interventions — logistic / mlp{w} / dendrite experts and per-expert capacity, plus a within-regime-permutation null; the ordering holds for all 12 architecture/graph configs at n = 2000 (`frozen_interventions.py`, `docs/robustness_scaling.md` Part 3).
 
 ---

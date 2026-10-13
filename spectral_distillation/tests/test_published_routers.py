@@ -112,10 +112,7 @@ def test_ad_gnn_high_preservation_nodes_route_to_low_pass_channel():
 
 def test_router_gnn_forward_depends_on_adjacency():
     """Message passing must actually consult the graph (architecture differs from MLP)."""
-    import torch
-
     from spectral_distillation.src.laplacian import normalize_adjacency
-    from spectral_distillation.src.learned_router import _router_features
     from spectral_distillation.src.mixture import train_test_split
     from spectral_distillation.src.published_routers import (
         train_message_passing_router,

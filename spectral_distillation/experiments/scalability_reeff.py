@@ -43,7 +43,7 @@ from spectral_distillation.src.laplacian import (
     edges_from_weights,
 )
 from spectral_distillation.src.sparsifier import spectral_sparsify
-from spectral_distillation.src.utils import ensure_dir, get_logger, load_yaml_config, set_seed
+from spectral_distillation.src.utils import ensure_dir, get_logger, load_yaml_config
 
 DEFAULT_NS = [100, 1000, 10000]
 DEFAULT_KS = [16, 32, 64, 128]

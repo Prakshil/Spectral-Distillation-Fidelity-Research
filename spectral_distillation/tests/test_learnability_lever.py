@@ -32,7 +32,7 @@ def _pool(X: np.ndarray, n_experts: int = 3, seed: int = 0) -> np.ndarray:
 
 
 def _oracle_gain(graph: dict, seed: int = 0, split: int = 0) -> float:
-    X, y, W = graph["features"], graph["y"], graph["W"]
+    X, y = graph["features"], graph["y"]
     pool = _pool(X, seed=seed)
     oracle = oracle_from_groups(graph["group"], pool)
     train, te = train_test_split(y, split, seed)

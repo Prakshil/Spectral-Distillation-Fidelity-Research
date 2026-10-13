@@ -10,7 +10,6 @@ from spectral_distillation.experiments.compare_methods import (
     check_bands,
     evaluate,
 )
-from spectral_distillation.src.sparsifier import spectral_sparsify
 from spectral_distillation.src.synthetic import make_erp_attention
 
 N = 48
@@ -63,16 +62,6 @@ def test_method_metric_rejects_unknown_metric():
     row = evaluate(W, BUDGET, seed=0, epsilon=0.1)
     with pytest.raises(ValueError):
         _method_metric(row, "spectral", "not_a_metric")
-
-
-def _band(n, factor, eps, method, low_freq):
-    return {
-        "n": n,
-        "budget_factor": factor,
-        "epsilon": eps,
-        "method": method,
-        "low_freq_mean": low_freq,
-    }
 
 
 def test_check_bands_detects_universal_winner():

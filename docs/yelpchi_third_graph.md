@@ -41,6 +41,15 @@ quietly truncating, the loader takes the largest connected component of a unifor
 random node sample (`DEFAULT_YELP_MAX_NODES = 15000`, seed 0) and records the
 sampling in `graph["source"]`. Pass `max_nodes=None` for the full graph.
 
+A **small** cap needs care: the induced subgraph is far sparser than the full
+graph, so the retained LCC can collapse to a handful of nodes and, below ~200,
+to a single class — which crashed the Node-MoE runner with
+`ValueError: YelpChi labels must be binary {0,1}, got [0]` instead of returning a
+usable graph. The loader now grows the sample (doubling, up to the full LCC)
+until the retained LCC carries both classes, and records the sample size actually
+used in `graph["source"]`. `test_yelpchi_small_cap_keeps_both_classes` pins this
+for caps 200/100/50.
+
 The cap preserves what the experiment measures. Measured directly on `YelpChi.mat`
 (sampling the LCC, seed 0, then taking the induced LCC), 98–99% of sampled nodes
 survive and the class balance is stable:

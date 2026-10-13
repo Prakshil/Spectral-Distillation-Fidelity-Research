@@ -202,13 +202,27 @@ def load_yelpchi(
     lcc = np.flatnonzero(comp == np.argmax(np.bincount(comp)))
     if max_nodes is not None and lcc.size > max_nodes:
         rng = np.random.default_rng(seed)
-        keep = np.sort(rng.choice(lcc, size=max_nodes, replace=False))
-        sub = full[keep][:, keep]
-        # Keep the largest connected component of the induced subgraph; a uniform
-        # random node sample can orphan a handful of nodes.
-        _, sub_comp = sp.csgraph.connected_components(sub, directed=False)
-        keep = keep[sub_comp == np.argmax(np.bincount(sub_comp))]
-        note = f"largest connected component of a uniform {max_nodes}-node sample (seed {seed})"
+        # A uniform sample's induced largest connected component can collapse to
+        # a handful of nodes (or to a single class) when the cap is small, since
+        # the induced subgraph is far sparser than the full graph. Grow the
+        # sample until the retained LCC carries both classes, so a small
+        # ``--max-nodes`` cannot produce a degenerate one-class graph. The
+        # sample size actually used is what the returned ``source`` records.
+        pool = max_nodes
+        take = max_nodes
+        for _ in range(16):
+            take = min(pool, lcc.size)
+            keep = np.sort(rng.choice(lcc, size=take, replace=False))
+            sub = full[keep][:, keep]
+            # Keep the largest connected component of the induced subgraph; a
+            # uniform random node sample can orphan nodes.
+            _, sub_comp = sp.csgraph.connected_components(sub, directed=False)
+            keep = keep[sub_comp == np.argmax(np.bincount(sub_comp))]
+            if len(np.unique(labels[keep])) == 2 or take >= lcc.size:
+                break
+            pool = min(pool * 2, lcc.size)
+        note = (f"largest connected component of a uniform {take}-node sample "
+                f"(seed {seed})")
     else:
         note = "full largest connected component"
 

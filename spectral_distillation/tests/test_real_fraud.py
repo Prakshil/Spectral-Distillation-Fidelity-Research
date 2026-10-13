@@ -19,6 +19,7 @@ from spectral_distillation.src.router_protocol import (
     uniform_assignment,
 )
 
+import functools
 import pathlib
 
 AMAZON_AVAILABLE = pathlib.Path(DEFAULT_AMAZON_MAT).exists()
@@ -28,6 +29,27 @@ TOLOKERS_AVAILABLE = (
 YELP_AVAILABLE = pathlib.Path(DEFAULT_YELP_MAT).exists()
 
 
+# The three loaders parse multi-MB .mat/.parquet files and build dense
+# Laplacians; several tests re-load the same graph. Cache per argument tuple so
+# the module runs in seconds instead of re-parsing YelpChi on every test (this
+# file alone spent ~100 s and could exceed a shell timeout under CPU load).
+@functools.lru_cache(maxsize=None)
+def _amazon():
+    return load_amazon_fraud()
+
+
+@functools.lru_cache(maxsize=None)
+def _tolokers():
+    return load_tolokers()
+
+
+@functools.lru_cache(maxsize=None)
+def _yelp(max_nodes=None, seed=0):
+    if max_nodes is None:
+        return load_yelpchi(seed=seed)
+    return load_yelpchi(max_nodes=max_nodes, seed=seed)
+
+
 def _skip_if_missing():
     if not AMAZON_AVAILABLE:
         pytest.skip("Amazon.mat not downloaded (data/benchmarks/amazon/raw)")
@@ -35,7 +57,7 @@ def _skip_if_missing():
 
 def test_loader_schema():
     _skip_if_missing()
-    g = load_amazon_fraud()
+    g = _amazon()
     for key in ("W", "features", "y", "n_nodes", "d_features", "source",
                 "positive_ratio", "n_edges"):
         assert key in g
@@ -46,7 +68,7 @@ def test_loader_schema():
 
 def test_loader_labels_match_dgl_block():
     _skip_if_missing()
-    g = load_amazon_fraud()
+    g = _amazon()
     assert set(np.unique(g["y"]).tolist()) == {0, 1}
     assert 0.09 < g["positive_ratio"] < 0.10
     assert int(g["y"].sum()) == 821
@@ -54,7 +76,7 @@ def test_loader_labels_match_dgl_block():
 
 def test_adjacency_symmetric_diagonal_free():
     _skip_if_missing()
-    W = load_amazon_fraud()["W"]
+    W = _amazon()["W"]
     assert np.allclose(W, W.T)
     assert np.count_nonzero(np.diag(W)) == 0
     assert np.count_nonzero(W) > 0
@@ -65,14 +87,14 @@ def test_single_connected_component():
     import scipy.sparse as sp
     from scipy.sparse.csgraph import connected_components
 
-    W = load_amazon_fraud()["W"]
+    W = _amazon()["W"]
     n_comp, _ = connected_components(sp.csr_matrix(W > 0), directed=False)
     assert n_comp == 1
 
 
 def test_adaptive_oracle_populates_three_channels():
     _skip_if_missing()
-    g = load_amazon_fraud()
+    g = _amazon()
     fixed = oracle_bucket_assignment(g["W"], g["y"], adaptive=False)
     adaptive = oracle_bucket_assignment(g["W"], g["y"], adaptive=True)
     fix_usage = np.bincount(np.argmax(fixed, axis=1), minlength=3)
@@ -83,7 +105,7 @@ def test_adaptive_oracle_populates_three_channels():
 
 def test_condition_shapes_and_usage():
     _skip_if_missing()
-    g = load_amazon_fraud()
+    g = _amazon()
     n = g["n_nodes"]
     oracle = oracle_bucket_assignment(g["W"], g["y"], adaptive=True)
     uniform = uniform_assignment(n, 3)
@@ -111,8 +133,8 @@ def test_loader_missing_file_raises():
 
 def test_registry_dispatch_and_unknown_key():
     _skip_if_missing()
-    assert load_real_fraud("amazon")["n_nodes"] == load_amazon_fraud()["n_nodes"]
-    assert load_real_fraud("AMAZON")["n_nodes"] == load_amazon_fraud()["n_nodes"]
+    assert load_real_fraud("amazon")["n_nodes"] == _amazon()["n_nodes"]
+    assert load_real_fraud("AMAZON")["n_nodes"] == _amazon()["n_nodes"]
     with pytest.raises(KeyError):
         load_real_fraud("not_a_dataset")
 
@@ -124,7 +146,7 @@ def _skip_if_missing_tolokers():
 
 def test_tolokers_schema_and_labels():
     _skip_if_missing_tolokers()
-    g = load_tolokers()
+    g = _tolokers()
     assert g["W"].shape == (g["n_nodes"], g["n_nodes"]) == (11758, 11758)
     assert g["d_features"] == 10
     assert g["features"].shape == (11758, 10)
@@ -136,7 +158,7 @@ def test_tolokers_schema_and_labels():
 
 def test_tolokers_adjacency_contract():
     _skip_if_missing_tolokers()
-    W = load_tolokers()["W"]
+    W = _tolokers()["W"]
     assert np.allclose(W, W.T)
     assert np.count_nonzero(np.diag(W)) == 0
     assert np.all((W == 0) | (W == 1))
@@ -152,7 +174,7 @@ def test_tolokers_is_sparser_than_amazon():
     is what the multi-dataset amplification claim relies on."""
     _skip_if_missing()
     _skip_if_missing_tolokers()
-    a, t = load_amazon_fraud(), load_tolokers()
+    a, t = _amazon(), _tolokers()
 
     def node_hom_sd(g):
         W, y = g["W"], g["y"]
@@ -177,7 +199,7 @@ def _skip_if_missing_yelp():
 
 def test_yelpchi_schema_and_labels():
     _skip_if_missing_yelp()
-    g = load_yelpchi()
+    g = _yelp()
     assert g["W"].shape == (g["n_nodes"], g["n_nodes"])
     assert g["d_features"] == 32
     assert g["features"].shape == (g["n_nodes"], 32)
@@ -192,7 +214,7 @@ def test_yelpchi_adjacency_contract_and_connectivity():
     import scipy.sparse as sp
     from scipy.sparse.csgraph import connected_components
 
-    W = load_yelpchi()["W"]
+    W = _yelp()["W"]
     assert np.allclose(W, W.T)
     assert np.count_nonzero(np.diag(W)) == 0
     assert np.all((W == 0) | (W == 1))
@@ -202,7 +224,7 @@ def test_yelpchi_adjacency_contract_and_connectivity():
 
 def test_yelpchi_respects_max_nodes():
     _skip_if_missing_yelp()
-    g = load_yelpchi(max_nodes=3000)
+    g = _yelp(3000)
     assert g["n_nodes"] <= 3000
     # connectivity still holds after the induced-sample + LCC filter
     import scipy.sparse as sp
@@ -220,7 +242,7 @@ def test_yelpchi_cap_preserves_class_balance_not_degree():
     balance claim keeps the loader honest about which one holds.
     """
     _skip_if_missing_yelp()
-    g = load_yelpchi()
+    g = _yelp()
     assert abs(g["positive_ratio"] - 0.1450) < 0.01, "cap should not skew labels"
     deg = 2 * g["n_edges"] / g["n_nodes"]
     assert deg < 0.75 * 167.6, f"expected cap to cost mean degree, got {deg:.1f}"
@@ -228,11 +250,27 @@ def test_yelpchi_cap_preserves_class_balance_not_degree():
 
 def test_yelpchi_sampling_is_deterministic():
     _skip_if_missing_yelp()
-    a = load_yelpchi(max_nodes=3000, seed=7)
-    b = load_yelpchi(max_nodes=3000, seed=7)
-    c = load_yelpchi(max_nodes=3000, seed=8)
+    a = _yelp(3000, 7)
+    b = _yelp(3000, 7)
+    c = _yelp(3000, 8)
     assert np.array_equal(a["y"], b["y"])
     assert not np.array_equal(a["y"], c["y"])
+
+
+def test_yelpchi_small_cap_keeps_both_classes():
+    """A small --max-nodes used to collapse the retained LCC to a single class
+    and crash the Node-MoE runner (``ValueError: ... got [0]``). The loader now
+    grows the sample until both classes survive, so the cap is safe to use."""
+    _skip_if_missing_yelp()
+    import scipy.sparse as sp
+    from scipy.sparse.csgraph import connected_components
+
+    for cap in (200, 100, 50):
+        g = _yelp(cap)
+        assert g["n_nodes"] >= 2, cap
+        assert set(np.unique(g["y"]).tolist()) == {0, 1}, cap
+        n_comp, _ = connected_components(sp.csr_matrix(g["W"] > 0), directed=False)
+        assert n_comp == 1, cap
 
 
 def test_yelpchi_missing_file_raises():
@@ -252,14 +290,14 @@ def test_max_nodes_rejected_for_uncapped_datasets():
 
 def test_max_nodes_dispatches_to_yelpchi():
     _skip_if_missing_yelp()
-    g = load_real_fraud("yelpchi", max_nodes=3000)
+    g = _yelp(3000)
     assert g["n_nodes"] <= 3000
 
 
 def test_registry_dispatch_includes_yelpchi():
     _skip_if_missing_yelp()
-    assert load_real_fraud("yelpchi")["n_nodes"] == load_yelpchi()["n_nodes"]
-    assert load_real_fraud("YELPCHI")["n_nodes"] == load_yelpchi()["n_nodes"]
+    assert load_real_fraud("yelpchi")["n_nodes"] == _yelp()["n_nodes"]
+    assert load_real_fraud("YELPCHI")["n_nodes"] == _yelp()["n_nodes"]
 
 
 def test_three_graphs_span_three_density_regimes():
@@ -275,7 +313,7 @@ def test_three_graphs_span_three_density_regimes():
         h = np.divide(W @ y, deg, out=np.zeros_like(deg), where=deg > 0)
         return float(h.std())
 
-    a, t, yp = load_amazon_fraud(), load_tolokers(), load_yelpchi()
+    a, t, yp = _amazon(), _tolokers(), _yelp()
     densities = [g["n_edges"] / g["n_nodes"] for g in (a, t, yp)]
     assert densities[0] > densities[1] > densities[2], densities
     sds = [node_hom_sd(g) for g in (a, t, yp)]
@@ -320,6 +358,6 @@ def test_tolokers_loads_with_torch_already_imported(tmp_path):
     from spectral_distillation.src.laplacian import compute_laplacian
 
     assert torch.is_tensor  # the import itself is the point of the test
-    g = load_tolokers()
+    g = _tolokers()
     assert g["W"].shape[0] == 11758
     assert compute_laplacian(g["W"]).shape[0] == 11758

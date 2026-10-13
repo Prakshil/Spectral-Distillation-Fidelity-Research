@@ -52,7 +52,7 @@ make figures          # all paper figures
 
 ```bash
 pip install -e ".[dev]"          # or: make install
-python -m pytest                 # 244 tests: theory bounds, sparsifiers, router protocol, statistics
+python -m pytest                 # 250 tests: theory bounds, sparsifiers, router protocol, statistics
 
 # Phase 1-2
 python -m spectral_distillation.experiments.run_diagnostic     # golden 4-node + ERP SD/fragility preview

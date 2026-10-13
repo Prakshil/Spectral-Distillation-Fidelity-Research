@@ -76,6 +76,6 @@ Dilution ladder = gradually scramble graph edges toward same-class wiring to tes
 
 - Full report: `docs/real_attention_results.md`
 - Result JSONs: `logs/real_attention/*.json`, `logs/rk16|rk64|rk32_s7|rk16_adapt/...`
-- Tests: `python -m pytest` (173 pass)
+- Tests: `python -m pytest` (250 pass)
 - Model: `HuggingFaceTB/SmolLM2-1.7B`; corpus: Gutenberg "The Time Machine"
 - Runtime note: full run ~49 min on RTX 4060; verdict-only ~5 min with `--skip-dilution`

@@ -28,7 +28,7 @@ Companion documents:
 | Phase 4 | Real ERP attention data + LLM attention export (Llama-3.1-8B) feeding the pipeline | Partially (real-attention + synthetic ERP-fraud runs done; **real DGL Amazon fraud graph run at `docs/real_fraud_results.md`**) |
 | Phase 5 | Publication materials from verified results | Partially drafted (`docs/*`) |
 
-**Tests:** 244 pass (`python -m pytest` on CPU, cosmetic warnings only).
+**Tests:** 250 pass (`python -m pytest` on CPU, cosmetic warnings only).
 
 **Lint:** `pyflakes` clean on `src/`, `experiments/`, and `tests/`. (`ruff`/`ty` are not installed locally; the Makefile targets remain for CI.)
 
@@ -107,7 +107,7 @@ reproducible; `per_layer` gives one column per transformer layer and is required
 for any downstream accuracy arm. A 29-way task from 3 features is near-chance
 regardless of routing.
 
-### 2.3 Tests (`spectral_distillation/tests/`, 244 tests)
+### 2.3 Tests (`spectral_distillation/tests/`, 250 tests)
 
 | File | Coverage |
 |------|----------|
@@ -239,7 +239,7 @@ real graph at a specific β.
 ```bash
 pip install -e ".[dev]"          # or: make dev-install
 
-python -m pytest                 # 244 tests
+python -m pytest                 # 250 tests
 python -m spectral_distillation.experiments.run_protocol        # D1-D4 + frozen gates
 python -m spectral_distillation.experiments.dilution_curve      # dilution ladder
 python -m spectral_distillation.experiments.ablation            # oracle Î´ + feature ablation
@@ -321,7 +321,7 @@ Every claim in Â§3 maps to a committed artifact:
 | D1â€“D4 supported, frozen-gate ordering, stats | `logs/protocol/protocol_results.json` |
 | Dilution decay (0.231 â†’ 0.008) vs flat oracle (0.260), 10k GPU | `logs/dilution/dilution_curve.json` |
 | Feature ablation ordering + oracle Î´ plateau | `logs/ablation/ablation.json` |
-| 244-test pass | `python -m pytest` |
+| 250-test pass | `python -m pytest` |
 
 ---
 

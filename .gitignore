@@ -40,6 +40,11 @@ wandb/
 logs/**/*.out
 logs/**/*.err
 
+# Scratch / sweep completion markers (never results)
+*.done
+/out.txt
+/err.txt
+
 # IDE / OS
 .vscode/
 .idea/

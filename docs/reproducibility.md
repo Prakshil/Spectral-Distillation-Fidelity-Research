@@ -25,8 +25,9 @@ Companion documents:
 | Phase 1 | Diagnostics + theory (SD metric, fragility, entropy; provable bounds) | **Implemented & tested** |
 | Phase 2 | Spectral sparsifiers + method comparison (threshold / random / degree / spectral) | **Implemented & tested** |
 | Phase 3 | Router evaluation protocol (label-free GNN router, D1â€“D4, PC-1c-R control, dilution ladder, ablations, figures) | **Implemented & tested** |
-| Phase 4 | Real ERP attention data + LLM attention export (Llama-3.1-8B) feeding the pipeline | Partially (real-attention + synthetic ERP-fraud runs done; **real DGL Amazon fraud graph run at `docs/real_fraud_results.md`**) |
+| Phase 4 | Real ERP attention data + LLM attention export (SmolLM2-1.7B) feeding the pipeline | **Done** (synthetic ERP-fraud, real LLM attention, and three real fraud graphs Amazon/Tolokers/YelpChi; see `docs/real_fraud_results.md`) |
 | Phase 5 | Publication materials from verified results | Partially drafted (`docs/*`) |
+| Phase 6 | Robustness and scaling (budget/epsilon bands, top-k R_eff, extended frozen interventions) | **Implemented & tested** (`docs/robustness_scaling.md`) |
 
 **Tests:** 250 pass (`python -m pytest` on CPU, cosmetic warnings only).
 

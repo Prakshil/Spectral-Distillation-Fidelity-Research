@@ -519,9 +519,9 @@ synthetic control; now make it work on *real* inputs.
    implemented) instead of planted regimes.
    - *What to watch:* does label-free still capture most of oracle's gain? Does the
      dilution mechanism reproduce?
-2. **LLM attention export.** Implement the `llm_export` module (default model
-   `meta-llama/Llama-3.1-8B`, 32 layers, 32 heads): for a batch of text, export the
-   attention matrices as weighted graphs and feed them through the *same* pipeline
+2. **LLM attention export.** `llm_export` is implemented and run (default model
+   `HuggingFaceTB/SmolLM2-1.7B`, 24 layers, 32 heads; see `docs/real_attention_results.md`):
+   it exports the attention matrices as weighted graphs and feeds them through the *same* pipeline
    (attention → entropy signal → spectral sparsification → router protocol).
    - This directly tests the headline claim: *"the pre-construction signal cannot be
      corrupted by distillation."*
@@ -593,5 +593,5 @@ reviewers.
 
 *Sources: committed `logs/**/*.json`, `docs/reproducibility.md`,
 `SPECTRAL_DISTILLATION_IMPLEMENTATION_GUIDE.md`, and the implementation in
-`spectral_distillation/src/` + `experiments/`. All measurements: NVIDIA RTX 4060
-Laptop GPU, n=10,000, 173 tests passing.*
+`spectral_distillation/src/` + `experiments/`. Measurements at n=10,000 with the
+committed logs as the CPU reference; 250 tests passing.*

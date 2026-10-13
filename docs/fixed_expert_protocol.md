@@ -756,7 +756,7 @@ nothing when the routing signal is real.
 
 | positive control, GNN expert | no-routing | oracle | k-means | random | oracle − no-routing |
 |---|---|---|---|---|---|
-| full graph | 0.6567 | 0.9637 | 0.9637 | 0.6315 | **+0.3070** |
+| full graph | 0.6503 | 0.9893 | 0.9893 | 0.6224 | **+0.3390** |
 | ragged edges | 0.6505 | 0.9901 | 0.9901 | 0.6248 | **+0.3396** |
 
 That is the load-bearing comparison for the whole implicit-routing argument: the

@@ -326,3 +326,61 @@ def frozen_intervention(
         out["within_regime_shuffled_samples"] = shuffles.tolist()
 
     return out
+
+
+def partial_spearman(x, y, z) -> tuple[float, float]:
+    """Partial Spearman correlation of ``x`` and ``y`` controlling for ``z``.
+
+    Ranks all three vectors, linearly residualises the ranks of ``x`` and ``y``
+    on the rank of ``z``, and returns the Pearson correlation of the residuals
+    with its two-sided t-test p-value (``df = n - 3``). This isolates whether
+    ``x`` carries information about ``y`` *beyond* the nuisance variable ``z`` --
+    e.g. whether spectral distortion predicts routing stability beyond
+    incidental node isolation. Returns ``(nan, nan)`` when there are fewer than
+    4 points or either residual is constant.
+    """
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    z = np.asarray(z, dtype=float)
+    n = x.size
+    if n < 4 or y.size != x.size or z.size != x.size:
+        return float("nan"), float("nan")
+    rx = stats.rankdata(x)
+    ry = stats.rankdata(y)
+    rz = stats.rankdata(z)
+    design = np.column_stack([rz, np.ones_like(rz)])
+    coef_x, *_ = np.linalg.lstsq(design, rx, rcond=None)
+    coef_y, *_ = np.linalg.lstsq(design, ry, rcond=None)
+    ex = rx - design @ coef_x
+    ey = ry - design @ coef_y
+    if np.ptp(ex) == 0 or np.ptp(ey) == 0:
+        return float("nan"), float("nan")
+    r = float(np.corrcoef(ex, ey)[0, 1])
+    if abs(r) >= 1.0:
+        return r, 0.0
+    n_obs = len(x)
+    dof = n_obs - 3
+    if dof <= 0:
+        return r, float("nan")
+    t = r * np.sqrt(dof / (1.0 - r * r))
+    p = 2.0 * float(stats.t.sf(abs(t), dof))
+    return r, p
+
+
+def bootstrap_spearman_ci(x, y, n_boot: int = 2000, seed: int = 0,
+                          alpha: float = 0.05) -> tuple[float, float, float]:
+    """Bootstrap percentile CI for Spearman ``x`` vs ``y`` (resample pairs)."""
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    rng = np.random.default_rng(seed)
+    n = len(x)
+    vals = []
+    for _ in range(n_boot):
+        idx = rng.integers(0, n, n)
+        if np.ptp(y[idx]) == 0 or np.ptp(x[idx]) == 0:
+            continue
+        vals.append(float(stats.spearmanr(x[idx], y[idx]).statistic))
+    if not vals:
+        return float("nan"), float("nan"), float("nan")
+    lo, hi = np.percentile(vals, [100 * alpha / 2, 100 * (1 - alpha / 2)])
+    return float(lo), float(hi), float(np.mean(vals))

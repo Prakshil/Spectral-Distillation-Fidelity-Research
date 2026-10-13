@@ -926,7 +926,10 @@ logging:
 | Method comparison | `compare_methods.py` | Threshold vs Spectral vs Random vs Degree | benchmark graphs |
 | Dilution curve | `dilution_curve.py` | Reproduce PC-1c-R decay; validate instrument | PC-1c-R |
 | Ablation | `ablation.py` | Oracle filter δ, budget, entropy signal, ε | subsets |
-| Figures | `reproduce_figures.py` | All paper figures/tables | results cached in `logs/` |
+| Robustness bands (WS1) | `compare_methods.py` | SD bands vs budget/epsilon on an equal-edge-mass basis (Table 2) | SBM / ERP |
+| Scalability (WS2) | `scalability_reeff.py` | exact vs top-k R_eff accuracy/rank at n = 100 / 1k / 10k (Table 3) | SBM |
+| Frozen ablations (WS3) | `frozen_interventions.py` | gate ordering across expert architectures + capacity | pc / erp_fraud |
+| Figures + Tables | `reproduce_figures.py` | All paper figures and Tables 1-3 (CSV + LaTeX) | results cached in `logs/` |
 
 ### 9.2 Makefile Targets
 
@@ -939,10 +942,12 @@ test-theory:     pytest tests/test_theoretical_bounds.py -v
 diagnostic:      python -m spectral_distillation.experiments.run_diagnostic
 protocol:        python -m spectral_distillation.experiments.run_protocol
 compare:         python -m spectral_distillation.experiments.compare_methods
+scalability:     python -m spectral_distillation.experiments.scalability_reeff
+frozen:          python -m spectral_distillation.experiments.frozen_interventions
 dilution:        python -m spectral_distillation.experiments.dilution_curve
 ablation:        python -m spectral_distillation.experiments.ablation
 figures:         python -m spectral_distillation.experiments.reproduce_figures
-full-pipeline:   diagnostic protocol compare dilution ablation figures
+full-pipeline:   diagnostic protocol compare scalability frozen dilution ablation figures
 clean:           remove build artifacts and logs/*.log
 lint:            ruff check . ; format: ruff format . ; typecheck: ty check .
 ```
@@ -973,15 +978,30 @@ lint:            ruff check . ; format: ruff format . ; typecheck: ty check .
 
 ```
 1. Abstract (<= 250 words)
-   Problem: LLM attention -> sparse graph loses routing signal.
-   Method: spectral sparsification + pre-training diagnostic + entropy signal.
-   Result: provable bound I(pi*;Y) − I(pi~;Y) <= C·SD·H(Y); validation on
-           planted + corrected benchmarks with the oracle/uniform protocol.
+   Problem: LLM attention -> sparse graph loses routing signal; worse, the
+            standard self-routing evaluation can manufacture routing gains that
+            vanish under a fixed-expert, usage-matched control.
+   Method: spectral sparsification (effective-resistance) + a pre-training
+           diagnostic (SD) tied to a provable routing-information bound, plus
+           the fixed-expert Protocol B with D1-D4 and usage-matched random.
+   Result: prompt-honest. Graph-MoE routers (incl. reproduced published ones)
+           do not beat one global model under Protocol B (0/234 cells; oracle
+           negative 9/9), and Protocol-A oracle numbers are retracted. The
+           supported positives are (i) connectivity survival predicts routing
+           *stability* (Spearman +0.78..+0.99; SD is a collinear proxy that
+           loses significance once isolated-fraction is partialled out) and
+           (ii) top-k R_eff is rank-faithful to exact out to n=10^4.
 
 2. Introduction
-   2.1 LLM attention distillation problem (thresholding failure, Fig 1)
+   2.1 Distillation destroys router signal; naive thresholding disconnects (Fig 1)
    2.2 The router depends on spectra it never sees intact
-   2.3 Contributions (4 bullets)
+   2.3 Contributions (4 bullets):
+       (i)   SD diagnostic + routing-information bound (Thm 1);
+       (ii)  fixed-expert / usage-matched protocol exposing self-routing artifacts;
+       (iii) honest negative for graph-MoE routing, incl. reproduced published
+             routers and Node-MoE on its own benchmarks;
+       (iv)  survival->stability empirical law (SD a collinear proxy) + top-k
+             R_eff scalability.
 
 3. Related Work  (§11 of this guide)
 
@@ -1002,20 +1022,25 @@ lint:            ruff check . ; format: ruff format . ; typecheck: ty check .
 7. Spectral Sparsification for ERP Graphs
    7.1 Effective resistance sampling with oracle filter
    7.2 Budget-aware algorithm, complexity O(n² log n), top-k approximation
+       (rank-faithful to exact; measured in Table 3)
 
 8. Attention Entropy Routing Signal
    8.1 Pre-construction signal from LLM attention (§4)
    8.2 Multi-layer/head aggregation and combination with graph signals
 
 9. Experiments
-   9.1 Setup (synthetic ERP generator, benchmarks, compute)
-   9.2 Diagnostic: SD predicts routing quality (Fig. 3)
+   9.1 Setup (synthetic ERP generator, benchmarks, real attention, compute)
+   9.2 Diagnostic: routing-retention / SD diagnostic (Fig. 4); SD-vs-stability
+       partial-correlation + bootstrap analysis (real_attention_results §9.3)
    9.3 Protocol: D1-D4 + findings matrix (Table 1)
-   9.4 Method comparison: threshold vs spectral vs random (Fig. 4, Table 2)
+   9.4 Method comparison bands: threshold vs spectral vs random vs degree
+       (Fig. 3, Table 2; equal-edge-mass, WS1)
    9.5 Planted control: dilution curve + foreign-architecture D4 (Fig. 5)
-   9.6 Frozen-model interventions: assignment value at fixed experts (Fig. 6)
+   9.6 Frozen-model interventions + architecture/capacity ablations (Fig. 6, WS3)
+   9.7 Scalability: exact vs top-k R_eff at n = 100 / 1k / 10k (Table 3, WS2)
 
-10. Discussion, Limitations, Conclusion, Broader Impact
+10. Discussion, Limitations (honest negatives: D2 on dense/homophilic graphs),
+    Conclusion, Broader Impact
 ```
 
 ### 10.2 Figures and Tables Specification
@@ -1027,10 +1052,13 @@ lint:            ruff check . ; format: ruff format . ; typecheck: ty check .
 | Fig 3 | SD vs edge-budget curves for all four methods | `compare_methods.py` |
 | Fig 4 | Routing retention (1−SD) vs predicted-acc vs actual-acc | `run_diagnostic.py` |
 | Fig 5 | PC-1c-R dilution curve: oracle gain & frozen-intervention decay vs λ | `dilution_curve.py` |
-| Fig 6 | Entropy features separate fraud nodes pre-construction | `run_diagnostic.py` |
+| Fig 6 | Frozen-gate interventions: assignment value at fixed experts + architecture/capacity ablations | `run_protocol.py`, `frozen_interventions.py` (WS3) |
 | Table 1 | Findings matrix: oracle−uniform, LF recovery, verdict, D1–D4 | `run_protocol.py` |
-| Table 2 | SD, retention, min_gap, fragility, runtime for each method × n | `compare_methods.py` |
-| Table 3 | Scalability: n = 100 / 1,000 / 10,000, exact vs top-k R_eff | `compare_methods.py` |
+| Table 2 | low-freq distortion, SD, retention, runtime for each method × n (equal-edge-mass bands) | `compare_methods.py` (WS1) |
+| Table 3 | Scalability: n = 100 / 1,000 / 10,000, exact vs top-k R_eff | `scalability_reeff.py` (WS2) |
+
+The entropy-feature figure (formerly Fig 6) is produced by `run_diagnostic.py`
+and kept as a supplementary panel; the main Fig 6 is the frozen-gate ablation.
 
 ### 10.3 Theorem Statements for the Paper
 

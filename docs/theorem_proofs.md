@@ -242,5 +242,28 @@ repo do not depend on them holding tightly.
 | Four-step chain (Thm 1) | valid chain under §7 assumptions; bound loose |
 | Random-retention `(1−2ε)^k` (Thm 2) | heuristic high-probability bound; running-example value exact arithmetic |
 | Lean edge-removal lemma | sketch, not compiled |
-| SD/fragility predict routing *stability* | **measured** (Spearman +0.78…+0.99, `docs/real_attention_results.md` §9.1) |
+| SD/fragility predict routing *stability* | **measured, proxy** — raw Spearman +0.78…+0.99 is against connectivity *survival*; after partialling out isolated-fraction the spectral term is not significant (pooled −0.20, p=0.16) while survival stays +0.83 (p=1e-13). See §8.1, `docs/real_attention_results.md` §9.1, §9.3 |
 | SD predicts routing *accuracy* drop | **not supported** (Spearman +0.231, p=0.448, §9.2) |
+
+### 8.1 Corollary (measured): stability is carried by connectivity survival
+
+The Step-3 Lipschitz router of §4 bounds the routing *assignment* change by the
+representation error, and the representation error is bounded by the spectral
+distortion. This predicts that SD should track routing stability. The prediction
+holds in the raw rank correlation (§9.1) but is not *identifiable* at the
+observed sparsities, because the low-frequency spectral error and the
+retained-connectivity (isolated-fraction) variable are nearly collinear on these
+graphs. Writing `S` for same-seed assignment stability, `SD` for low-frequency
+spectral error, and `π` for the isolated-node fraction, the measured relations on
+the collapse-free points (four graphs, n=51, §9.3) are
+
+- `rho(SD, S) = -0.549` (p=3e-05), but `rho(SD, S | π) = -0.200` (p=0.16);
+- `rho(survival, S) = +0.880` (p=2e-17), and `rho(survival, S | SD) = +0.829` (p=1e-13).
+
+So the operational corollary — *emphasis is a claim about which variable to
+monitor, not a theorem* — is that routing stability is predicted by connectivity
+survival rather than by the raw spectral error. The Lipschitz chain is not
+contradicted: if the sparsifier's low-frequency distortion is precisely what
+destroys connectivity, then `π` is a *mediator* of `SD`, and conditioning on it
+over-controls (the two readings cannot be separated from observational data
+alone). Both readings agree that survival, not SD, is the deployable proxy.

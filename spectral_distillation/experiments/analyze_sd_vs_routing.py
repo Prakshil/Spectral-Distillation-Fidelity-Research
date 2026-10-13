@@ -17,9 +17,12 @@ import glob
 import json
 import os
 import sys
+from collections import defaultdict
 
 import numpy as np
 from scipy.stats import spearmanr
+
+from spectral_distillation.src.evaluation import bootstrap_spearman_ci, partial_spearman
 
 COLLAPSE = "router_collapse_seeds"
 
@@ -90,10 +93,29 @@ def report(rows, label, outcomes=("stab", "oag")):
     print(f"    collapse-free lowfreq->stability: "
           f"{'SIGNIFICANT' if p_moved < 0.05 else 'not significant'}"
           f" (rho={s_moved:+.3f}, p={p_moved:.3g})")
+
+    y_stab = np.array([r["stab"] for r in rows])
+    lf_c, y_c = lf[clean], y_stab[clean]
+    iso_c, surv_c = iso[clean], surv[clean]
+    part_lf_iso = partial_spearman(lf_c, y_c, iso_c)
+    part_surv_lf = partial_spearman(surv_c, y_c, lf_c)
+    lo_lf, hi_lf, _ = bootstrap_spearman_ci(lf_c, y_c)
+    lo_sv, hi_sv, _ = bootstrap_spearman_ci(surv_c, y_c)
+    print(f"    partial rho(lowfreq, stability | isolated) = {part_lf_iso[0]:+.3f} (p={part_lf_iso[1]:.3g})")
+    print(f"    partial rho(survival, stability | lowfreq) = {part_surv_lf[0]:+.3f} (p={part_surv_lf[1]:.3g})")
+    print(f"    bootstrap 95% CI  lowfreq->stability [{lo_lf:+.3f}, {hi_lf:+.3f}]  "
+          f"survival->stability [{lo_sv:+.3f}, {hi_sv:+.3f}]")
+
     return {"label": label, "n_points": len(rows), "collapse_affected": len(cc),
             "lowfreq_max": float(lf.max()), "density": float(rows[0]["density"]),
             "rho_lowfreq_stability_collapsefree": s_moved,
-            "p_lowfreq_stability_collapsefree": p_moved}
+            "p_lowfreq_stability_collapsefree": p_moved,
+            "rho_lowfreq_stability_bootstrap_ci": [lo_lf, hi_lf],
+            "rho_survival_stability_bootstrap_ci": [lo_sv, hi_sv],
+            "partial_rho_lowfreq_stability_given_isolation": part_lf_iso[0],
+            "p_partial_lowfreq_stability_given_isolation": part_lf_iso[1],
+            "partial_rho_survival_stability_given_lowfreq": part_surv_lf[0],
+            "p_partial_survival_stability_given_lowfreq": part_surv_lf[1]}
 
 
 def pretty_source(src):
@@ -132,6 +154,38 @@ def main():
     with open(out, "w", encoding="utf-8") as fh:
         json.dump(summaries, fh, indent=2)
     print(f"\nwrote {out}")
+
+    # Leave-one-graph-out pooled correlations: is the pooled stability result
+    # driven by a single graph? Pool the collapse-free points from every graph
+    # except one and recompute the rank correlations.
+    by_source = defaultdict(list)
+    for r in all_rows:
+        by_source[r["source"]].append(r)
+    loo = {}
+    for src in sorted(by_source, key=str):
+        rest = [r for r in all_rows if r["source"] != src]
+        clean = [r for r in rest if r["collapsed"] == 0]
+        if len(clean) < 4:
+            continue
+        lf = np.array([r["lowfreq"] for r in clean])
+        sv = np.array([r["surv"] for r in clean])
+        y = np.array([r["stab"] for r in clean])
+        row = {"n_points": len(clean)}
+        if np.ptp(y) > 0:
+            row["rho_lowfreq_stability"] = float(spearmanr(lf, y).statistic)
+            row["rho_survival_stability"] = float(spearmanr(sv, y).statistic)
+        loo[str(pretty_source(src))] = row
+    extra = {"per_graph": summaries, "leave_one_graph_out": loo}
+    extra_path = "logs/sd_vs_routing/partial_correlations.json"
+    with open(extra_path, "w", encoding="utf-8") as fh:
+        json.dump(extra, fh, indent=2)
+    if loo:
+        print("=== leave-one-graph-out (collapse-free pooled) ===")
+        for name, row in loo.items():
+            print(f"    without {name:>28}: n={row['n_points']:3d}  "
+                  f"lowfreq->stab rho={row.get('rho_lowfreq_stability', float('nan')):+.3f}  "
+                  f"survival->stab rho={row.get('rho_survival_stability', float('nan')):+.3f}")
+    print(f"wrote {extra_path}")
 
 
 if __name__ == "__main__":

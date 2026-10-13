@@ -40,7 +40,7 @@ make figures          # all paper figures
 
 **Phase 1 (diagnostics + theory), Phase 2 (sparsifiers + comparison), Phase 3 (router protocol: label-free GNN router, D1-D4 decision rules, PC-1c-R planted control, dilution ladder, ablations, figures), the fair published-router audit (`RouterGNN` / `AD-GNN` / MLP gate under Protocol B), and the learnability lever (`β`-sweep + abstaining selective router) are implemented and tested — 214 tests pass.**
 
-> **Headline result (honest, Protocol B).** On the planted **PC-1c-R control** the D1–D4 instrument is valid and routing helps (see "Phase 3 findings"). On **real graphs** (fraud benchmarks and real LLM attention) under the fixed-expert protocol, **no label-free or learned router beats training one global model** (0/234 candidate/expert/graph cells), and the oracle is *negative* (9/9). The one supported positive is that spectral distortion + connectivity survival **predict routing *stability*** (Spearman +0.78…+0.99). Protocol-A self-routing oracle numbers are **retracted**. See `docs/fixed_expert_protocol.md` and `docs/real_attention_results.md`.
+> **Headline result (honest, Protocol B).** On the planted **PC-1c-R control** the D1–D4 instrument is valid and routing helps (see "Phase 3 findings"). On **real graphs** (fraud benchmarks and real LLM attention) under the fixed-expert protocol, **no label-free or learned router beats training one global model** (0/234 candidate/expert/graph cells), and the oracle is *negative* (9/9). The one supported positive is that connectivity **survival** predicts routing *stability* (Spearman +0.78..+0.99); low-frequency spectral distortion is a collinear proxy that loses significance once the isolated-node fraction is partialled out (pooled partial rho = -0.20, p = 0.16, vs survival +0.83, p = 1e-13; `docs/real_attention_results.md` §9.3). Protocol-A self-routing oracle numbers are **retracted**. See `docs/fixed_expert_protocol.md` and `docs/real_attention_results.md`.
 
 ## System requirements
 
@@ -68,7 +68,7 @@ python -m spectral_distillation.experiments.reproduce_figures   # render all Pha
 ```
 
 - `make test-theory` runs the theory-bound test file only. The Makefile targets run on `cuda` by default (runners auto-fallback to `cpu` when CUDA is absent).- Runners accept `--n`, `--n-patches`, `--splits`, `--seeds`, `--router-epochs`, `--device`, `--config`, `--out` (see each module's argparse help). Use small `--n` (600-2000) for CPU smoke runs; the defaults target the full 10k-node PC-1c-R control on a GPU.
-- Outputs: `logs/protocol/protocol_results.json`, `logs/dilution/dilution_curve.{csv,json}`, `logs/ablation/ablation.{csv,json}`, `logs/compare_methods/{results,bands}.{csv,json}` + `bands_vs_*_n*.png`, `logs/frozen_interventions/{pc,erp_fraud}.json`, `logs/scalability_reeff/table3.{csv,json}`, plus Phase 3 figures under `logs/protocol/`, `logs/dilution/`, `logs/ablation/`.
+- Outputs: `logs/protocol/protocol_results.json`, `logs/dilution/dilution_curve.{csv,json}`, `logs/ablation/ablation.{csv,json}`, `logs/compare_methods/{results,bands}.{csv,json}` + `bands_vs_*_n*.png`, `logs/frozen_interventions/{pc,erp_fraud}.json`, `logs/scalability_reeff/table3.{csv,json}`, plus Phase 3 figures under `logs/protocol/`, `logs/dilution/`, `logs/ablation/`. `reproduce_figures.py` also exports Tables 1-3 as CSV + LaTeX (`table1_*`, `table2_*`, `table3.tex`; `make tables`).
 - Config defaults live in `configs/default.yaml` (`router_protocol:`, `planted_control:`, `experiments:` sections).
 
 ### Verified findings so far

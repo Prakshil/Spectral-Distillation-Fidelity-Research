@@ -228,11 +228,11 @@ structural router:
 
 | Graph | density | Spearman(lowfreq, stability), collapse-free | Spearman(survival, stability), collapse-free |
 |---|---|---|---|
-| Amazon | 1.49e-01 | -0.424 (p=0.115) — no signal | +0.777 (p=0.000655) |
+| Amazon | 1.49e-01 | -0.424 (p=0.115) ï¿½ no signal | +0.777 (p=0.000655) |
 | **SmolLM2** | 4.39e-03 | **-0.673 (p=0.033)** | **+0.988 (p=9.3e-08)** |
 | Tolokers | 7.19e-03 | -0.600 (p=0.030) | +0.978 (p=8.2e-09) |
 | YelpChi | 5.13e-03 | -0.711 (p=0.0064) | +0.778 (p=0.0018) |
-| Pooled | — | -0.549 (p=3.0e-05) | +0.880 (p=2.0e-17) |
+| Pooled | ï¿½ | -0.549 (p=3.0e-05) | +0.880 (p=2.0e-17) |
 
 All three sparsifiers degrade SmolLM2 routing monotonically with retention:
 
@@ -246,7 +246,8 @@ So spectral distortion does track *routing stability* on real LLM attention.
 Note the confound: on SmolLM2 the isolated-node fraction alone correlates -0.996
 with stability, and at r=0.05 effective resistance leaves 1,826 of 2,000 nodes
 isolated. The spectral term is not separable from connectivity destruction on
-this graph.
+this graph. Section 9.3 quantifies this confound across all four graphs with
+partial correlations and bootstrap confidence intervals.
 
 ### 9.2 Protocol B accuracy: null (`run_llm_protocol_b.py`)
 
@@ -277,5 +278,46 @@ is no useful routing channel for spectral distortion to corrupt. This confirms
 the earlier positive SmolLM2 result was a Protocol A self-routing artifact. The
 defensible claim is the stability result in 9.1, not an accuracy claim.
 
+### 9.3 The stability signal is carried by connectivity survival
+
+Section 9.1 reported that low-frequency spectral error correlates negatively with
+routing stability, and that connectivity survival correlates strongly positively
+with it. Those two predictors are themselves almost collinear (both are monotone
+in the retained isolated-fraction), so the raw Spearman coefficients cannot say
+which one carries the signal. `analyze_sd_vs_routing.py` now adds, on the same
+collapse-free points, a partial Spearman that controls for the isolated-node
+fraction, bootstrap 95% CIs, and a leave-one-graph-out pooled check.
+
+Pooled across the four graphs (n = 51 collapse-free points):
+
+| predictor | raw Spearman rho | p | bootstrap 95% CI | partial rho | p |
+|---|---|---|---|---|---|
+| low-frequency error -> stability | -0.549 | 3.0e-05 | [-0.767, -0.271] | **-0.200** | 0.164 |
+| connectivity survival -> stability | +0.880 | 2.0e-17 | [+0.727, +0.962] | **+0.829** | 1.1e-13 |
+
+Controlling for the isolated-node fraction removes the significance of the
+spectral term (pooled partial rho = -0.200, p = 0.16); every individual graph
+follows suit (Amazon -0.10 p=0.75, SmolLM2 +0.49 p=0.18, Tolokers +0.45 p=0.15,
+YelpChi -0.02 p=0.94). Connectivity survival retains a large, significant partial
+correlation (pooled +0.829, p = 1.1e-13), significant per graph on Amazon
+(+0.72, p=0.0036), SmolLM2 (+0.98, p=2e-06) and Tolokers (+0.97, p=1e-07), and
+directional on YelpChi (+0.45, p=0.14). The pooled result is not driven by any
+single graph: leaving one out gives low-frequency->stability rho in
+[-0.65, -0.38] and survival->stability rho in [+0.84, +0.93] throughout.
+
+**Interpretation.** The robust, cross-graph predictor of label-free routing
+stability is *connectivity survival*, i.e. how much of the sparsified graph keeps
+the nodes connected enough to route. Low-frequency spectral distortion is a
+correlated but not independently predictive proxy, at least at this sample size
+and on these graphs. This is consistent with -- and sharpens -- the SmolLM2
+confound in section 9.1: the spectral term and the isolation channel are nearly
+the same variable here. One caveat cuts the other way: if sparsification destroys
+connectivity *because* it distorts low-frequency structure, then isolation is a
+mechanism of the distortion rather than a nuisance, and partialling it out
+over-controls. Both readings agree on the defensible operational claim: routing
+survival, not the raw spectral error, is what should be watched when pruning
+these graphs.
+
 Artifacts: `logs/sd_vs_routing/**`, `logs/sd_vs_routing/summary.json`,
+`logs/sd_vs_routing/partial_correlations.json`,
 `logs/llm_protocol_b/llm_protocol_b.json`.

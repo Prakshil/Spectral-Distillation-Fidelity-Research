@@ -84,7 +84,7 @@ Companion documents:
 | `run_learned_router.py` | RouterGNN-lite vs no-routing / k-means / random / oracle on a frozen pool, real graphs (`--dataset amazon\|tolokers\|yelpchi`) | `logs/{dataset}_learned_router*/fixed_expert.json` |
 | `run_published_routers.py` | RouterGNN + AD-GNN vs the same frozen pool/baselines, on fraud and heterophily graphs (`--dataset amazon\|tolokers\|yelpchi\|actor\|chameleon\|squirrel`) | `logs/{dataset}_published_routers/fixed_expert.json` |
 | `run_sd_vs_routing.py` | Spectral distortion vs label-free routing stability across a retention ladder on fraud **and** real LLM attention (`--dataset llm`); same-seed multi-router stability, collapse detection | `logs/sd_vs_routing/{dataset}/sd_vs_routing.json` |
-| `analyze_sd_vs_routing.py` | Pooled/per-graph Spearman of low-frequency error and connectivity survival vs stability and oracle agreement | `logs/sd_vs_routing/summary.json` |
+| `analyze_sd_vs_routing.py` | Pooled/per-graph Spearman of low-frequency error and connectivity survival vs stability and oracle agreement, plus partial Spearman controlling for isolated-fraction, bootstrap CIs, and leave-one-graph-out pooling | `logs/sd_vs_routing/summary.json`, `logs/sd_vs_routing/partial_correlations.json` |
 | `run_llm_protocol_b.py` | Protocol B on real LLM attention: frozen routing-blind k-means pool, only the routing varies with sparsification. `--feature-mode per_layer` (24 features) | `logs/llm_protocol_b/llm_protocol_b.json` |
 
 ### Two environment landmines (cost real debugging time)
@@ -495,7 +495,8 @@ so import order decided whether the loader ran at all. Fixed by preloading it in
 - `docs/literature_positioning.md` (drafted): related work and the honest differences vs MoG / GOKU / MORGAN.
 - Target the Figures/Tables spec (guide Â§10.2): Fig 3â€“6 and Tables 1â€“3 come from
   `compare_methods.py`, `scalability_reeff.py`, `run_protocol.py`, `frozen_interventions.py`, `dilution_curve.py`, `ablation.py` outputs.
-- Optionally add table/row exports in `reproduce_figures.py` for Tables 1â€“3 (LaTeX/CSV).
+- Done: `reproduce_figures.py` exports Tables 1–3 as CSV + LaTeX next to the logs
+  (`--tables`, on by default; `--no-tables` to skip).
 
 ### Phase 6 â€” Robustness and scaling
 

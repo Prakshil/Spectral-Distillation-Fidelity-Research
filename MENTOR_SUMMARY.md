@@ -69,7 +69,7 @@ Dilution ladder = gradually scramble graph edges toward same-class wiring to tes
 ## 6. Bottom line (3 bullets for a meeting)
 
 1. **Not supported (retracted).** The label-free router does **not** route on real attention; its apparent gain is a usage-imbalance artifact (null, −0.0002, p≈0.56, at matched usage). The "router survives sparsity" claim is withdrawn.
-2. **What survives:** the label-homophily **oracle** detects a sentence-homophily signal at top-k ≥ 32 (D1, D3), the instrument (D4) is valid, and the *positive* project result is that spectral distortion predicts routing **stability** (`docs/real_attention_results.md` §9.1).
+2. **What survives:** the label-homophily **oracle** detects a sentence-homophily signal at top-k ≥ 32 (D1, D3), the instrument (D4) is valid, and the *positive* project result is that **connectivity survival** predicts routing **stability** (`docs/real_attention_results.md` §9.1). Low-frequency spectral distortion is a collinear proxy: it loses significance once the isolated-node fraction is partialled out (pooled partial rho −0.20, p=0.16, vs survival +0.83, p=1e-13; §9.3).
 3. The dilution-ladder anomaly was investigated and shown to be a test artifact; reported honestly rather than overclaimed.
 
 ## 7. Reproduce / artifacts

@@ -6,16 +6,40 @@
     "lowfreq_max": 0.006389339478695334,
     "density": 0.1485447723861931,
     "rho_lowfreq_stability_collapsefree": -0.4244604316546763,
-    "p_lowfreq_stability_collapsefree": 0.11480531996282868
+    "p_lowfreq_stability_collapsefree": 0.11480531996282868,
+    "rho_lowfreq_stability_bootstrap_ci": [
+      -0.8432630909458505,
+      0.2271625163826995
+    ],
+    "rho_survival_stability_bootstrap_ci": [
+      0.2880533778148457,
+      0.966551976273781
+    ],
+    "partial_rho_lowfreq_stability_given_isolation": -0.09540473818686107,
+    "p_partial_lowfreq_stability_given_isolation": 0.7456117630456816,
+    "partial_rho_survival_stability_given_lowfreq": 0.7218056808762559,
+    "p_partial_survival_stability_given_lowfreq": 0.0035612400232688346
   },
   {
-    "label": "llm:HuggingFaceTB (n=2000)",
+    "label": "llm:HuggingFaceTB/SmolLM2-1.7B (n=2000)",
     "n_points": 15,
     "collapse_affected": 5,
     "lowfreq_max": 0.0034179245679392053,
     "density": 0.004388694347173587,
     "rho_lowfreq_stability_collapsefree": -0.6727272727272726,
-    "p_lowfreq_stability_collapsefree": 0.0330412225454377
+    "p_lowfreq_stability_collapsefree": 0.0330412225454377,
+    "rho_lowfreq_stability_bootstrap_ci": [
+      -0.9635620915032679,
+      -0.05660377358490567
+    ],
+    "rho_survival_stability_bootstrap_ci": [
+      0.8692377613296972,
+      1.0
+    ],
+    "partial_rho_lowfreq_stability_given_isolation": 0.49005111346535124,
+    "p_partial_lowfreq_stability_given_isolation": 0.1805075540956618,
+    "partial_rho_survival_stability_given_lowfreq": 0.9831353843426083,
+    "p_partial_survival_stability_given_lowfreq": 2.0174939735485824e-06
   },
   {
     "label": "tolokers (n=2000)",
@@ -24,7 +48,19 @@
     "lowfreq_max": 0.009048937330089409,
     "density": 0.007190595297648824,
     "rho_lowfreq_stability_collapsefree": -0.6,
-    "p_lowfreq_stability_collapsefree": 0.03017079516557383
+    "p_lowfreq_stability_collapsefree": 0.03017079516557383,
+    "rho_lowfreq_stability_bootstrap_ci": [
+      -0.926170731707317,
+      -0.04444444444444443
+    ],
+    "rho_survival_stability_bootstrap_ci": [
+      0.8599366062214359,
+      1.0
+    ],
+    "partial_rho_lowfreq_stability_given_isolation": 0.4452309354939343,
+    "p_partial_lowfreq_stability_given_isolation": 0.14693499336271654,
+    "partial_rho_survival_stability_given_lowfreq": 0.9720803555807415,
+    "p_partial_survival_stability_given_lowfreq": 1.2749199814937263e-07
   },
   {
     "label": "yelpchi (n=2000)",
@@ -33,7 +69,19 @@
     "lowfreq_max": 0.40737189164916154,
     "density": 0.005125062531265633,
     "rho_lowfreq_stability_collapsefree": -0.7111111111111109,
-    "p_lowfreq_stability_collapsefree": 0.006426039332004917
+    "p_lowfreq_stability_collapsefree": 0.006426039332004917,
+    "rho_lowfreq_stability_bootstrap_ci": [
+      -0.9590848539687327,
+      -0.17083640473733372
+    ],
+    "rho_survival_stability_bootstrap_ci": [
+      0.2423308997295695,
+      1.0
+    ],
+    "partial_rho_lowfreq_stability_given_isolation": -0.022554388919056697,
+    "p_partial_lowfreq_stability_given_isolation": 0.9445326884733056,
+    "partial_rho_survival_stability_given_lowfreq": 0.4481547005502054,
+    "p_partial_survival_stability_given_lowfreq": 0.14398096709238484
   },
   {
     "label": "POOLED (all graphs)",
@@ -42,6 +90,18 @@
     "lowfreq_max": 0.40737189164916154,
     "density": 0.1485447723861931,
     "rho_lowfreq_stability_collapsefree": -0.5493175614194722,
-    "p_lowfreq_stability_collapsefree": 2.9864702061525828e-05
+    "p_lowfreq_stability_collapsefree": 2.9864702061525828e-05,
+    "rho_lowfreq_stability_bootstrap_ci": [
+      -0.7670358049916123,
+      -0.2713137410736902
+    ],
+    "rho_survival_stability_bootstrap_ci": [
+      0.727338039729887,
+      0.9619318923846584
+    ],
+    "partial_rho_lowfreq_stability_given_isolation": -0.19967680695501616,
+    "p_partial_lowfreq_stability_given_isolation": 0.1644491811965713,
+    "partial_rho_survival_stability_given_lowfreq": 0.8289370828681217,
+    "p_partial_survival_stability_given_lowfreq": 1.0596810001316013e-13
   }
 ]

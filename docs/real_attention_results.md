@@ -61,7 +61,7 @@ separates cleanly. Switching to tercile-based adaptive thresholds keeps all buck
 | 1.00 | 0.0000 | 0.0852 |
 
 **Anomaly resolved (and undercut by §6).** The label-free gain that *rises* toward dilution→1 looked
-like a violation of the synthetic pattern (0.231 → 0.008). Diagnostics show it is an artifact of the
+like a violation of the synthetic pattern (0.231 → 0.015). Diagnostics show it is an artifact of the
 ladder itself: the dilution rewrite forces same-class edges (label homophily → 1.0), which plants
 degree/spectral structure the structural router reads mechanically — independent of real attention.
 Concretely the router's `feature_homophily` field stays ≈ 0.996 flat across all dilutions (L2 drift

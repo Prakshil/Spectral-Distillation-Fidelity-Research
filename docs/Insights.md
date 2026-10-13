@@ -357,10 +357,10 @@ How the label-free gain behaves as we erase structure but keep labels:
 | Dilution λ | Oracle gain | Label-free gain |
 |-----------|-------------|-----------------|
 | 0.00 | 0.2599 | **0.2314** |
-| 0.25 | 0.2599 | 0.1703 |
-| 0.50 | 0.2599 | 0.1754 |
+| 0.25 | 0.2599 | 0.1972 |
+| 0.50 | 0.2599 | 0.1751 |
 | 0.75 | 0.2599 | 0.1071 |
-| 1.00 | 0.2599 | **0.0077** |
+| 1.00 | 0.2599 | **0.0153** |
 
 This is the **cleanest mechanistic result** in the repo:
 - Oracle gain is **completely flat** (0.260) — it reads labels, and dilution never
@@ -474,10 +474,9 @@ evidence below is mutually consistent and theory-aligned *for the control*:
 5. **The instrument is valid (D4 + δ-sweep).** Results are not an artifact of one magic
    threshold or a broken experimental setup.
 
-Two minor wiggles worth knowing (see §8): the ablation oracle δ-sweep plateau at 10k
+One minor wiggle worth knowing (see §8): the ablation oracle δ-sweep plateau at 10k
 nodes reads a bit differently from the earlier small-scale smoke run (peak at δ=0.3
-rather than a flat plateau), and the dilution 0.25 vs 0.50 points are nearly equal
-(0.170 vs 0.175) — both are within expected noise and do not disturb the trend.
+rather than a flat plateau) — within expected noise and does not disturb the trend.
 
 ---
 
@@ -494,8 +493,8 @@ rather than a flat plateau), and the dilution 0.25 vs 0.50 points are nearly equ
   express." The enormous effect sizes (`d_z > 100`) are the more informative number.
 - **Statistical resolution of dilution/ablation.** Those sweeps use fewer splits ×
   seeds (config default 4–6), so their effect sizes are noisier than the protocol's.
-- **2 of the dilution rungs are close** (0.25 vs 0.50) — the monotone trend is clear
-  across 0 → 1, but a tighter-rung run would smooth the middle points.
+- **Dilution spacing is uneven** (0.25 → 0.50 spans 0.197 → 0.175) — the monotone
+  trend is clear across 0 → 1, but a tighter-rung run would smooth the middle points.
 - **RouterGNN epoch-level variation across GPU/CPU** — the *crisp KMeans gate* is the
   operational router (deterministic); the GNN imitation is its transferable proxy.
 - **Top-k effective resistance is a lower bound** at high `n`; the code uses exact

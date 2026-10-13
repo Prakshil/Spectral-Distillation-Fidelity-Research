@@ -68,7 +68,8 @@ python -m spectral_distillation.experiments.ablation            # oracle-filter 
 python -m spectral_distillation.experiments.reproduce_figures   # render all Phase 3 figures from logs
 ```
 
-- `make test-theory` runs the theory-bound test file only. The Makefile targets run on `cuda` by default (runners auto-fallback to `cpu` when CUDA is absent).- Runners accept `--n`, `--n-patches`, `--splits`, `--seeds`, `--router-epochs`, `--device`, `--config`, `--out` (see each module's argparse help). Use small `--n` (600-2000) for CPU smoke runs; the defaults target the full 10k-node PC-1c-R control on a GPU.
+- `make test-theory` runs the theory-bound test file only. The Makefile targets (and every runner except `run_real_attention`) run on `cpu` by default; pass `--device cuda` explicitly for a faster GPU run (runners auto-fallback to `cpu` when CUDA is absent).
+- Runners accept `--n`, `--n-patches`, `--splits`, `--seeds`, `--router-epochs`, `--device`, `--config`, `--out` (see each module's argparse help). Use small `--n` (600-2000) for CPU smoke runs; the defaults target the full 10k-node PC-1c-R control on a GPU.
 - Outputs: `logs/protocol/protocol_results.json`, `logs/dilution/dilution_curve.{csv,json}`, `logs/ablation/ablation.{csv,json}`, `logs/compare_methods/{results,bands}.{csv,json}` + `bands_vs_*_n*.png`, `logs/frozen_interventions/{pc,erp_fraud}.json`, `logs/scalability_reeff/table3.{csv,json}`, plus Phase 3 figures under `logs/protocol/`, `logs/dilution/`, `logs/ablation/`. `reproduce_figures.py` also exports Tables 1-3 as CSV + LaTeX (`table1_*`, `table2_*`, `table3.tex`; `make tables`).
 - Config defaults live in `configs/default.yaml` (`router_protocol:`, `planted_control:`, `experiments:` sections).
 

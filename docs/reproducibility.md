@@ -166,10 +166,10 @@ Full run (`n=10000`, 50 patches, 10 splits Ã— 3 seeds, `logs/protocol/protoco
 | dilution Î» | oracle gain | label-free gain |
 |-----------|-------------|-----------------|
 | 0.00 | 0.2599 | 0.2314 |
-| 0.25 | 0.2599 | 0.1703 |
-| 0.50 | 0.2599 | 0.1754 |
+| 0.25 | 0.2599 | 0.1972 |
+| 0.50 | 0.2599 | 0.1751 |
 | 0.75 | 0.2599 | 0.1071 |
-| 1.00 | 0.2599 | 0.0077 |
+| 1.00 | 0.2599 | 0.0153 |
 
 Label-free gain decays monotonically as regime nodes are rewritten toward homogeneous wiring;
 oracle gain (true regime id) stays flat. This is exactly what the mechanism predicts: dilution
@@ -323,7 +323,7 @@ Every claim in Â§3 maps to a committed artifact:
 | Frozen-gate ablations: ordering holds across logistic / mlp{w} / dendrite at n=2000 (within-regime null near-identity) | `logs/frozen_interventions/{pc,erp_fraud}.json`, `docs/robustness_scaling.md` Part 3 |
 | Top-k R_eff: rank-faithful (ρ→0.91) though absolute edge error high; induced distortion ≤1.2% of exact | `logs/scalability_reeff/table3.json`, `docs/robustness_scaling.md` Part 2 |
 | D1â€“D4 supported, frozen-gate ordering, stats | `logs/protocol/protocol_results.json` |
-| Dilution decay (0.231 â†’ 0.008) vs flat oracle (0.260), 10k GPU | `logs/dilution/dilution_curve.json` |
+| Dilution decay (0.231 â†’ 0.015) vs flat oracle (0.260), 10k CPU | `logs/dilution/dilution_curve.json` |
 | Feature ablation ordering + oracle Î´ plateau | `logs/ablation/ablation.json` |
 | 250-test pass | `python -m pytest` |
 

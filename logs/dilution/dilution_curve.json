@@ -8,12 +8,12 @@
     {
       "dilution": 0.25,
       "oracle_gain": 0.2599353203974128,
-      "label_free_gain": 0.17025071681002868
+      "label_free_gain": 0.1971727678869107
     },
     {
       "dilution": 0.5,
       "oracle_gain": 0.2599353203974128,
-      "label_free_gain": 0.17538507701540307
+      "label_free_gain": 0.17511835700473424
     },
     {
       "dilution": 0.75,
@@ -23,7 +23,7 @@
     {
       "dilution": 1.0,
       "oracle_gain": 0.2599353203974128,
-      "label_free_gain": 0.007651530306061194
+      "label_free_gain": 0.015253050610122018
     }
   ]
 }

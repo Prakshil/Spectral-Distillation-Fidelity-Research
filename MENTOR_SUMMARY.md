@@ -62,7 +62,7 @@ survives at k≥32; the label-free router does not route at any k.**
 
 Dilution ladder = gradually scramble graph edges toward same-class wiring to test when the label-free router loses the signal.
 
-- Synthetic graphs: label-free gain decays as expected (0.23 → 0.008).
+- Synthetic graphs: label-free gain decays as expected (0.23 → 0.015).
 - Real graphs: gain *rose* (0.013 → 0.085). Investigated thoroughly.
 - **Resolution:** the scrambling procedure plants new artificial structure (degree/spectral patterns) that the structural router reads back — an artifact of the test, not evidence of surviving signal. A limitation of applying the synthetic dilution ladder to imbalanced real graphs; documented transparently in `docs/real_attention_results.md`.
 

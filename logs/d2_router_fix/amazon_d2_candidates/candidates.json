@@ -1,4 +1,5 @@
 {
+  "device": "cpu",
   "dataset": "amazon",
   "screen": [
     {

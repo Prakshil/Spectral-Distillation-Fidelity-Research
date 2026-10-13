@@ -86,7 +86,7 @@ def run_ladder(graph: dict, args, log) -> dict:
                 "label_free_gain": label_free_gain,
             }
         )
-    return {"ladder": rows}
+    return {"device": str(args.device), "ladder": rows}
 
 
 def main() -> None:
@@ -112,8 +112,8 @@ def main() -> None:
 
     args.n = args.n or pc.get("n_nodes", 10000)
     args.n_patches = args.n_patches or pc.get("n_patches", 50)
-    args.splits = args.splits or 6
-    args.seeds = args.seeds or 2
+    args.splits = args.splits or 10
+    args.seeds = args.seeds or 3
     args.router_epochs = args.router_epochs or 60
     args.device = device_config(args.device)
     if args.dilutions is None:

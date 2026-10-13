@@ -165,11 +165,11 @@ Full run (`n=10000`, 50 patches, 10 splits Ã— 3 seeds, `logs/protocol/protoco
 
 | dilution Î» | oracle gain | label-free gain |
 |-----------|-------------|-----------------|
-| 0.00 | 0.2599 | 0.2314 |
-| 0.25 | 0.2599 | 0.1972 |
-| 0.50 | 0.2599 | 0.1751 |
-| 0.75 | 0.2599 | 0.1071 |
-| 1.00 | 0.2599 | 0.0153 |
+| 0.00 | 0.2591 | 0.2308 |
+| 0.25 | 0.2591 | 0.1974 |
+| 0.50 | 0.2591 | 0.1764 |
+| 0.75 | 0.2591 | 0.1084 |
+| 1.00 | 0.2591 | 0.0147 |
 
 Label-free gain decays monotonically as regime nodes are rewritten toward homogeneous wiring;
 oracle gain (true regime id) stays flat. This is exactly what the mechanism predicts: dilution
@@ -203,9 +203,9 @@ Oracle-bucket Î´-sweep (on the homophily-range 3-block SBM, block homophily 0.
 
 ### 3.6 Known caveats
 
-- The dilution ladder uses 6 splits Ã— 2 seeds (config default), so its rep-wise p-values saturate
-  at the Wilcoxon resolution floor; the point estimates above are the headline numbers and can be
-  tightened with `--splits 10`.
+- The dilution ladder runs at the protocol resolution (10 splits Ã— 3 seeds); the ablation sweep
+  still uses 4 splits Ã— 2 seeds (config default), so its rep-wise p-values saturate at the
+  Wilcoxon resolution floor and its point estimates are the noisier of the two.
 - The `uniform` arm is a degenerate gate (all nodes to one expert) in the current ladder â€” by
   construction `uniform_gates = (1/3, 1/3, 1/3)` is only realized for the oracle/conditional
   comparisons; see `configs/router_protocol.yaml` and the `test_protocol.py` uniform-baseline tests.
@@ -323,7 +323,7 @@ Every claim in Â§3 maps to a committed artifact:
 | Frozen-gate ablations: ordering holds across logistic / mlp{w} / dendrite at n=2000 (within-regime null near-identity) | `logs/frozen_interventions/{pc,erp_fraud}.json`, `docs/robustness_scaling.md` Part 3 |
 | Top-k R_eff: rank-faithful (ρ→0.91) though absolute edge error high; induced distortion ≤1.2% of exact | `logs/scalability_reeff/table3.json`, `docs/robustness_scaling.md` Part 2 |
 | D1â€“D4 supported, frozen-gate ordering, stats | `logs/protocol/protocol_results.json` |
-| Dilution decay (0.231 â†’ 0.015) vs flat oracle (0.260), 10k CPU | `logs/dilution/dilution_curve.json` |
+| Dilution decay (0.231 â†’ 0.015) vs flat oracle (0.259), 10k CPU, 10 splits Ã— 3 seeds | `logs/dilution/dilution_curve.json` |
 | Feature ablation ordering + oracle Î´ plateau | `logs/ablation/ablation.json` |
 | 250-test pass | `python -m pytest` |
 

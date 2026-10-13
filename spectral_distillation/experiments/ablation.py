@@ -317,7 +317,10 @@ def main() -> None:
             writer.writeheader()
             writer.writerows(rows)
     json_path = out_dir / "ablation.json"
-    json_path.write_text(json.dumps({"rows": rows, "mode": ",".join(modes)}, indent=2), encoding="utf-8")
+    json_path.write_text(
+        json.dumps({"device": str(args.device), "rows": rows, "mode": ",".join(modes)}, indent=2),
+        encoding="utf-8",
+    )
     log.info("wrote %s and %s", csv_path, json_path)
 
     print("\n=== Ablation ===")

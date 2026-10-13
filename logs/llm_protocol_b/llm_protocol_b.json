@@ -1,4 +1,5 @@
 {
+  "device": "cpu",
   "graph": {
     "source": "C:\\Users\\Prakshil\\.cache\\huggingface\\hub\\models--HuggingFaceTB--SmolLM2-1.7B\\snapshots\\effd688a12921b4cc83e3312b6feb579f70f9c71",
     "n_nodes": 2000,

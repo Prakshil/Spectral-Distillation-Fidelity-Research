@@ -1,29 +1,30 @@
 {
+  "device": "cpu",
   "ladder": [
     {
       "dilution": 0.0,
-      "oracle_gain": 0.2599353203974128,
-      "label_free_gain": 0.23144628925785157
+      "oracle_gain": 0.25909181836367273,
+      "label_free_gain": 0.2308261652330466
     },
     {
       "dilution": 0.25,
-      "oracle_gain": 0.2599353203974128,
-      "label_free_gain": 0.1971727678869107
+      "oracle_gain": 0.25909181836367273,
+      "label_free_gain": 0.19741281589651258
     },
     {
       "dilution": 0.5,
-      "oracle_gain": 0.2599353203974128,
-      "label_free_gain": 0.17511835700473424
+      "oracle_gain": 0.25909181836367273,
+      "label_free_gain": 0.1764486230579449
     },
     {
       "dilution": 0.75,
-      "oracle_gain": 0.2599353203974128,
-      "label_free_gain": 0.10705474428218976
+      "oracle_gain": 0.25909181836367273,
+      "label_free_gain": 0.10837500833500033
     },
     {
       "dilution": 1.0,
-      "oracle_gain": 0.2599353203974128,
-      "label_free_gain": 0.015253050610122018
+      "oracle_gain": 0.25909181836367273,
+      "label_free_gain": 0.01474961658998466
     }
   ]
 }

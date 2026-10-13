@@ -204,6 +204,13 @@ def _write_table(rows: list[dict], columns: list[str], csv_path: Path, tex_path:
         writer.writeheader()
         writer.writerows(rows)
 
+    md_path = csv_path.with_suffix(".md")
+    md_lines = [f"# {caption}", "", "| " + " | ".join(columns) + " |", "| " + " | ".join("---" for _ in columns) + " |"]
+    for row in rows:
+        cells = [str(row.get(c, "")).replace("|", r"\|") for c in columns]
+        md_lines.append("| " + " | ".join(cells) + " |")
+    md_path.write_text("\n".join(md_lines) + "\n", encoding="utf-8")
+
     lines = [
         r"\begin{table}[t]",
         r"\centering",
@@ -216,7 +223,7 @@ def _write_table(rows: list[dict], columns: list[str], csv_path: Path, tex_path:
         lines.append(" & ".join(_tex_escape(row.get(c, "")) for c in columns) + r" \\")
     lines += [r"\hline", r"\end{tabular}", r"\caption{" + _tex_escape(caption) + "}", r"\end{table}"]
     tex_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
-    log.info("wrote %s and %s (%d rows)", csv_path, tex_path, len(rows))
+    log.info("wrote %s, %s and %s (%d rows)", csv_path, tex_path, md_path, len(rows))
 
 
 def export_table1(out_dir: Path, log: logging.Logger) -> None:
@@ -376,7 +383,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--log-level", default="INFO", choices=["DEBUG", "INFO", "WARNING"])
     parser.add_argument("--out", default="logs", help="output directory containing the experiment logs")
-    parser.add_argument("--tables", dest="tables", action="store_true", default=True, help="export Tables 1-3 as CSV + LaTeX")
+    parser.add_argument("--tables", dest="tables", action="store_true", default=True, help="export Tables 1-3 as CSV + LaTeX + Markdown")
     parser.add_argument("--no-tables", dest="tables", action="store_false", help="skip Table 1-3 export")
     args = parser.parse_args()
 

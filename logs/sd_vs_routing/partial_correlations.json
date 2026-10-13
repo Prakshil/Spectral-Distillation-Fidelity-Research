@@ -1,4 +1,5 @@
 {
+  "device": "cpu",
   "per_graph": [
     {
       "label": "amazon (n=2000)",

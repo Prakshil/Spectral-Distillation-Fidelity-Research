@@ -356,14 +356,14 @@ How the label-free gain behaves as we erase structure but keep labels:
 
 | Dilution λ | Oracle gain | Label-free gain |
 |-----------|-------------|-----------------|
-| 0.00 | 0.2599 | **0.2314** |
-| 0.25 | 0.2599 | 0.1972 |
-| 0.50 | 0.2599 | 0.1751 |
-| 0.75 | 0.2599 | 0.1071 |
-| 1.00 | 0.2599 | **0.0153** |
+| 0.00 | 0.2591 | **0.2308** |
+| 0.25 | 0.2591 | 0.1974 |
+| 0.50 | 0.2591 | 0.1764 |
+| 0.75 | 0.2591 | 0.1084 |
+| 1.00 | 0.2591 | **0.0147** |
 
 This is the **cleanest mechanistic result** in the repo:
-- Oracle gain is **completely flat** (0.260) — it reads labels, and dilution never
+- Oracle gain is **completely flat** (0.259) — it reads labels, and dilution never
   touches labels.
 - Label-free gain **decays monotonically** and collapses to ~0 at full dilution — it
   reads structure, and we erased structure.
@@ -491,9 +491,10 @@ rather than a flat plateau) — within expected noise and does not disturb the t
 - **Wilcoxon p-values at resolution floor.** With 30 paired samples the exact Wilcoxon
   p cannot go below 0.00195, so the tiny p's are "as significant as this test can
   express." The enormous effect sizes (`d_z > 100`) are the more informative number.
-- **Statistical resolution of dilution/ablation.** Those sweeps use fewer splits ×
-  seeds (config default 4–6), so their effect sizes are noisier than the protocol's.
-- **Dilution spacing is uneven** (0.25 → 0.50 spans 0.197 → 0.175) — the monotone
+- **Statistical resolution of dilution/ablation.** The dilution ladder now runs at the
+  protocol resolution (10 splits × 3 seeds); the ablation sweep still uses 4 × 2, so its
+  effect sizes are the noisier of the two.
+- **Dilution spacing is uneven** (0.25 → 0.50 spans 0.197 → 0.176) — the monotone
   trend is clear across 0 → 1, but a tighter-rung run would smooth the middle points.
 - **RouterGNN epoch-level variation across GPU/CPU** — the *crisp KMeans gate* is the
   operational router (deterministic); the GNN imitation is its transferable proxy.

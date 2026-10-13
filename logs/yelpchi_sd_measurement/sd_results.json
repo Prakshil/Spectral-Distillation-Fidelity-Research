@@ -1,4 +1,5 @@
 {
+  "device": "cpu",
   "config": {
     "dataset": "yelpchi",
     "data_path": null,

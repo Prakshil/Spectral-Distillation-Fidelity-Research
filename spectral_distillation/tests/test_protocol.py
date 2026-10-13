@@ -409,19 +409,21 @@ def test_dilution_ladder_preserves_invariants():
 # mixture
 # --------------------------------------------------------------------------- #
 
-def test_fit_experts_handles_small_routed_subsets():
+def test_fit_experts_gives_under_populated_channels_a_global_fallback():
     rng = np.random.default_rng(0)
     n, k = 60, 4
     X = rng.standard_normal((n, k))
     y = np.tile(np.arange(3), 20)
     assignment = np.zeros((n, 3))
-    assignment[:, 1] = 1.0  # everyone to expert 1 -> experts 0,2 empty
+    assignment[:, 1] = 1.0  # everyone to expert 1 -> experts 0,2 under-populated
     train, test = train_test_split(y, 0, 0)
     experts = fit_experts(X, y, assignment, train)
-    assert experts[0] is None and experts[2] is None
-    assert experts[1] is not None
-    acc, _ = mixture_accuracy(X, y, assignment, experts, test)
+    # Channels with no (or too few) routed train nodes still get a global-fallback
+    # head so the accuracy denominator stays the *fixed* test set, never emptied.
+    assert all(e is not None for e in experts)
+    acc, n_eval = mixture_accuracy(X, y, assignment, experts, test)
     assert 0.0 <= acc <= 1.0
+    assert n_eval == int(np.asarray(test).sum())
 
 
 def test_mixture_correct_routing_beats_wrong_routing():

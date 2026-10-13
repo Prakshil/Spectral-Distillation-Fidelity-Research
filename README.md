@@ -33,20 +33,21 @@ make figures          # all paper figures
 
 ## Hardware
 
-- Local: RTX 4060 (8 GB) — full 10k pipeline in ~9 minutes with `--device cuda` (see `docs/reproducibility.md` §4.2 for measured runtimes)
+- Local: NVIDIA RTX 4060 Laptop (8 GB), CUDA 13.x. The Phase-3 10k pipeline (`run_protocol`+`dilution`+`ablation`+`figures`) was measured at ~9 minutes with `--device cuda` (`docs/reproducibility.md` §4.2). That figure **excludes** `scalability_reeff` (Table 3), whose n=10,000 top-k grid takes ~25 minutes on its own.
+- Committed logs are the **CPU** reference (`--device cpu`) — CUDA and CPU are not bit-identical, so reproduce with the default `device: cpu` before comparing numbers.
 - Heavy protocol runs: Kaggle / Colab GPUs
 
 ## Status
 
-**Phase 1 (diagnostics + theory), Phase 2 (sparsifiers + comparison), Phase 3 (router protocol: label-free GNN router, D1-D4 decision rules, PC-1c-R planted control, dilution ladder, ablations, figures), the fair published-router audit (`RouterGNN` / `AD-GNN` / MLP gate under Protocol B), and the learnability lever (`β`-sweep + abstaining selective router) are implemented and tested — 214 tests pass.**
+**Phase 1 (diagnostics + theory), Phase 2 (sparsifiers + comparison), Phase 3 (router protocol: label-free GNN router, D1-D4 decision rules, PC-1c-R planted control, dilution ladder, ablations, figures), the fair published-router audit (`RouterGNN` / `AD-GNN` / MLP gate under Protocol B), and the learnability lever (`β`-sweep + abstaining selective router) are implemented and tested — 250 tests pass.**
 
-> **Headline result (honest, Protocol B).** On the planted **PC-1c-R control** the D1–D4 instrument is valid and routing helps (see "Phase 3 findings"). On **real graphs** (fraud benchmarks and real LLM attention) under the fixed-expert protocol, **no label-free or learned router beats training one global model** (0/234 candidate/expert/graph cells), and the oracle is *negative* (9/9). The one supported positive is that connectivity **survival** predicts routing *stability* (Spearman +0.78..+0.99); low-frequency spectral distortion is a collinear proxy that loses significance once the isolated-node fraction is partialled out (pooled partial rho = -0.20, p = 0.16, vs survival +0.83, p = 1e-13; `docs/real_attention_results.md` §9.3). Protocol-A self-routing oracle numbers are **retracted**. See `docs/fixed_expert_protocol.md` and `docs/real_attention_results.md`.
+> **Headline result (honest, Protocol B).** On the planted **PC-1c-R control** the D1–D4 instrument is valid and routing helps (see "Phase 3 findings"). On **real graphs** (fraud benchmarks and real LLM attention) under the fixed-expert protocol, **no label-free or learned router beats training one global model** (2/234 candidate/expert/graph cells — both reduced-power YelpChi GNN cells at ~+0.002, p>=0.75; every full-scale cell is 0/26), and the oracle is *negative* (9/9). The one supported positive is that connectivity **survival** predicts routing *stability* (Spearman +0.78..+0.99); low-frequency spectral distortion is a collinear proxy that loses significance once the isolated-node fraction is partialled out (pooled partial rho = -0.20, p = 0.16, vs survival +0.83, p = 1e-13; `docs/real_attention_results.md` §9.3). Protocol-A self-routing oracle numbers are **retracted**. See `docs/fixed_expert_protocol.md` and `docs/real_attention_results.md`.
 
 ## System requirements
 
 - Python >= 3.10 (developed and tested on 3.12.1, Windows / Linux)
 - Packages (`pip install -e ".[dev]"`): `numpy>=1.23`, `scipy>=1.10`, `scikit-learn>=1.2`, `networkx>=2.8`, `pyyaml>=6.0`, `torch>=2.0` (only for CUDA-aware seeding; diagnostics run without it), `pytest`, `matplotlib` (optional; SD-vs-budget plots)
-- Hardware: any CPU for Phase 1-2 (`n <= 512` sweeps run in ~2 minutes); the LLM-export / GNN phases later expect the RTX 4060 Ti (16 GB) or a GPU runtime
+- Hardware: any CPU for Phase 1-2 (`n <= 512` sweeps run in ~2 minutes); the GNN / LLM-export phases expect a CUDA GPU (developed on an NVIDIA RTX 4060 Laptop, 8 GB) or a larger GPU runtime
 
 ## Run and test (Phase 1-3)
 

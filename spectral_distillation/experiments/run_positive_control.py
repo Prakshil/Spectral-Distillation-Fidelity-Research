@@ -38,6 +38,39 @@ def mean_over_splits(res: dict[str, dict[int, float]]) -> float:
     return float(np.mean(list(res.values())))
 
 
+def _interpretation(per_expert, learned_acc, x_only_acc) -> dict:
+    """Derive the control verdict from the numbers instead of asserting it.
+
+    The harness is only a valid control if, on this task, oracle routing beats
+    the global model and random routing does not. The text is generated from the
+    measured deltas so a failed control can never be reported as a pass.
+    """
+    ref = per_expert.get("logistic") or next(iter(per_expert.values()))
+    oracle_win = ref["oracle_minus_no_routing"] > 0
+    random_win = ref["random_minus_no_routing"] > 0
+    learned_win = learned_acc["learned_router"] - learned_acc["single_global"] > 0
+    xonly_win = x_only_acc["learned_router"] - x_only_acc["single_global"] > 0
+    control_ok = bool(oracle_win and not random_win)
+    text = (
+        f"oracle-vs-global {ref['oracle_minus_no_routing']:+.4f} "
+        f"({'beats' if oracle_win else 'does NOT beat'} the global model); "
+        f"random-vs-global {ref['random_minus_no_routing']:+.4f} "
+        f"({'also beats' if random_win else 'does not beat'} it); "
+        f"learned router {learned_acc['learned_router'] - learned_acc['single_global']:+.4f} "
+        f"({'recovers' if learned_win else 'fails to recover'} the routing gain); "
+        f"x_only gate {x_only_acc['learned_router'] - x_only_acc['single_global']:+.4f} "
+        f"({'does' if xonly_win else 'does not'}). "
+    )
+    if control_ok:
+        text += "Harness valid: it detects the planted routing win."
+    else:
+        text += (
+            "WARNING: control behaved unexpectedly (oracle must win, random must "
+            "not); the real-data null cannot be trusted until this is resolved."
+        )
+    return {"interpretation": text, "control_passed": control_ok}
+
+
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--n", type=int, default=1800)
@@ -203,14 +236,7 @@ def main() -> None:
             )),
         },
         "per_split_win_counts": win_counts,
-        "interpretation": (
-            "A correct positive control: oracle routing beats the global model by a "
-            "wide margin under logistic experts, while random routing does not. The "
-            "learned router also beats the global model here, so the router can "
-            "exploit structure when it exists. The 0/234 result on real data is "
-            "therefore a statement about those datasets, not a blind spot in the "
-            "protocol or the router."
-        ),
+        **_interpretation(per_expert, learned_acc, x_only_acc),
     }
     path = out_dir / "fixed_expert.json"
     with open(path, "w", encoding="utf8") as fh:

@@ -18,9 +18,19 @@ def set_seed(seed: int) -> None:
     torch.manual_seed(seed)
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(seed)
+    # Same-device determinism: a re-run on the *same* device is reproducible.
+    # This does NOT make CPU and CUDA bitwise identical (float32 reduction order
+    # differs across devices), so every artifact must record the device that
+    # actually produced it -- see :func:`device_config`.
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    try:
+        torch.use_deterministic_algorithms(True, warn_only=True)
+    except (AttributeError, RuntimeError):
+        pass
 
 
-def device_config(device: str = "cuda") -> str:
+def device_config(device: str = "cpu") -> str:
     import torch
 
     if device.startswith("cuda") and not torch.cuda.is_available():

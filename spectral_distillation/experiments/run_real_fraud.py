@@ -225,7 +225,7 @@ def main() -> None:
                              "(default loader cap 15000; use 0 for the full graph)")
     parser.add_argument("--no-progress", action="store_true", help="disable tqdm progress bars")
     parser.add_argument("--out", default="logs")
-    parser.add_argument("--device", default="cuda")
+    parser.add_argument("--device", default="cpu")
     args = parser.parse_args()
 
     config = load_yaml_config(args.config)

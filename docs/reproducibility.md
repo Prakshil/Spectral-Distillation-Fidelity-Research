@@ -268,8 +268,11 @@ python -m spectral_distillation.experiments.reproduce_figures
   deconfounding invariants (feature-noise constant, nested converted sets, unconverted retain
   wiring, **no arm saturates** â‰ˆ single-M accuracy ~0.80).
 - Runners accept `--n`, `--n-patches`, `--splits`, `--seeds`, `--router-epochs`, `--device`,
-  `--config`, `--out` (see each module's argparse help). `--device` defaults to `cuda` and
-  auto-falls back to `cpu` when CUDA is unavailable.
+  `--config`, `--out` (see each module's argparse help). `--device` defaults to `cpu` —
+  the **committed logs are the CPU reference**, and CUDA and CPU are not bit-identical, so
+  reproduce with the default before comparing numbers. Pass `--device cuda` (or
+  `--device cuda` on a machine with CUDA) for a faster GPU run; it auto-falls back to
+  `cpu` when CUDA is unavailable.
 
 #### 4.2 Measured runtime (RTX 4060 Laptop GPU, n=10,000)
 

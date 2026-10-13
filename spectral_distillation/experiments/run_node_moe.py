@@ -112,8 +112,8 @@ def main() -> None:
                    choices=list(FRAUD_DATASETS) + list(HETEROPHILY_DATASETS))
     p.add_argument("--data-path", default=None)
     p.add_argument("--max-nodes", type=int, default=None)
-    p.add_argument("--splits", type=int, default=3)
-    p.add_argument("--seeds", type=int, default=1)
+    p.add_argument("--splits", type=int, default=10)
+    p.add_argument("--seeds", type=int, default=3)
     p.add_argument("--router-frac", type=float, default=0.35,
                    help="fraction of training nodes used to supervise the gate in "
                         "Protocol B (the rest fit the frozen expert pool)")

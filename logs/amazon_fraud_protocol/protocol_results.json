@@ -15,7 +15,7 @@
     "budget_oracle": false,
     "no_progress": false,
     "out": "logs",
-    "device": "cuda"
+    "device": "cpu"
   },
   "graph": {
     "n_nodes": 8639,

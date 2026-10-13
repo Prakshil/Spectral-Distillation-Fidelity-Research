@@ -47,7 +47,8 @@ from spectral_distillation.src.gnn_router import _as_torch_W
 class GraphExpertNet(nn.Module):
     """GraphSAGE-style encoder with a linear read-out and an input skip.
 
-    ``h0 = AX + X`` is the one-hop neighbourhood representation and the read-out
+    ``h0 = [X, AX]`` (the concatenation of a node's own features and its
+    one-hop aggregated neighbours) is the input representation and the read-out
     is ``Linear_skip(h0)``. With ``hidden_dim=0`` (the default) there is no
     hidden branch at all, i.e. a one-hop message-passing expert: the prediction
     is a linear function of the node's own features *and* its neighbours'.

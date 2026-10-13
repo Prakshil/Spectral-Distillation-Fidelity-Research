@@ -250,7 +250,7 @@ def export_table1(out_dir: Path, log: logging.Logger) -> None:
         ["rule", "mean_diff", "ci_low", "ci_high", "p_wilcoxon", "effect_size_dz", "significant"],
         out_dir / "protocol" / "table1_findings.csv",
         out_dir / "protocol" / "table1_findings.tex",
-        "D1-D4 findings matrix (Protocol B).",
+        "D1-D4 findings matrix (Protocol A, PC-1c-R planted control).",
         log,
     )
 

@@ -102,7 +102,7 @@ def main() -> None:
     parser.add_argument("--random-seed", type=int, default=1)
     parser.add_argument("--dilution-seed", type=int, default=3)
     parser.add_argument("--out", default="logs")
-    parser.add_argument("--device", default="cuda")
+    parser.add_argument("--device", default="cpu")
     args = parser.parse_args()
 
     config = load_yaml_config(args.config)

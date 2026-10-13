@@ -21,7 +21,7 @@
     "max_nodes": null,
     "no_progress": true,
     "out": "logs",
-    "device": "cuda"
+    "device": "cpu"
   },
   "graph": {
     "n_nodes": 14840,

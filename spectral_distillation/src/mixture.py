@@ -89,10 +89,14 @@ def fit_experts(
 ) -> list[object | None]:
     """Fit K expert heads, each on its own routed train subset.
 
-    A shortage of routes yields a majority-class dummy head (never ``None``
-    unless the masked set is empty) so the mixture stays well defined even
-    under heavy dilution. ``expert_factory`` builds each head; it defaults to
-    the linear ``expert_head`` so existing callers reproduce exactly. Passing
+    Every channel is guaranteed a head unless the whole training split is empty.
+    A channel with too few routed nodes (< 10) cannot fit a specialist, so it
+    falls back to a head trained on the **full** training split rather than
+    ``None``. This is deliberate: :func:`mixture_accuracy` scores a *fixed*
+    node set, so dropping an under-populated channel would make the accuracy
+    denominator condition-dependent and make conditions incomparable.
+    ``expert_factory`` builds each head; it defaults to the linear
+    ``expert_head`` so existing callers reproduce exactly. Passing
     ``expert_factories`` (one per expert, in channel order) overrides
     ``expert_factory`` and is how the heterogeneous-capacity ablation builds
     experts with different widths.
@@ -107,11 +111,14 @@ def fit_experts(
     assignment = np.asarray(assignment, dtype=float)
     K = assignment.shape[1]
     experts: list[object | None] = []
+    have_train = int(np.count_nonzero(train_mask)) > 0
     for k in range(K):
         masked = train_mask & (assignment[:, k] >= 0.01)
-        if masked.sum() < 10:
-            experts.append(None)
-            continue
+        if int(np.count_nonzero(masked)) < 10:
+            if not have_train:
+                experts.append(None)
+                continue
+            masked = train_mask  # global fallback: keep the node set fixed
         unique = np.unique(y[masked])
         if unique.size < 2:
             dummy = DummyClassifier(strategy="most_frequent")
@@ -137,8 +144,11 @@ def mixture_accuracy(
 ) -> tuple[float, int]:
     """Accuracy over test nodes using hard routing (argmax assignment).
 
-    Returns (accuracy, n_evaluated). Nodes routed to experts that had no
-    training data are skipped and reported neither correct nor wrong.
+    Returns (accuracy, n_evaluated). The accuracy is over a *fixed* node set:
+    :func:`fit_experts` gives every channel a head (globally-fallback when it is
+    under-populated), so ``n_evaluated`` equals the number of test nodes unless
+    the whole training split was empty. Callers must not compare accuracies
+    computed over different ``n_evaluated`` values.
 
     Heads exposing ``predict_nodes`` are handed the global node indices as well
     as the full feature matrix, because a message-passing expert cannot recover

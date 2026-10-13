@@ -150,7 +150,13 @@ def oracle_regime_assignment(regime_ids: np.ndarray, n_regimes: int = 3) -> np.n
 
 
 def uniform_assignment(n: int, n_experts: int = 3) -> np.ndarray:
-    """Uniform equal-mixing assignment (1/K, ..., 1/K), gates frozen."""
+    """Uniform equal-mixing assignment (1/K, ..., 1/K), gates frozen.
+
+    Every row is identical, so a hard ``argmax`` (used by the mixture) sends
+    every node to channel 0: the reported usage is ``[n, 0, ..., 0]``. That is
+    intended, not a bug -- uniform mixing is exactly one global expert, which is
+    the "no-routing" reference the oracle/learned arms are measured against.
+    """
     return np.full((n, n_experts), 1.0 / n_experts)
 
 

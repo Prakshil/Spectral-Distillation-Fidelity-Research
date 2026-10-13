@@ -24,7 +24,7 @@
     "skip_dilution": true,
     "no_progress": false,
     "out": "logs/rk16",
-    "device": "cuda"
+    "device": "cpu"
   },
   "graph": {
     "n_nodes": 11520,

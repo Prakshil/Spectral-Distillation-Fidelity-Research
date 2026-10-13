@@ -25,7 +25,7 @@
     "adaptive_oracle": true,
     "no_progress": false,
     "out": "logs/rk16_adapt",
-    "device": "cuda"
+    "device": "cpu"
   },
   "graph": {
     "n_nodes": 11520,

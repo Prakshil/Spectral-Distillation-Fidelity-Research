@@ -14,7 +14,7 @@ at n = 100 / 1,000 / 10,000:
   sparsification, and vs the full graph (when ``n <= sd_n_max``, because that path
   needs a dense ``eigvalsh``);
 - **wall-clock** — exact pseudoinverse vs ``eigsh`` top-k;
-- **self-convergence** — ``||r_k − r_Kmax|| / ||r_Kmax||`` across the k grid, the
+- **self-convergence** — ``||r_k - r_Kmax|| / ||r_Kmax||`` across the k grid, the
   only accuracy reference available when exact is infeasible (n = 10,000).
 
 The exact reference is skipped beyond ``exact_n_max`` (default 3,000) rather than
@@ -102,7 +102,7 @@ def topk_scaled(L: np.ndarray, k: int, tol: float = 1e-10) -> np.ndarray:
 def edge_resistance_from_scaled(
     scaled: np.ndarray, rows: np.ndarray, cols: np.ndarray, chunk: int = 2_000_000
 ) -> np.ndarray:
-    """``R_ij = ||scaled_i − scaled_j||^2`` without materialising the n x n matrix.
+    """``R_ij = ||scaled_i - scaled_j||^2`` without materialising the n x n matrix.
 
     Edges are processed in ``chunk``-sized blocks so the ``chunk x k`` working set
     stays small even for n = 10000 (~10^7 edges).

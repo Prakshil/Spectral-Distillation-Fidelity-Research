@@ -35,7 +35,9 @@ N_GROUPS = 3
 
 def _group_rules(X: np.ndarray, groups: np.ndarray) -> np.ndarray:
     """Per-group linear rules, each over a different pair of shared features."""
-    scores = np.zeros(groups.shape[0], dtype=np.int64)
+    # float accumulation: an int64 buffer truncates each linear score toward
+    # zero (e.g. 0.4 -> 0), which would flip the sign test for fractional scores.
+    scores = np.zeros(groups.shape[0], dtype=float)
     scores[groups == 0] = X[groups == 0, 0] + X[groups == 0, 1]
     scores[groups == 1] = X[groups == 1, 1] - X[groups == 1, 2]
     scores[groups == 2] = X[groups == 2, 2] - X[groups == 2, 0]

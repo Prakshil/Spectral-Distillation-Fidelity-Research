@@ -94,11 +94,13 @@ genuinely does understand the structure it is given.
 Then we re-ran everything. Across **all 234 combinations** of router, expert type,
 and graph:
 
-**Not a single router beat simply training one model on everything.**
+**Only 2 of the 234 beat simply training one model on everything — both are
+reduced-power YelpChi GNN cells, positive by ~0.002 with p >= 0.75 (noise). Every
+full-scale cell is a loss (0 of 26).**
 
 The graph expert is the interesting case, because it made *more* routers look
-good than before (17 of 26 on Amazon beat random splitting, up from 11) — and still
-not one of them beat the single model. So:
+good than before (16 of 26 on Amazon beat a random split, up from 11 with the
+logistic expert) — and still not one of them beat the single model. So:
 
 - Beating *random* routing is easy and does not mean much.
 - The real question is whether routing beats *no routing*, and it never does.
@@ -123,16 +125,16 @@ positive one. So we added two controls.
 **A test problem where routing must win.** We built a synthetic graph whose answer
 is three different linear rules in three different regions — a shape no single
 straight line can fit, but three local experts can. On that problem, knowing which
-expert to send a node to raises accuracy from 0.785 to 0.981. Splitting the work is
-worth +0.20 there. Random splitting does *not* help (0.747), so this is not a
+expert to send a node to raises accuracy from 0.652 to 0.988. Splitting the work is
+worth +0.34 there. Random splitting does *not* help (0.627), so this is not a
 harness that flatters every option. It also shows why routing looked unpromising:
 with a flexible neural expert the gain shrinks to +0.01, because one big model can
 already do the job. Routing only pays when the global model is too simple.
 
 **A router that learns from the labels.** Every router above was a fixed formula.
 We also trained a small graph neural network to pick the expert per node, using
-only training labels, against the same frozen pool. It found +0.18 of the available
-+0.19 on the synthetic problem — so the trained router works. On the three real
+only training labels, against the same frozen pool. It found +0.31 of the available
++0.33 on the synthetic problem — so the trained router works. On the three real
 fraud graphs it landed within 0.002 of just training one model, and the sign
 flipped from graph to graph: noise, not signal.
 
@@ -157,7 +159,7 @@ What we found:
 
 - Routing first becomes **possible** when the dial reaches about **0.2**. Below
   that, even the cheating oracle gains nothing.
-- Routing becomes **reliably worth doing** a little higher, around **0.3–0.5**.
+- Routing becomes **reliably worth doing** a little higher, around **0.3**.
   Below that, a router trained on labels is too uncertain to commit.
 - On the two real fraud graphs, a router that is allowed to *decline* correctly
   declines: its held-out check says routing would not help, and it sends
@@ -212,10 +214,11 @@ Done and reproducible:
 - The fair protocol, with the weak-baseline bug found and fixed, and a test that
   stops it returning.
 - All three graphs (Amazon, Tolokers, YelpChi) × three expert families × 26
-  routers = 234 comparisons. None beat one model.
-- A positive control where routing wins by +0.20, so the null result is not a
+  routers = 234 comparisons. Two beat one model (both reduced-power YelpChi GNN
+  cells, p >= 0.75); every full-scale cell is a loss.
+- A positive control where routing wins by +0.34, so the null result is not a
   broken harness.
-- A label-trained router that recovers +0.18 of +0.19 on the positive control and
+- A label-trained router that recovers +0.31 of +0.33 on the positive control and
   nothing on the real graphs.
 - A **learnability lever** (`docs/learnability_lever.md`) that locates where
   routing starts to pay off: it becomes *possible* at β ≈ 0.2 and *reliably worth

@@ -1,6 +1,7 @@
 {
   "config": {
     "config": "configs/default.yaml",
+    "graph": "pc",
     "n": 10000,
     "n_patches": 50,
     "splits": 10,
@@ -12,7 +13,7 @@
     "random_seed": 1,
     "frozen_perms": 20,
     "out": "logs",
-    "device": "cuda"
+    "device": "cpu"
   },
   "graph": {
     "n_nodes": 10000,

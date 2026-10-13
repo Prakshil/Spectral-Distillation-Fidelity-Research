@@ -119,18 +119,19 @@ for itself. Across **all three expert families on all three graphs**:
 | Tolokers | GNN | 2/26 | **0/26** |
 | YelpChi | logistic | 0/26 | **0/26** |
 | YelpChi | MLP | 0/26 | **0/26** |
-| YelpChi | GNN (capped) | 2/26 | 2/26 † |
+| YelpChi | GNN (capped) | 0/26 | 2/26 † |
 
-**0 of 234 candidate/expert/graph combinations beat training one model on
-everything** (43 beat a random routing). The best gap in each row is negative
+**2 of 234 candidate/expert/graph combinations beat training one model on
+everything** (41 beat a random routing). The best gap in each row is negative
 throughout.
 
 † The two YelpChi cases are `eig_nb_sim_k32` and `eig_nb_sim_abs_k32`, both
-positive by ~+0.002 with p=0.25 on a 3-split capped run — not significant, and
-they appear only because YelpChi must be node-capped for memory (14840 of 45954
-nodes, 3 splits × 1 seed instead of 10 × 3). Every full-scale cell is 0/26. Do not
-quote this row as a routing win; it is the reduced-power arm, and the honest
-summary remains 0/26 at full power.
+positive by ~+0.002 (+0.0026 and +0.0012) with paired-Wilcoxon p=0.75 and p=1.0
+vs no-routing on a 3-split capped run — not significant, and they appear only
+because YelpChi must be node-capped for memory (14,681 of 45,954 nodes, 3 splits
+× 1 seed instead of 10 × 3). Every full-scale cell is 0/26. Do not quote this row
+as a routing win; it is the reduced-power arm, and the honest summary remains
+0/26 at full power.
 
 ### The GNN expert is a real graph model, not a proxy
 
@@ -466,7 +467,7 @@ binary path byte-identical.
 
 ## Positive control: can the protocol detect a win at all?
 
-A 0/234 result is only meaningful if the harness would have reported a win when one
+A 2/234 result is only meaningful if the harness would have reported a win when one
 existed. `spectral_distillation/src/positive_control.py` supplies a task where
 routing is provably useful.
 
@@ -476,13 +477,15 @@ hyperplane satisfying all three. A marker feature offsets the groups in feature
 space (so feature k-means recovers them at purity 1.000) and the graph is
 block-diagonal over the same groups, so the task is graph-native.
 
-Run: `python -m spectral_distillation.experiments.run_positive_control`
-→ `logs/positive_control/fixed_expert.json` (5 splits × 3 seeds)
+Run: `python -m spectral_distillation.experiments.run_positive_control --experts
+logistic mlp gnn --splits 5 --seeds 3 --n 1800 --out logs/positive_control_gnn`
+→ `logs/positive_control_gnn/fixed_expert.json` (5 splits × 3 seeds)
 
 | expert | no-routing | oracle | k-means | random | oracle − no-routing |
 |---|---|---|---|---|---|
-| logistic | 0.7853 | 0.9806 | 0.9806 | 0.7470 | **+0.1953** |
-| MLP | 0.9758 | 0.9874 | 0.9874 | 0.6774 | +0.0116 |
+| logistic | 0.6518 | 0.9885 | 0.9885 | 0.6274 | **+0.3367** |
+| MLP | 0.9810 | 0.9926 | 0.9926 | 0.6164 | +0.0116 |
+| GNN | 0.6503 | 0.9893 | 0.9893 | 0.6224 | **+0.3390** |
 
 Random routing does **not** win, which rules out a degenerate "everything beats the
 baseline" harness. The MLP contrast is the informative one: an MLP expressive
@@ -544,8 +547,8 @@ is worse than training one model, which bounds the achievable routing gain at �
 here: no router, however good, could have won. This is a bound rather than a
 failure to search.
 
-The control matters: on the positive control the same router reaches 0.9541 against
-a global 0.7837, recovering **+0.170** of the oracle's +0.189. So the router is not
+The control matters: on the positive control the same router reaches 0.9613 against
+a global 0.6534, recovering **+0.308** of the oracle's +0.330. So the router is not
 broken and the harness is not blind — on these three fraud graphs there is simply
 no per-node expert-selection signal to exploit.
 
@@ -553,16 +556,16 @@ no per-node expert-selection signal to exploit.
 
 | condition | positive control | real graphs (GNN pool) |
 |---|---|---|
-| no-routing | 0.7837 | 0.9428 / 0.6721 / 0.7166 |
-| Ens-Avg | 0.8011 | 0.9140 / 0.5174 / 0.7320 |
-| k-means routing | **0.9730** | 0.9401 / — |
-| oracle routing | **0.9730** | 0.8339 / 0.4939 / 0.6886 |
-| learned router | **0.9541** | 0.9731 / 0.7819 / 0.8533 |
+| no-routing | 0.6534 | 0.9428 / 0.6721 / 0.7166 |
+| Ens-Avg | 0.6946 | 0.9140 / 0.5174 / 0.7320 |
+| k-means routing | **0.9835** | 0.9401 / — |
+| oracle routing | **0.9835** | 0.8339 / 0.4939 / 0.6886 |
+| learned router | **0.9613** | 0.9731 / 0.7819 / 0.8533 |
 
 On the positive control the experts are genuine *specialists* — each is optimal on
 one latent group — so averaging their probabilities blurs three distinct decision
-boundaries into one mediocre one (+0.017 over global), while routing to the right
-specialist recovers almost everything (+0.19). Ens-Avg and routing are not
+boundaries into one mediocre one (+0.041 over global), while routing to the right
+specialist recovers almost everything (+0.33). Ens-Avg and routing are not
 redundant controls; they fail in opposite regimes, and which one wins tells you
 what kind of pool you have.
 
@@ -613,7 +616,7 @@ Deltas are against no-routing. Every mean is negative on every graph. Across the
 16 individual runs RouterGNN wins 2 (Amazon split 1, +0.0005; Tolokers split 3,
 +0.0003), AD-GNN wins 1 (the same Tolokers split), and the MLP gate wins 2
 (Amazon split 1, Tolokers split 3) — every win is at the ±0.0005 noise scale and
-none survives a per-graph mean. This matches the 0/234 structural-score result: no
+none survives a per-graph mean. This matches the 2/234 structural-score result: no
 router, learned or fixed, separates from a single global model on any of these
 pools.
 
@@ -746,23 +749,23 @@ Both directions are pinned by tests:
   per-row experts, which never touch the graph and would make the arm look
   controlled without being controlled.
 
-The positive control also holds under ragged edges: oracle `+0.3043` and k-means
-routing `+0.3043` over no-routing, both **5/5 splits**, against `+0.3070` for the
+The positive control also holds under ragged edges: oracle `+0.3396` and k-means
+routing `+0.3396` over no-routing, both **5/5 splits**, against `+0.3390` for the
 full-graph expert at the same settings. So removing cross-subset edges costs
 nothing when the routing signal is real.
 
 | positive control, GNN expert | no-routing | oracle | k-means | random | oracle − no-routing |
 |---|---|---|---|---|---|
 | full graph | 0.6567 | 0.9637 | 0.9637 | 0.6315 | **+0.3070** |
-| ragged edges | 0.6619 | 0.9662 | 0.9662 | 0.6421 | **+0.3043** |
+| ragged edges | 0.6505 | 0.9901 | 0.9901 | 0.6248 | **+0.3396** |
 
 That is the load-bearing comparison for the whole implicit-routing argument: the
 control removes an entire channel through which a frozen pool could have routed
 internally, and the planted gain survives its removal intact.
 
 The control arm matters as much as the real one. On the positive control the
-`x_only` gate does **better** than the Node-MoE gate — `+0.1841` vs `+0.1704`,
-recovering more of the oracle's `+0.189`, with k-means agreement 0.858 vs 0.777.
+`x_only` gate does **better** than the Node-MoE gate — `+0.3236` vs `+0.3079`,
+recovering more of the oracle's `+0.330`, with k-means agreement 0.960 vs 0.847.
 The three planted regimes are linearly separable in raw feature space, so graph
 terms only add noise for the gate to fit. This is what makes the real-data arm
 interpretable: the propagation-free gate provably *can* recover a routing gain

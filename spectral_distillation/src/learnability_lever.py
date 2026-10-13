@@ -53,18 +53,17 @@ def _group_rule_score(X: np.ndarray, groups: np.ndarray) -> np.ndarray:
     """Per-group linear rules, each over a different pair of shared features.
 
     Reproduces :func:`spectral_distillation.src.positive_control._group_rules`
-    *exactly*, including its ``int64`` accumulator: that function writes the real
-    sums into an integer array, truncating toward zero before thresholding, so a
-    score in ``(0, 1)`` becomes ``0`` and is labelled negative. Replicating the
-    truncation keeps ``separability = 1`` bit-identical to the validated positive
-    control rather than merely close to it. The returned array is float so it can
-    be linearly interpolated with the common rule.
+    *exactly*: same per-group feature pairs, same sign threshold. The scores are
+    accumulated in float (not ``int64``) so the sign test is applied to the true
+    value of the linear rule; truncating toward zero would flip the label of any
+    node whose score falls in ``(0, 1)``. This makes ``separability = 1``
+    bit-identical to the validated positive control.
     """
-    scores = np.zeros(X.shape[0], dtype=np.int64)
+    scores = np.zeros(X.shape[0], dtype=float)
     scores[groups == 0] = X[groups == 0, 0] + X[groups == 0, 1]
     scores[groups == 1] = X[groups == 1, 1] - X[groups == 1, 2]
     scores[groups == 2] = X[groups == 2, 2] - X[groups == 2, 0]
-    return scores.astype(float)
+    return scores
 
 
 def planted_separability_graph(

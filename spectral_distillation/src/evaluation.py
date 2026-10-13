@@ -137,6 +137,11 @@ def evaluate_comparison(
     keys = sorted(set(splits_a) & set(splits_b))
     a = np.array([splits_a[k] for k in keys])
     b = np.array([splits_b[k] for k in keys])
+    # NOTE: ``significant``/``alpha_corrected`` below are provisional -- they use
+    # the raw ``alpha`` and must NOT be read as FWER-controlled. Callers that
+    # evaluate several comparisons together (e.g. :func:`run_protocol`) overwrite
+    # both fields with Holm-Bonferroni thresholds. Use this function directly
+    # only for a single, pre-registered comparison.
     p_ww = wilcoxon_paired(a, b)
     p_t = paired_ttest(a, b)
     dz = effect_size_dz(a, b)

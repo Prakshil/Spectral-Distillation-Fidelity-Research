@@ -257,11 +257,26 @@ def main() -> None:
     drop = np.array([r["accuracy_drop_vs_dense"] for r in conditions])
     corr = {}
     for nm, v in (("low_frequency_error", lf), ("routing_survival", surv)):
-        if len(v) >= 4 and np.ptp(drop) > 0 and np.ptp(v) > 0:
+        if len(drop) >= 3 and np.ptp(drop) > 0 and np.ptp(v) > 0:
             s = spearmanr(v, drop)
-            corr[nm] = {"rho": float(s.statistic), "p": float(s.pvalue)}
+            # The (method, retention) points all come from one graph: they are
+            # neither independent nor identically distributed, so the nominal p
+            # is not a valid test statistic. Report a leave-one-out range so the
+            # reader can see the correlation is not driven by a single point.
+            loo = []
+            for i in range(len(drop)):
+                idx = np.delete(np.arange(len(drop)), i)
+                if np.ptp(drop[idx]) > 0 and np.ptp(v[idx]) > 0:
+                    loo.append(float(spearmanr(v[idx], drop[idx]).statistic))
+            corr[nm] = {
+                "rho": float(s.statistic),
+                "p_nominal_uncorrected": float(s.pvalue),
+                "n_points": int(len(drop)),
+                "loo_rho_min": min(loo) if loo else None,
+                "loo_rho_max": max(loo) if loo else None,
+            }
         else:
-            corr[nm] = {"rho": None, "p": None}
+            corr[nm] = {"rho": None, "p_nominal_uncorrected": None}
 
     out = Path(args.out)
     ensure_dir(out)
@@ -274,7 +289,12 @@ def main() -> None:
                "n_experts": args.n_experts,
                "dense_label_free_accuracy": dense_acc,
                "conditions": conditions,
-               "sd_vs_accuracy_drop": corr}
+               "sd_vs_accuracy_drop": corr,
+               "sd_vs_accuracy_drop_note": (
+                   "All (method, retention) points come from a single graph, so "
+                   "they are dependent and the p-values are nominal/uncorrected. "
+                   "Treat rho as descriptive; use loo_rho_min/max for stability."
+               )}
     dest = out / "llm_protocol_b.json"
     dest.write_text(json.dumps(payload, indent=2), encoding="utf-8")
     log.info("=== SD vs Protocol-B accuracy drop ===")
@@ -282,7 +302,10 @@ def main() -> None:
         if c["rho"] is None:
             log.info("  %-22s n/a", nm)
         else:
-            log.info("  %-22s rho=%+.3f (p=%.3g)", nm, c["rho"], c["p"])
+            log.info("  %-22s rho=%+.3f (nominal p=%.3g, loo rho %.2f..%.2f)",
+                     nm, c["rho"], c["p_nominal_uncorrected"],
+                     c["loo_rho_min"] if c["loo_rho_min"] is not None else float("nan"),
+                     c["loo_rho_max"] if c["loo_rho_max"] is not None else float("nan"))
     log.info("wrote %s", dest)
 
 

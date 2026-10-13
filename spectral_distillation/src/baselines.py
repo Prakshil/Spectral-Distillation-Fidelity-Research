@@ -1,4 +1,14 @@
-"""Baseline graph-distillation methods: thresholding, random, degree-based."""
+"""Baseline graph-distillation methods: thresholding, random, degree-based.
+
+``random_sparsify`` and ``degree_sparsify`` use different weight conventions.
+Random edge sampling is a randomized estimator, so it importance-rescales the
+kept weights by ``n_edges / n_edges_budget`` to preserve edge-weight mass in
+expectation. Degree-based selection is deterministic top-k, so it keeps the
+original weights and simply drops the rest. Comparisons of homophily or
+spectral distortion across the two therefore contrast a mass-preserving sampler
+with a mass-dropping selector, not merely two ranking rules -- keep this in mind
+when reading the method bands.
+"""
 
 from __future__ import annotations
 

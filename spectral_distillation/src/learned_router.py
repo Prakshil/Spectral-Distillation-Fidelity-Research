@@ -28,9 +28,10 @@ Holding the experts out makes the target mean "which expert generalizes to this
 node", which is what a router has to guess at deployment time.
 
 "Lite" refers to the router, not the experts: the router is a small MLP over
-cached one-hop propagated features ``[X, AX]``, the same trick
-:mod:`spectral_distillation.src.gnn_expert` uses to stay fast. Experts are the
-unmodified protocol-B heads.
+cached label-free propagations ``[X, |AX - X|, |A^2 X - X|]`` (the default
+``nodemoe`` gate; ``x_only`` drops the graph terms). This mirrors the caching
+trick :mod:`spectral_distillation.src.gnn_expert` uses to stay fast on CPU.
+Experts are the unmodified protocol-B heads.
 """
 
 from __future__ import annotations

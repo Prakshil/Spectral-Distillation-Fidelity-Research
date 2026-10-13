@@ -1,4 +1,16 @@
-"""Spielman-Srivastava spectral sparsification with business-rule oracle filter."""
+"""Effective-resistance edge sampling with a business-rule oracle filter.
+
+This is *inspired by* Spielman-Srivastava sparsification -- edges are scored by
+``w_e * r_e`` (weight times effective resistance) -- but it is **not** an
+SS-style spectral approximation. The SS guarantee needs a sampling constant
+chosen from ``(n, eps)`` alone, independent of the target edge count. Here that
+constant is instead set to ``n_edges_budget / (n log n)`` so the expected number
+of kept edges lands near the requested budget; the ``log n`` cancels and the
+scheme is best described as **budget-normalized resistance sampling**. The
+returned weights are importance-rescaled (Horvitz-Thompson) by ``1/q`` so
+resistance-weighted mass is preserved in expectation, but no ``1 +/- eps``
+Laplacian bound is claimed or tested.
+"""
 
 from __future__ import annotations
 
@@ -52,6 +64,9 @@ def spectral_sparsify(
         R = compute_effective_resistance(L, k=k_eig)
         r = R[rows, cols]
 
+    # Budget-normalized sampling probability (see module docstring). Written in
+    # SS form for readability, but C is budget-derived so the log n factors
+    # cancel and this targets an edge count, not a 1 +/- eps spectral bound.
     logn = np.log(n) + 1e-12
     C = n_edges_budget / (n * logn)
     q = np.minimum(1.0, C * weights * r * logn / (epsilon ** 2 + 1e-12))

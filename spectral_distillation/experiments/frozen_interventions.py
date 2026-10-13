@@ -210,7 +210,7 @@ def main() -> None:
     parser.add_argument("--split-seed", type=int, default=0)
     parser.add_argument("--frozen-perms", type=int, default=10)
     parser.add_argument("--out", default="logs")
-    parser.add_argument("--device", default="cuda")
+    parser.add_argument("--device", default="cpu")
     args = parser.parse_args()
 
     config = load_yaml_config(args.config)

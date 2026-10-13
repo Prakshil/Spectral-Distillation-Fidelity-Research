@@ -28,9 +28,9 @@ With `s_common(x) = x0 + x1` and the per-group rules of
 s_g(x) = (1 − β) · s_common(x) + β · s_rule(g, x),      label = [s_g(x) > 0].
 ```
 
-At β = 1 the lever reproduces the positive control's labels **bit-identically**,
-including that function's `int64` accumulator truncation (see the module
-docstring). The lever only interpolates; it invents no structure.
+At β = 1 the lever reproduces the positive control's labels **bit-identically**
+(both use the same float-valued `_group_rules`; see the module docstring). The
+lever only interpolates; it invents no structure.
 
 The graph stays block-diagonal over the latent groups (`edge_p = 0.02`), so
 feature k-means recovers the groups and the protocol's routing-blind pool aligns
@@ -46,16 +46,16 @@ n = 3000, 3 groups, d = 8, logistic experts, 5 splits × 1 seed, 200 epochs,
 | β | global | oracle gain | k-means gain | learned gain | cond | cond gain |
 |----|--------|-------------|--------------|--------------|------|-----------|
 | 0.0 | 0.9916 | −0.0100 | −0.0100 | −0.0065 | **abstain** | 0.0000 |
-| 0.1 | 0.9833 | −0.0036 | −0.0036 | −0.0083 | **abstain** | −0.0021 |
-| 0.2 | 0.9657 | +0.0091 | +0.0091 | −0.0055 | **abstain** | −0.0008 |
-| 0.3 | 0.9405 | +0.0257 | +0.0257 | +0.0031 | route (4/5) | +0.0031 |
-| 0.4 | 0.9061 | +0.0492 | +0.0492 | +0.0128 | abstain (1/5) | +0.0032 |
-| 0.5 | 0.8720 | +0.0712 | +0.0712 | +0.0283 | route (5/5) | +0.0120 |
-| 0.6 | 0.8320 | +0.0979 | +0.0979 | +0.0521 | route (4/5) | +0.0245 |
-| 0.7 | 0.7971 | +0.1253 | +0.1253 | +0.0831 | route (4/5) | +0.0521 |
-| 0.8 | 0.7911 | +0.1315 | +0.1315 | +0.0927 | route (5/5) | +0.0583 |
-| 0.9 | 0.7924 | +0.1261 | +0.1261 | +0.0916 | route (5/5) | +0.0511 |
-| 1.0 | 0.7792 | +0.1944 | +0.1944 | +0.1584 | route (5/5) | +0.1295 |
+| 0.1 | 0.9775 | −0.0015 | −0.0015 | −0.0048 | route (2/5) | −0.0035 |
+| 0.2 | 0.9517 | +0.0317 | +0.0317 | +0.0031 | route (4/5) | −0.0036 |
+| 0.3 | 0.9203 | +0.0592 | +0.0592 | +0.0217 | route (5/5) | +0.0099 |
+| 0.4 | 0.8756 | +0.1047 | +0.1047 | +0.0591 | route (5/5) | +0.0472 |
+| 0.5 | 0.8336 | +0.1484 | +0.1484 | +0.1032 | route (5/5) | +0.0827 |
+| 0.6 | 0.7872 | +0.1931 | +0.1931 | +0.1427 | route (5/5) | +0.1143 |
+| 0.7 | 0.7473 | +0.2355 | +0.2355 | +0.2003 | route (5/5) | +0.1692 |
+| 0.8 | 0.7167 | +0.2609 | +0.2609 | +0.2265 | route (5/5) | +0.1916 |
+| 0.9 | 0.6936 | +0.2841 | +0.2841 | +0.2535 | route (5/5) | +0.2195 |
+| 1.0 | 0.6753 | +0.3068 | +0.3068 | +0.2728 | route (5/5) | +0.2363 |
 
 Two boundaries, which need not coincide (`find_thresholds`):
 
@@ -70,9 +70,9 @@ label-free router captures the entire available gain. This is the strongest
 possible version of the lever — it cannot be dismissed as "the oracle was the
 only thing that could route."
 
-Above β ≈ 0.5 the result is monotone and robust (5/5 splits route, positive gain
-at every setting). The mid-range β ∈ [0.3, 0.4] is genuinely noisy (route rate
-4/5 then 1/5), which is itself the honest finding: near the boundary the selective
+Above β ≈ 0.3 the result is monotone and robust (5/5 splits route, positive gain
+at every setting). The low range β ∈ [0.1, 0.2] is genuinely noisy (route rate
+2/5 then 4/5), which is itself the honest finding: near the boundary the selective
 router's held-out signal is weak.
 
 ## 3. The learnability-conditioned router
@@ -116,8 +116,8 @@ null is a statement about the tasks, not a failure of the method.**
 ## 5. The homophily lever (secondary)
 
 At fixed β = 1, adding cross-group edges (`cross_edge_p`) does **not** reduce
-routing gain; it rises slightly (oracle +0.1944 constant; learned +0.158 → +0.172;
-cond +0.129 → +0.161 as `cross_edge_p` goes 0 → 0.02).
+routing gain; it rises slightly (oracle +0.3068 constant; learned +0.2728 → +0.2873;
+cond +0.2363 → +0.2659 as `cross_edge_p` goes 0 → 0.02).
 
 Interpretation: in this construction the routability is carried by the
 **label/feature** structure, not by edge homophily. The expert pool (feature

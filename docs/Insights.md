@@ -11,7 +11,7 @@
 > so its oracle numbers are self-routing artifacts and are **retracted** for real
 > graphs. The planted-control numbers remain a valid **D4 instrument check**. On
 > **real graphs** under the fixed-expert Protocol B, no router beats a single
-> global model (0/234) and the oracle is *negative*. The one supported positive
+> global model (2/234, both reduced-power cells) and the oracle is *negative*. The one supported positive
 > is that spectral distortion predicts routing **stability**. Current numbers:
 > `docs/fixed_expert_protocol.md`, `docs/real_attention_results.md`.
 
@@ -449,7 +449,8 @@ evidence below is mutually consistent and theory-aligned *for the control*:
    label-free captures ~87% of the oracle's advantage on the planted control, and
    survives the frozen-gate intervention. **This does not transfer to real
    graphs**: under the fixed-expert Protocol B, no label-free or learned router
-   beats one global model (0/234), and the oracle is negative.
+   beats one global model (2/234, both reduced-power YelpChi GNN cells), and the
+   oracle is negative.
 
 **On real graphs (Protocol B), the honest verdict is a null plus one positive:**
 

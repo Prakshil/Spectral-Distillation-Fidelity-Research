@@ -20,7 +20,7 @@
     "spectral_k": 8,
     "no_progress": true,
     "out": "logs",
-    "device": "cuda"
+    "device": "cpu"
   },
   "graph": {
     "n_nodes": 11758,

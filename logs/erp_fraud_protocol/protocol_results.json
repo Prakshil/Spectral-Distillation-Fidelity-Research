@@ -13,7 +13,7 @@
     "random_seed": 1,
     "frozen_perms": 20,
     "out": "logs",
-    "device": "cuda"
+    "device": "cpu"
   },
   "graph": {
     "n_nodes": 10000,

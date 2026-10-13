@@ -157,7 +157,10 @@ def _run_point(graph: dict, W: np.ndarray, method: str, retention: float, args, 
     )
     comparisons = {name: _comparison_dict(c) for name, c in combine_comparisons(results).items()}
 
-    sd = 0.0
+    # ``sd`` stays None when SD is not measured (full retention or --skip-sd).
+    # The old 0.0 sentinel was an in-band value indistinguishable from a real
+    # measurement of zero distortion and silently corrupted downstream tables.
+    sd: float | None = None
     sd_profile = {}
     if retention < 1.0 and not args.skip_sd:
         L_pt = compute_laplacian(W_pt)
@@ -198,7 +201,7 @@ def _run_point(graph: dict, W: np.ndarray, method: str, retention: float, args, 
         "n_edges_kept": n_kept,
         "n_edges_orig": n_orig,
         "fraction_kept": n_kept / n_orig,
-        "sd_laplacian": float(sd),
+        "sd_laplacian": (float(sd) if sd is not None else None),
         "sd_profile": sd_profile,
         "edge_label_homophily": _homophily_mean(W_pt, graph["y"]),
         "assignments_usage": {
@@ -278,7 +281,7 @@ def main() -> None:
                              "and only compute the missing ones")
     parser.add_argument("--no-progress", action="store_true")
     parser.add_argument("--out", default="logs")
-    parser.add_argument("--device", default="cuda")
+    parser.add_argument("--device", default="cpu")
     args = parser.parse_args()
 
     config = load_yaml_config(args.config)
@@ -389,11 +392,15 @@ def main() -> None:
             lf_err = record["sd_profile"].get("low_frequency", {}).get(
                 "low_freq_mean_error", float("nan"))
             surv = record["sd_profile"].get("routing_survival", float("nan"))
+            sd_field = (
+                "  SD=   n/a" if record["sd_laplacian"] is None
+                else f"  SD={record['sd_laplacian']:.4f}"
+            )
             print(
                 f"{m:<7} r={b:<5.2f} kept={record['n_edges_kept']:<9d} "
                 f"D2={record['comparisons'].get('label_free_vs_random', {}).get('mean_diff', float('nan')):>+.4f}"
                 f"  D1={record['comparisons'].get('oracle_vs_uniform', {}).get('mean_diff', float('nan')):>+.4f}"
-                f"  SD={record['sd_laplacian']:.4f}"
+                f"{sd_field}"
                 f"  lowfreq={lf_err:.5f}"
                 f"  survival={surv:.4f}"
             )

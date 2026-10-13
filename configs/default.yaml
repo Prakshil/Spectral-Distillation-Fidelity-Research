@@ -1,6 +1,12 @@
 # Spectral Distillation Default Configuration
 seed: 42
-device: "cuda"                     # RTX 4060 Ti locally; T4/A100 on Kaggle/Colab
+# Reference device for the committed artifacts. CPU is the reproducible
+# default: the learned-router numbers are device-dependent in float32, so the
+# canonical logs are CPU-generated and `make` reproduces them exactly. Pass
+# `--device cuda` (or set this to "cuda") for a faster GPU run; GPU numbers are
+# valid but differ from the committed ones in the last digits and are not
+# bit-reproducible across devices.
+device: "cpu"
 
 # Graph construction
 attention_aggregation: "mean"      # mean | max | weighted_by_head_norm

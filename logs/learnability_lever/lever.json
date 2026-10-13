@@ -1,6 +1,6 @@
 {
   "config": {
-    "separabilities": "0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1",
+    "separabilities": "0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0",
     "n": 3000,
     "n_features": 8,
     "edge_p": 0.02,
@@ -51,122 +51,174 @@
     },
     {
       "arms": {
-        "single_global": 0.9833333333333332,
-        "oracle": 0.9797333333333335,
-        "feature_kmeans": 0.9797333333333335,
-        "learned_router": 0.9750666666666667,
-        "ensemble_uniform": 0.9856
+        "single_global": 0.9774666666666667,
+        "oracle": 0.976,
+        "feature_kmeans": 0.976,
+        "learned_router": 0.9726666666666667,
+        "ensemble_uniform": 0.976
       },
-      "gain_oracle": -0.0035999999999997145,
-      "gain_kmeans": -0.0035999999999997145,
-      "gain_learned": -0.008266666666666422,
-      "conditioned_accuracy": 0.9812,
-      "conditioned_gain": -0.0021333333333333204,
-      "conditioned_validation_gain": -0.014285714285714301,
-      "conditioned_route_rate": 0.2,
+      "gain_oracle": -0.0014666666666667272,
+      "gain_kmeans": -0.0014666666666667272,
+      "gain_learned": -0.0048000000000000265,
+      "conditioned_accuracy": 0.974,
+      "conditioned_gain": -0.003466666666666662,
+      "conditioned_validation_gain": -0.0028571428571428693,
+      "conditioned_route_rate": 0.4,
       "conditioned_decisions": [
+        "route",
         "abstain",
+        "route",
         "abstain",
-        "abstain",
-        "abstain",
-        "route"
+        "abstain"
       ],
       "n_nodes": 3000,
-      "class_balance": 0.49966666666666665,
+      "class_balance": 0.5016666666666667,
       "separability": 0.1
     },
     {
       "arms": {
-        "single_global": 0.9657333333333333,
-        "oracle": 0.9747999999999999,
-        "feature_kmeans": 0.9747999999999999,
-        "learned_router": 0.9602666666666666,
-        "ensemble_uniform": 0.966
+        "single_global": 0.9517333333333333,
+        "oracle": 0.9834666666666667,
+        "feature_kmeans": 0.9834666666666667,
+        "learned_router": 0.9548,
+        "ensemble_uniform": 0.9538666666666668
       },
-      "gain_oracle": 0.009066666666666556,
-      "gain_kmeans": 0.009066666666666556,
-      "gain_learned": -0.005466666666666731,
-      "conditioned_accuracy": 0.9649333333333334,
-      "conditioned_gain": -0.0008000000000000007,
-      "conditioned_validation_gain": -0.009523809523809513,
-      "conditioned_route_rate": 0.2,
+      "gain_oracle": 0.03173333333333339,
+      "gain_kmeans": 0.03173333333333339,
+      "gain_learned": 0.003066666666666662,
+      "conditioned_accuracy": 0.9481333333333334,
+      "conditioned_gain": -0.003599999999999981,
+      "conditioned_validation_gain": 0.011428571428571432,
+      "conditioned_route_rate": 0.8,
       "conditioned_decisions": [
-        "abstain",
-        "abstain",
-        "abstain",
         "route",
-        "abstain"
+        "route",
+        "route",
+        "abstain",
+        "route"
       ],
       "n_nodes": 3000,
-      "class_balance": 0.498,
+      "class_balance": 0.5046666666666667,
       "separability": 0.2
     },
     {
       "arms": {
-        "single_global": 0.9405333333333333,
-        "oracle": 0.9662666666666666,
-        "feature_kmeans": 0.9662666666666666,
-        "learned_router": 0.9436,
-        "ensemble_uniform": 0.9429333333333332
+        "single_global": 0.9202666666666668,
+        "oracle": 0.9794666666666668,
+        "feature_kmeans": 0.9794666666666668,
+        "learned_router": 0.942,
+        "ensemble_uniform": 0.9249333333333334
       },
-      "gain_oracle": 0.025733333333333275,
-      "gain_kmeans": 0.025733333333333275,
-      "gain_learned": 0.003066666666666662,
-      "conditioned_accuracy": 0.9436,
-      "conditioned_gain": 0.003066666666666662,
-      "conditioned_validation_gain": 0.012380952380952359,
-      "conditioned_route_rate": 0.8,
+      "gain_oracle": 0.05920000000000003,
+      "gain_kmeans": 0.05920000000000003,
+      "gain_learned": 0.02173333333333316,
+      "conditioned_accuracy": 0.9301333333333334,
+      "conditioned_gain": 0.009866666666666668,
+      "conditioned_validation_gain": 0.016190476190476134,
+      "conditioned_route_rate": 1.0,
       "conditioned_decisions": [
         "route",
-        "abstain",
+        "route",
+        "route",
+        "route",
+        "route"
+      ],
+      "n_nodes": 3000,
+      "class_balance": 0.5066666666666667,
+      "separability": 0.3
+    },
+    {
+      "arms": {
+        "single_global": 0.8756,
+        "oracle": 0.9802666666666667,
+        "feature_kmeans": 0.9802666666666667,
+        "learned_router": 0.9346666666666665,
+        "ensemble_uniform": 0.8849333333333332
+      },
+      "gain_oracle": 0.10466666666666669,
+      "gain_kmeans": 0.10466666666666669,
+      "gain_learned": 0.05906666666666649,
+      "conditioned_accuracy": 0.9228,
+      "conditioned_gain": 0.04720000000000002,
+      "conditioned_validation_gain": 0.03238095238095236,
+      "conditioned_route_rate": 1.0,
+      "conditioned_decisions": [
+        "route",
+        "route",
+        "route",
+        "route",
+        "route"
+      ],
+      "n_nodes": 3000,
+      "class_balance": 0.5086666666666667,
+      "separability": 0.4
+    },
+    {
+      "arms": {
+        "single_global": 0.8336,
+        "oracle": 0.982,
+        "feature_kmeans": 0.982,
+        "learned_router": 0.9368000000000001,
+        "ensemble_uniform": 0.8486666666666667
+      },
+      "gain_oracle": 0.14839999999999998,
+      "gain_kmeans": 0.14839999999999998,
+      "gain_learned": 0.10320000000000007,
+      "conditioned_accuracy": 0.9162666666666667,
+      "conditioned_gain": 0.0826666666666667,
+      "conditioned_validation_gain": 0.06571428571428573,
+      "conditioned_route_rate": 1.0,
+      "conditioned_decisions": [
+        "route",
+        "route",
+        "route",
+        "route",
+        "route"
+      ],
+      "n_nodes": 3000,
+      "class_balance": 0.5006666666666667,
+      "separability": 0.5
+    },
+    {
+      "arms": {
+        "single_global": 0.7872,
+        "oracle": 0.9802666666666667,
+        "feature_kmeans": 0.9802666666666667,
+        "learned_router": 0.9298666666666667,
+        "ensemble_uniform": 0.8037333333333333
+      },
+      "gain_oracle": 0.19306666666666672,
+      "gain_kmeans": 0.19306666666666672,
+      "gain_learned": 0.14266666666666672,
+      "conditioned_accuracy": 0.9014666666666665,
+      "conditioned_gain": 0.11426666666666667,
+      "conditioned_validation_gain": 0.12285714285714286,
+      "conditioned_route_rate": 1.0,
+      "conditioned_decisions": [
+        "route",
+        "route",
         "route",
         "route",
         "route"
       ],
       "n_nodes": 3000,
       "class_balance": 0.504,
-      "separability": 0.3
+      "separability": 0.6
     },
     {
       "arms": {
-        "single_global": 0.9061333333333333,
-        "oracle": 0.9553333333333335,
-        "feature_kmeans": 0.9553333333333335,
-        "learned_router": 0.9189333333333334,
-        "ensemble_uniform": 0.9138666666666666
+        "single_global": 0.7473333333333334,
+        "oracle": 0.9827999999999999,
+        "feature_kmeans": 0.9827999999999999,
+        "learned_router": 0.9476000000000001,
+        "ensemble_uniform": 0.778
       },
-      "gain_oracle": 0.04920000000000013,
-      "gain_kmeans": 0.04920000000000013,
-      "gain_learned": 0.012800000000000034,
-      "conditioned_accuracy": 0.9093333333333333,
-      "conditioned_gain": 0.0032000000000000028,
-      "conditioned_validation_gain": -0.0047619047619047675,
-      "conditioned_route_rate": 0.2,
-      "conditioned_decisions": [
-        "route",
-        "abstain",
-        "abstain",
-        "abstain",
-        "abstain"
-      ],
-      "n_nodes": 3000,
-      "class_balance": 0.503,
-      "separability": 0.4
-    },
-    {
-      "arms": {
-        "single_global": 0.8720000000000001,
-        "oracle": 0.9432,
-        "feature_kmeans": 0.9432,
-        "learned_router": 0.9002666666666667,
-        "ensemble_uniform": 0.8849333333333333
-      },
-      "gain_oracle": 0.07119999999999993,
-      "gain_kmeans": 0.07119999999999993,
-      "gain_learned": 0.02826666666666655,
-      "conditioned_accuracy": 0.884,
-      "conditioned_gain": 0.011999999999999945,
-      "conditioned_validation_gain": 0.019999999999999997,
+      "gain_oracle": 0.2354666666666665,
+      "gain_kmeans": 0.2354666666666665,
+      "gain_learned": 0.2002666666666667,
+      "conditioned_accuracy": 0.9165333333333333,
+      "conditioned_gain": 0.1692,
+      "conditioned_validation_gain": 0.1723809523809524,
       "conditioned_route_rate": 1.0,
       "conditioned_decisions": [
         "route",
@@ -177,74 +229,22 @@
       ],
       "n_nodes": 3000,
       "class_balance": 0.49933333333333335,
-      "separability": 0.5
-    },
-    {
-      "arms": {
-        "single_global": 0.8320000000000001,
-        "oracle": 0.9298666666666666,
-        "feature_kmeans": 0.9298666666666666,
-        "learned_router": 0.8841333333333333,
-        "ensemble_uniform": 0.8497333333333333
-      },
-      "gain_oracle": 0.09786666666666655,
-      "gain_kmeans": 0.09786666666666655,
-      "gain_learned": 0.052133333333333254,
-      "conditioned_accuracy": 0.8565333333333335,
-      "conditioned_gain": 0.02453333333333334,
-      "conditioned_validation_gain": 0.04380952380952383,
-      "conditioned_route_rate": 0.8,
-      "conditioned_decisions": [
-        "route",
-        "route",
-        "abstain",
-        "route",
-        "route"
-      ],
-      "n_nodes": 3000,
-      "class_balance": 0.49533333333333335,
-      "separability": 0.6
-    },
-    {
-      "arms": {
-        "single_global": 0.7970666666666666,
-        "oracle": 0.9224,
-        "feature_kmeans": 0.9224,
-        "learned_router": 0.8801333333333334,
-        "ensemble_uniform": 0.8208
-      },
-      "gain_oracle": 0.1253333333333334,
-      "gain_kmeans": 0.1253333333333334,
-      "gain_learned": 0.08306666666666684,
-      "conditioned_accuracy": 0.8492000000000001,
-      "conditioned_gain": 0.05213333333333332,
-      "conditioned_validation_gain": 0.04285714285714284,
-      "conditioned_route_rate": 0.8,
-      "conditioned_decisions": [
-        "route",
-        "route",
-        "route",
-        "abstain",
-        "route"
-      ],
-      "n_nodes": 3000,
-      "class_balance": 0.49633333333333335,
       "separability": 0.7
     },
     {
       "arms": {
-        "single_global": 0.7910666666666668,
-        "oracle": 0.9225333333333333,
-        "feature_kmeans": 0.9225333333333333,
-        "learned_router": 0.8837333333333334,
-        "ensemble_uniform": 0.8208
+        "single_global": 0.7166666666666666,
+        "oracle": 0.9776,
+        "feature_kmeans": 0.9776,
+        "learned_router": 0.9432,
+        "ensemble_uniform": 0.7437333333333334
       },
-      "gain_oracle": 0.1314666666666665,
-      "gain_kmeans": 0.1314666666666665,
-      "gain_learned": 0.09266666666666656,
-      "conditioned_accuracy": 0.8493333333333334,
-      "conditioned_gain": 0.05826666666666667,
-      "conditioned_validation_gain": 0.07904761904761903,
+      "gain_oracle": 0.26093333333333346,
+      "gain_kmeans": 0.26093333333333346,
+      "gain_learned": 0.22653333333333348,
+      "conditioned_accuracy": 0.9082666666666667,
+      "conditioned_gain": 0.19160000000000002,
+      "conditioned_validation_gain": 0.19904761904761908,
       "conditioned_route_rate": 1.0,
       "conditioned_decisions": [
         "route",
@@ -254,23 +254,23 @@
         "route"
       ],
       "n_nodes": 3000,
-      "class_balance": 0.49466666666666664,
+      "class_balance": 0.49866666666666665,
       "separability": 0.8
     },
     {
       "arms": {
-        "single_global": 0.7924,
-        "oracle": 0.9185333333333332,
-        "feature_kmeans": 0.9185333333333332,
-        "learned_router": 0.884,
-        "ensemble_uniform": 0.8165333333333333
+        "single_global": 0.6936,
+        "oracle": 0.9777333333333333,
+        "feature_kmeans": 0.9777333333333333,
+        "learned_router": 0.9470666666666666,
+        "ensemble_uniform": 0.7250666666666667
       },
-      "gain_oracle": 0.1261333333333332,
-      "gain_kmeans": 0.1261333333333332,
-      "gain_learned": 0.09160000000000001,
-      "conditioned_accuracy": 0.8434666666666667,
-      "conditioned_gain": 0.051066666666666684,
-      "conditioned_validation_gain": 0.06476190476190473,
+      "gain_oracle": 0.28413333333333335,
+      "gain_kmeans": 0.28413333333333335,
+      "gain_learned": 0.2534666666666666,
+      "conditioned_accuracy": 0.9130666666666667,
+      "conditioned_gain": 0.21946666666666664,
+      "conditioned_validation_gain": 0.2133333333333333,
       "conditioned_route_rate": 1.0,
       "conditioned_decisions": [
         "route",
@@ -280,23 +280,23 @@
         "route"
       ],
       "n_nodes": 3000,
-      "class_balance": 0.49433333333333335,
+      "class_balance": 0.498,
       "separability": 0.9
     },
     {
       "arms": {
-        "single_global": 0.7792,
-        "oracle": 0.9736,
-        "feature_kmeans": 0.9736,
-        "learned_router": 0.9376,
-        "ensemble_uniform": 0.8024000000000001
+        "single_global": 0.6753333333333333,
+        "oracle": 0.9821333333333333,
+        "feature_kmeans": 0.9821333333333333,
+        "learned_router": 0.9481333333333334,
+        "ensemble_uniform": 0.7185333333333334
       },
-      "gain_oracle": 0.19440000000000002,
-      "gain_kmeans": 0.19440000000000002,
-      "gain_learned": 0.15839999999999999,
-      "conditioned_accuracy": 0.9086666666666666,
-      "conditioned_gain": 0.12946666666666667,
-      "conditioned_validation_gain": 0.13047619047619047,
+      "gain_oracle": 0.30679999999999996,
+      "gain_kmeans": 0.30679999999999996,
+      "gain_learned": 0.27280000000000004,
+      "conditioned_accuracy": 0.9116,
+      "conditioned_gain": 0.23626666666666668,
+      "conditioned_validation_gain": 0.2638095238095238,
       "conditioned_route_rate": 1.0,
       "conditioned_decisions": [
         "route",
@@ -306,7 +306,7 @@
         "route"
       ],
       "n_nodes": 3000,
-      "class_balance": 0.22666666666666666,
+      "class_balance": 0.49733333333333335,
       "separability": 1.0
     }
   ],
@@ -317,18 +317,18 @@
   "homophily_sweep": [
     {
       "arms": {
-        "single_global": 0.7792,
-        "oracle": 0.9736,
-        "feature_kmeans": 0.9736,
-        "learned_router": 0.9376,
-        "ensemble_uniform": 0.8024000000000001
+        "single_global": 0.6753333333333333,
+        "oracle": 0.9821333333333333,
+        "feature_kmeans": 0.9821333333333333,
+        "learned_router": 0.9481333333333334,
+        "ensemble_uniform": 0.7185333333333334
       },
-      "gain_oracle": 0.19440000000000002,
-      "gain_kmeans": 0.19440000000000002,
-      "gain_learned": 0.15839999999999999,
-      "conditioned_accuracy": 0.9086666666666666,
-      "conditioned_gain": 0.12946666666666667,
-      "conditioned_validation_gain": 0.13047619047619047,
+      "gain_oracle": 0.30679999999999996,
+      "gain_kmeans": 0.30679999999999996,
+      "gain_learned": 0.27280000000000004,
+      "conditioned_accuracy": 0.9116,
+      "conditioned_gain": 0.23626666666666668,
+      "conditioned_validation_gain": 0.2638095238095238,
       "conditioned_route_rate": 1.0,
       "conditioned_decisions": [
         "route",
@@ -338,24 +338,24 @@
         "route"
       ],
       "n_nodes": 3000,
-      "class_balance": 0.22666666666666666,
+      "class_balance": 0.49733333333333335,
       "cross_edge_p": 0.0,
       "separability": 1.0
     },
     {
       "arms": {
-        "single_global": 0.7792,
-        "oracle": 0.9736,
-        "feature_kmeans": 0.9736,
-        "learned_router": 0.9458666666666666,
-        "ensemble_uniform": 0.8024000000000001
+        "single_global": 0.6753333333333333,
+        "oracle": 0.9821333333333333,
+        "feature_kmeans": 0.9821333333333333,
+        "learned_router": 0.9562666666666667,
+        "ensemble_uniform": 0.7185333333333334
       },
-      "gain_oracle": 0.19440000000000002,
-      "gain_kmeans": 0.19440000000000002,
-      "gain_learned": 0.16666666666666663,
-      "conditioned_accuracy": 0.9276,
-      "conditioned_gain": 0.1484,
-      "conditioned_validation_gain": 0.14952380952380948,
+      "gain_oracle": 0.30679999999999996,
+      "gain_kmeans": 0.30679999999999996,
+      "gain_learned": 0.28093333333333337,
+      "conditioned_accuracy": 0.9263999999999999,
+      "conditioned_gain": 0.25106666666666666,
+      "conditioned_validation_gain": 0.2752380952380952,
       "conditioned_route_rate": 1.0,
       "conditioned_decisions": [
         "route",
@@ -365,24 +365,24 @@
         "route"
       ],
       "n_nodes": 3000,
-      "class_balance": 0.22666666666666666,
+      "class_balance": 0.49733333333333335,
       "cross_edge_p": 0.002,
       "separability": 1.0
     },
     {
       "arms": {
-        "single_global": 0.7792,
-        "oracle": 0.9736,
-        "feature_kmeans": 0.9736,
-        "learned_router": 0.9468,
-        "ensemble_uniform": 0.8024000000000001
+        "single_global": 0.6753333333333333,
+        "oracle": 0.9821333333333333,
+        "feature_kmeans": 0.9821333333333333,
+        "learned_router": 0.9641333333333334,
+        "ensemble_uniform": 0.7185333333333334
       },
-      "gain_oracle": 0.19440000000000002,
-      "gain_kmeans": 0.19440000000000002,
-      "gain_learned": 0.16759999999999997,
-      "conditioned_accuracy": 0.9359999999999999,
-      "conditioned_gain": 0.1568,
-      "conditioned_validation_gain": 0.14571428571428566,
+      "gain_oracle": 0.30679999999999996,
+      "gain_kmeans": 0.30679999999999996,
+      "gain_learned": 0.28880000000000006,
+      "conditioned_accuracy": 0.9398666666666667,
+      "conditioned_gain": 0.26453333333333334,
+      "conditioned_validation_gain": 0.27904761904761904,
       "conditioned_route_rate": 1.0,
       "conditioned_decisions": [
         "route",
@@ -392,24 +392,24 @@
         "route"
       ],
       "n_nodes": 3000,
-      "class_balance": 0.22666666666666666,
+      "class_balance": 0.49733333333333335,
       "cross_edge_p": 0.005,
       "separability": 1.0
     },
     {
       "arms": {
-        "single_global": 0.7792,
-        "oracle": 0.9736,
-        "feature_kmeans": 0.9736,
-        "learned_router": 0.9529333333333334,
-        "ensemble_uniform": 0.8024000000000001
+        "single_global": 0.6753333333333333,
+        "oracle": 0.9821333333333333,
+        "feature_kmeans": 0.9821333333333333,
+        "learned_router": 0.9612,
+        "ensemble_uniform": 0.7185333333333334
       },
-      "gain_oracle": 0.19440000000000002,
-      "gain_kmeans": 0.19440000000000002,
-      "gain_learned": 0.1737333333333334,
-      "conditioned_accuracy": 0.9374666666666667,
-      "conditioned_gain": 0.1582666666666666,
-      "conditioned_validation_gain": 0.1514285714285714,
+      "gain_oracle": 0.30679999999999996,
+      "gain_kmeans": 0.30679999999999996,
+      "gain_learned": 0.2858666666666667,
+      "conditioned_accuracy": 0.942,
+      "conditioned_gain": 0.2666666666666666,
+      "conditioned_validation_gain": 0.29523809523809524,
       "conditioned_route_rate": 1.0,
       "conditioned_decisions": [
         "route",
@@ -419,24 +419,24 @@
         "route"
       ],
       "n_nodes": 3000,
-      "class_balance": 0.22666666666666666,
+      "class_balance": 0.49733333333333335,
       "cross_edge_p": 0.01,
       "separability": 1.0
     },
     {
       "arms": {
-        "single_global": 0.7792,
-        "oracle": 0.9736,
-        "feature_kmeans": 0.9736,
-        "learned_router": 0.9507999999999999,
-        "ensemble_uniform": 0.8024000000000001
+        "single_global": 0.6753333333333333,
+        "oracle": 0.9821333333333333,
+        "feature_kmeans": 0.9821333333333333,
+        "learned_router": 0.9626666666666667,
+        "ensemble_uniform": 0.7185333333333334
       },
-      "gain_oracle": 0.19440000000000002,
-      "gain_kmeans": 0.19440000000000002,
-      "gain_learned": 0.17159999999999986,
-      "conditioned_accuracy": 0.9397333333333332,
-      "conditioned_gain": 0.16053333333333336,
-      "conditioned_validation_gain": 0.15238095238095234,
+      "gain_oracle": 0.30679999999999996,
+      "gain_kmeans": 0.30679999999999996,
+      "gain_learned": 0.28733333333333333,
+      "conditioned_accuracy": 0.9412,
+      "conditioned_gain": 0.26586666666666664,
+      "conditioned_validation_gain": 0.2857142857142857,
       "conditioned_route_rate": 1.0,
       "conditioned_decisions": [
         "route",
@@ -446,7 +446,7 @@
         "route"
       ],
       "n_nodes": 3000,
-      "class_balance": 0.22666666666666666,
+      "class_balance": 0.49733333333333335,
       "cross_edge_p": 0.02,
       "separability": 1.0
     }

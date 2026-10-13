@@ -224,6 +224,7 @@ def load_yelpchi(
         note = (f"largest connected component of a uniform {take}-node sample "
                 f"(seed {seed})")
     else:
+        keep = lcc
         note = "full largest connected component"
 
     W = build_adjacency(full[keep][:, keep].toarray())

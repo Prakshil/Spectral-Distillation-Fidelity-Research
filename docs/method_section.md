@@ -228,7 +228,7 @@ experiments/run_fixed_expert_protocol.py, run_sd_vs_routing.py,
   (Spearman +0.78…+0.99, `docs/real_attention_results.md` §9.1). The accuracy
   claim is a **null**.
 - Under the fixed-expert protocol, **no label-free or learned router beats one
-  global model** on the fraud graphs (0/234) or on the heterophily suite, and the
+  global model** on the fraud graphs (2/234, both reduced-power cells) or on the heterophily suite, and the
   oracle is *negative* (9/9 fraud). RouterGNN (message-passing router,
   `published_routers.py`) and Ada-Routing/AD-GNN (per-node propagation depth via a
   signal-preservation factor) are reproduced; their mean deltas are negative on

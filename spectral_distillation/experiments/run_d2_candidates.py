@@ -162,7 +162,7 @@ def main() -> None:
                    help="evaluate only the top-N most informative candidates")
     p.add_argument("--no-progress", action="store_true")
     p.add_argument("--out", default="logs")
-    p.add_argument("--device", default="cuda")
+    p.add_argument("--device", default="cpu")
     args = p.parse_args()
 
     log = get_logger("d2_candidates")

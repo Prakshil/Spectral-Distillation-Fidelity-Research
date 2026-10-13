@@ -86,6 +86,12 @@ def _summarize(results, args, graph, assignments) -> dict:
         }
         for name, c in comparisons.items()
     }
+    # This runner *is* the positive control on the PC-1c-R planted graph, so the
+    # comparisons double as their own control (control_comparisons=pairs). On a
+    # planted graph where routing is provably useful that is intended: D4
+    # (the positive-control rule) intentionally shares D1's numbers here.
+    # On real-data runs (run_fixed_expert_protocol) the control is the separate
+    # frozen-router arm, so do not copy this pattern there.
     decisions = evaluate_decision_rules(
         comparisons=pairs,
         control_comparisons=pairs,
@@ -142,7 +148,7 @@ def main() -> None:
     parser.add_argument("--random-seed", type=int, default=1)
     parser.add_argument("--frozen-perms", type=int, default=20)
     parser.add_argument("--out", default="logs")
-    parser.add_argument("--device", default="cuda")
+    parser.add_argument("--device", default="cpu")
     args = parser.parse_args()
 
     config = load_yaml_config(args.config)

@@ -1,7 +1,7 @@
 {
   "config": {
     "seed": 42,
-    "device": "cuda",
+    "device": "cpu",
     "attention_aggregation": "mean",
     "symmetrize": true,
     "sparsification": {
@@ -54,9 +54,11 @@
       "dropout": 0.1
     },
     "llm_export": {
-      "model_id": "meta-llama/Llama-3.1-8B",
-      "n_layers": 32,
-      "n_heads": 32
+      "model_id": "HuggingFaceTB/SmolLM2-1.7B",
+      "n_layers": 24,
+      "n_heads": 32,
+      "max_tokens": 480,
+      "top_k": 32
     },
     "synthetic": {
       "n": 256,
@@ -82,6 +84,39 @@
           10,
           15
         ],
+        "epsilons": [
+          0.02,
+          0.05,
+          0.1,
+          0.2,
+          0.4
+        ],
+        "seeds": [
+          0,
+          1,
+          2
+        ],
+        "seed": 0
+      },
+      "scalability_reeff": {
+        "ns": [
+          100,
+          1000,
+          10000
+        ],
+        "ks": [
+          16,
+          32,
+          64,
+          128
+        ],
+        "budget_factor": 4,
+        "epsilon": 0.1,
+        "exact_n_max": 3000,
+        "sd_n_max": 1000,
+        "n_blocks": 5,
+        "p_in": 0.5,
+        "p_out": 0.05,
         "seed": 0
       }
     },
@@ -122,162 +157,162 @@
     ]
   },
   "erp_diagnostic": {
-    "n": 64,
+    "n": 256,
     "seeds": 3,
-    "budget": 486,
+    "budget": 2560,
     "summary": {
       "threshold": {
+        "retention": {
+          "mean": 6.064844552492824e-10,
+          "std": 2.8723513267388896e-11
+        },
+        "fragility": {
+          "mean": 112.80140019055057,
+          "std": 24.15115794433091
+        },
+        "frobenius_norm": {
+          "mean": 184.44419670298026,
+          "std": 9.005351036093591
+        },
         "zero_eigenvalues": {
-          "mean": 1.0,
+          "mean": 105.33333333333333,
+          "std": 0.4714045207910317
+        },
+        "fiedler_full": {
+          "mean": 2.7980993421511187,
+          "std": 1.6695172504085798
+        },
+        "fiedler_sparse": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "n_edges_sparse": {
+          "mean": 2559.0,
           "std": 0.0
         },
         "SD": {
-          "mean": 0.012134137221878885,
-          "std": 0.008400900148131874
-        },
-        "fragility": {
-          "mean": 0.7157558672957125,
-          "std": 0.7198774991212769
-        },
-        "retention": {
-          "mean": 0.9878658627781212,
-          "std": 0.008400900148131907
-        },
-        "fiedler_full": {
-          "mean": 0.7884358503132395,
-          "std": 0.32791756973619374
-        },
-        "n_edges_sparse": {
-          "mean": 474.0,
-          "std": 8.602325267042627
-        },
-        "fiedler_sparse": {
-          "mean": 0.7883197458572127,
-          "std": 0.32775361231240546
-        },
-        "frobenius_norm": {
-          "mean": 0.10238683947698007,
-          "std": 0.000125923511156976
+          "mean": 0.9999999993935156,
+          "std": 2.8723513267388896e-11
         }
       },
       "random": {
+        "retention": {
+          "mean": 0.5194531875615408,
+          "std": 0.20371280153746535
+        },
+        "fragility": {
+          "mean": 51.38751501721015,
+          "std": 15.666590093779682
+        },
+        "frobenius_norm": {
+          "mean": 127.29139776058099,
+          "std": 3.553183454062827
+        },
         "zero_eigenvalues": {
           "mean": 1.0,
           "std": 0.0
         },
-        "SD": {
-          "mean": 0.0,
-          "std": 0.0
-        },
-        "fragility": {
-          "mean": 0.0,
-          "std": 0.0
-        },
-        "retention": {
-          "mean": 1.0,
-          "std": 0.0
-        },
         "fiedler_full": {
-          "mean": 0.7884358503132395,
-          "std": 0.32791756973619374
-        },
-        "n_edges_sparse": {
-          "mean": 475.0,
-          "std": 8.602325267042627
+          "mean": 2.7980993421511187,
+          "std": 1.6695172504085798
         },
         "fiedler_sparse": {
-          "mean": 0.7884358503132395,
-          "std": 0.32791756973619374
+          "mean": 2.901328232998523,
+          "std": 1.532289911940819
         },
-        "frobenius_norm": {
-          "mean": 0.0,
+        "n_edges_sparse": {
+          "mean": 2560.0,
           "std": 0.0
+        },
+        "SD": {
+          "mean": 0.48054681243845915,
+          "std": 0.20371280153746538
         }
       },
       "degree": {
+        "retention": {
+          "mean": 5.549005329304654e-10,
+          "std": 2.6284665243692336e-11
+        },
+        "fragility": {
+          "mean": 112.80140019635675,
+          "std": 24.15115794556077
+        },
+        "frobenius_norm": {
+          "mean": 222.04740237822517,
+          "std": 8.684238643408813
+        },
         "zero_eigenvalues": {
-          "mean": 1.0,
+          "mean": 111.66666666666667,
+          "std": 2.0548046676563256
+        },
+        "fiedler_full": {
+          "mean": 2.7980993421511187,
+          "std": 1.6695172504085798
+        },
+        "fiedler_sparse": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "n_edges_sparse": {
+          "mean": 2560.0,
           "std": 0.0
         },
         "SD": {
-          "mean": 0.0,
-          "std": 0.0
-        },
-        "fragility": {
-          "mean": 0.0,
-          "std": 0.0
-        },
-        "retention": {
-          "mean": 1.0,
-          "std": 0.0
-        },
-        "fiedler_full": {
-          "mean": 0.7884358503132395,
-          "std": 0.32791756973619374
-        },
-        "n_edges_sparse": {
-          "mean": 475.0,
-          "std": 8.602325267042627
-        },
-        "fiedler_sparse": {
-          "mean": 0.7884358503132395,
-          "std": 0.32791756973619374
-        },
-        "frobenius_norm": {
-          "mean": 0.0,
-          "std": 0.0
+          "mean": 0.9999999994450994,
+          "std": 2.6284665243692336e-11
         }
       },
       "spectral": {
+        "retention": {
+          "mean": 0.17177914002147357,
+          "std": 0.04730421932518828
+        },
+        "fragility": {
+          "mean": 93.47168745519315,
+          "std": 20.148191207677936
+        },
+        "frobenius_norm": {
+          "mean": 355.12780018726215,
+          "std": 3.4139379823660754
+        },
         "zero_eigenvalues": {
           "mean": 1.0,
           "std": 0.0
         },
-        "SD": {
-          "mean": 0.0,
-          "std": 0.0
-        },
-        "fragility": {
-          "mean": 0.0,
-          "std": 0.0
-        },
-        "retention": {
-          "mean": 1.0,
-          "std": 0.0
-        },
         "fiedler_full": {
-          "mean": 0.7884358503132395,
-          "std": 0.32791756973619374
-        },
-        "n_edges_sparse": {
-          "mean": 475.0,
-          "std": 8.602325267042627
+          "mean": 2.7980993421511187,
+          "std": 1.6695172504085798
         },
         "fiedler_sparse": {
-          "mean": 0.7884358503132395,
-          "std": 0.32791756973619374
+          "mean": 0.8560173148654173,
+          "std": 0.41029909640000434
         },
-        "frobenius_norm": {
-          "mean": 0.0,
+        "n_edges_sparse": {
+          "mean": 2560.0,
           "std": 0.0
+        },
+        "SD": {
+          "mean": 0.8282208599785265,
+          "std": 0.04730421932518828
         }
       },
       "full": {
-        "fiedler_full": {
-          "mean": 0.7884358503132395,
-          "std": 0.32791756973619374
-        },
-        "min_eigengap": {
-          "mean": 0.02485081338234026,
-          "std": 0.008046413036434254
-        },
-        "n_edges_sparse": {
-          "mean": 475.0,
-          "std": 8.602325267042627
-        },
         "SD": {
           "mean": 0.0,
           "std": 0.0
+        },
+        "fiedler_full": {
+          "mean": 2.7980993421511187,
+          "std": 1.6695172504085798
+        },
+        "n_edges_sparse": {
+          "mean": 7028.333333333333,
+          "std": 210.49993401951988
+        },
+        "min_eigengap": {
+          "mean": 0.009266349016192757,
+          "std": 0.0018925418208042596
         }
       }
     }

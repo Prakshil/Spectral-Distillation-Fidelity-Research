@@ -1,4 +1,6 @@
-[
+{
+  "device": "cpu",
+  "points": [
   {
     "method": "random",
     "retention": 1.0,
@@ -600,3 +602,4 @@
     "low_frequency_error": 0.02038119461535281
   }
 ]
+}

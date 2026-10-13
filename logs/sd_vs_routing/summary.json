@@ -1,4 +1,6 @@
-[
+{
+  "device": "cpu",
+  "summaries": [
   {
     "label": "amazon (n=2000)",
     "n_points": 15,
@@ -105,3 +107,4 @@
     "p_partial_survival_stability_given_lowfreq": 1.0596810001316013e-13
   }
 ]
+}

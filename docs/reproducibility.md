@@ -275,6 +275,12 @@ python -m spectral_distillation.experiments.reproduce_figures
   `--device cuda` on a machine with CUDA) for a faster GPU run; it auto-falls back to
   `cpu` when CUDA is unavailable.
 
+**Provenance.** Every committed log under `logs/` records the device it was produced on —
+either at the JSON root (`"device": "cpu"`) or inside its embedded run `config`
+(`config.device`). The `sd_vs_routing` derived views (`*/points.json`, `summary.json`) also
+carry it at the root, so "CPU reference vs CUDA run" is legible from the artifact alone,
+without reading the code.
+
 #### 4.2 Measured runtime (RTX 4060 Laptop GPU, n=10,000)
 
 Measured on the local dev machine (RTX 4060 Laptop, Python 3.12, torch 2.6.0+cu124),
@@ -309,6 +315,7 @@ Two optimizations made this possible (commit in this session):
 | Theoretical bounds hold | `test_theoretical_bounds.py` asserts Weyl / Davis-Kahan / Cauchy on the 4-node example |
 | Protocol identity | `test_protocol.py` asserts usage-matched random and uniform baselines |
 | A/A negative control | random/self comparisons in the findings matrix |
+| Device provenance | every committed log records `device` (root or `config.device`) |
 
 ---
 

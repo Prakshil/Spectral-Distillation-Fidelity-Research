@@ -131,9 +131,10 @@ def pretty_source(src):
 
 def main():
     paths = sys.argv[1:] or sorted(glob.glob("logs/sd_vs_routing/*/sd_vs_routing.json"))
-    all_rows, summaries = [], []
+    all_rows, summaries, configs = [], [], []
     for p in paths:
         d, rows = load(p)
+        configs.append(d.get("config", {}))
         all_rows.extend(rows)
         summaries.append(report(rows, f"{pretty_source(d['graph']['source'])} "
                                       f"(n={d['graph']['n_nodes']})"))
@@ -150,9 +151,11 @@ def main():
                   f"rho={s['rho_lowfreq_stability_collapsefree']:+.3f} "
                   f"p={s['p_lowfreq_stability_collapsefree']:.3g} "
                   f"-> {'PREDICTS' if works else 'no signal'}")
+    devices = sorted({str(c.get("device", "unknown")) for c in configs})
+    device = devices[0] if len(devices) == 1 else ("+".join(devices) if devices else "unknown")
     out = "logs/sd_vs_routing/summary.json"
     with open(out, "w", encoding="utf-8") as fh:
-        json.dump(summaries, fh, indent=2)
+        json.dump({"device": device, "summaries": summaries}, fh, indent=2)
     print(f"\nwrote {out}")
 
     # Leave-one-graph-out pooled correlations: is the pooled stability result
@@ -175,7 +178,7 @@ def main():
             row["rho_lowfreq_stability"] = float(spearmanr(lf, y).statistic)
             row["rho_survival_stability"] = float(spearmanr(sv, y).statistic)
         loo[str(pretty_source(src))] = row
-    extra = {"per_graph": summaries, "leave_one_graph_out": loo}
+    extra = {"device": device, "per_graph": summaries, "leave_one_graph_out": loo}
     extra_path = "logs/sd_vs_routing/partial_correlations.json"
     with open(extra_path, "w", encoding="utf-8") as fh:
         json.dump(extra, fh, indent=2)

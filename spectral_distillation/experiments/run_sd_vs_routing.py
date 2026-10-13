@@ -383,7 +383,8 @@ def main() -> None:
             pt["low_frequency_error"] = pt["low_frequency"]["low_freq_mean_error"]
             points.append(pt)
             (out_dir / "points.json").write_text(
-                json.dumps(points, indent=2, default=str), encoding="utf-8")
+                json.dumps({"device": str(args.device), "points": points}, indent=2, default=str),
+                encoding="utf-8")
 
     summary = summarise(points)
     result = {

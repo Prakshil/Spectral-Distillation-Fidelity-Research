@@ -1,4 +1,4 @@
-.PHONY: install dev-install test test-fast test-theory diagnostic protocol compare dilution ablation figures full-pipeline clean lint format typecheck
+.PHONY: install dev-install test test-fast test-theory diagnostic protocol compare scalability frozen dilution ablation figures tables full-pipeline clean lint format typecheck
 
 # Setup
 install:
@@ -27,6 +27,12 @@ protocol:
 compare:
 	python -m spectral_distillation.experiments.compare_methods
 
+scalability:
+	python -m spectral_distillation.experiments.scalability_reeff
+
+frozen:
+	python -m spectral_distillation.experiments.frozen_interventions
+
 dilution:
 	python -m spectral_distillation.experiments.dilution_curve
 
@@ -36,7 +42,10 @@ ablation:
 figures:
 	python -m spectral_distillation.experiments.reproduce_figures
 
-full-pipeline: diagnostic protocol compare dilution ablation figures
+tables:
+	python -m spectral_distillation.experiments.reproduce_figures --tables
+
+full-pipeline: diagnostic protocol compare scalability frozen dilution ablation figures
 
 # Utilities
 clean:

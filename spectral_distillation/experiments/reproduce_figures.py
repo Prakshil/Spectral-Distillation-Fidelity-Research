@@ -184,10 +184,200 @@ def plot_ablation(out_dir: Path, log: logging.Logger) -> Path:
     return fig_path
 
 
+def _tex_escape(value: str) -> str:
+    return (
+        str(value)
+        .replace("\\", r"\textbackslash{}")
+        .replace("_", r"\_")
+        .replace("%", r"\%")
+        .replace("&", r"\&")
+        .replace("#", r"\#")
+    )
+
+
+def _write_table(rows: list[dict], columns: list[str], csv_path: Path, tex_path: Path, caption: str, log: logging.Logger) -> None:
+    import csv
+
+    ensure_dir(csv_path.parent)
+    with csv_path.open("w", newline="", encoding="utf-8") as fh:
+        writer = csv.DictWriter(fh, fieldnames=columns, extrasaction="ignore")
+        writer.writeheader()
+        writer.writerows(rows)
+
+    lines = [
+        r"\begin{table}[t]",
+        r"\centering",
+        r"\begin{tabular}{" + "l" + "r" * (len(columns) - 1) + "}",
+        r"\hline",
+        " & ".join(_tex_escape(c) for c in columns) + r" \\",
+        r"\hline",
+    ]
+    for row in rows:
+        lines.append(" & ".join(_tex_escape(row.get(c, "")) for c in columns) + r" \\")
+    lines += [r"\hline", r"\end{tabular}", r"\caption{" + _tex_escape(caption) + "}", r"\end{table}"]
+    tex_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    log.info("wrote %s and %s (%d rows)", csv_path, tex_path, len(rows))
+
+
+def export_table1(out_dir: Path, log: logging.Logger) -> None:
+    path = out_dir / "protocol" / "protocol_results.json"
+    if not path.exists():
+        log.warning("no %s; skipping Table 1", path)
+        return
+    with path.open(encoding="utf-8") as fh:
+        results = json.load(fh)
+
+    labels = {
+        "oracle_vs_uniform": "D1 oracle > uniform",
+        "label_free_vs_random": "D2 label-free > random",
+        "oracle_vs_random": "D3 oracle > random",
+    }
+    rows = []
+    for key, comp in results.get("comparisons", {}).items():
+        rows.append(
+            {
+                "rule": labels.get(key, key),
+                "mean_diff": f"{comp['mean_diff']:.4f}",
+                "ci_low": f"{comp['ci_low']:.4f}",
+                "ci_high": f"{comp['ci_high']:.4f}",
+                "p_wilcoxon": f"{comp['p_wilcoxon']:.6g}",
+                "effect_size_dz": f"{comp.get('effect_size_dz', float('nan')):.2f}",
+                "significant": str(comp.get("significant", "")),
+            }
+        )
+    _write_table(
+        rows,
+        ["rule", "mean_diff", "ci_low", "ci_high", "p_wilcoxon", "effect_size_dz", "significant"],
+        out_dir / "protocol" / "table1_findings.csv",
+        out_dir / "protocol" / "table1_findings.tex",
+        "D1-D4 findings matrix (Protocol B).",
+        log,
+    )
+
+    frozen = results.get("frozen", {})
+    if frozen:
+        frows = [
+            {"gate": k, "mixture_accuracy": f"{v:.4f}"}
+            for k, v in frozen.items()
+            if not k.endswith("_std")
+        ]
+        frows.append({"gate": "node_shuffled_std", "mixture_accuracy": f"{frozen.get('node_shuffled_std', float('nan')):.4f}"})
+        _write_table(
+            frows,
+            ["gate", "mixture_accuracy"],
+            out_dir / "protocol" / "table1_frozen.csv",
+            out_dir / "protocol" / "table1_frozen.tex",
+            "Frozen-gate interventions.",
+            log,
+        )
+
+
+def export_table2(out_dir: Path, log: logging.Logger) -> None:
+    path = out_dir / "compare_methods" / "results.json"
+    if not path.exists():
+        log.warning("no %s; skipping Table 2", path)
+        return
+    with path.open(encoding="utf-8") as fh:
+        data = json.load(fh)
+
+    methods = ["threshold", "random", "degree", "spectral"]
+    groups: dict[tuple, list[dict]] = {}
+    for row in data.get("rows", []):
+        groups.setdefault((row["n"], row["budget_factor"], row["epsilon"]), []).append(row)
+
+    def _mean(rows: list[dict], key: str) -> float:
+        vals = [r[key] for r in rows if r.get(key) is not None]
+        return float(np.mean(vals)) if vals else float("nan")
+
+    long_rows = []
+    for (n, bf, eps), rows in sorted(groups.items()):
+        for method in methods:
+            long_rows.append(
+                {
+                    "n": n,
+                    "budget_factor": bf,
+                    "epsilon": eps,
+                    "method": method,
+                    "lowfreq": f"{_mean(rows, method + '_lowfreq'):.4f}",
+                    "SD": f"{_mean(rows, method + '_SD'):.4f}",
+                    "retention": f"{_mean(rows, method + '_retention'):.4f}",
+                    "seconds": f"{_mean(rows, method + '_seconds'):.4f}",
+                    "n_edges": f"{_mean(rows, method + '_edges'):.0f}",
+                }
+            )
+    _write_table(
+        long_rows,
+        ["n", "budget_factor", "epsilon", "method", "lowfreq", "SD", "retention", "seconds", "n_edges"],
+        out_dir / "compare_methods" / "table2_methods.csv",
+        out_dir / "compare_methods" / "table2_methods.tex",
+        "Table 2 (long form): per-method low-frequency distortion, SD, retention, runtime (mass-matched).",
+        log,
+    )
+
+    wide_rows = []
+    for (n, bf, eps), rows in sorted(groups.items()):
+        entry = {"n": n, "budget_factor": bf, "epsilon": eps}
+        for method in methods:
+            entry[method] = f"{_mean(rows, method + '_lowfreq'):.4f}"
+        wide_rows.append(entry)
+    _write_table(
+        wide_rows,
+        ["n", "budget_factor", "epsilon"] + methods,
+        out_dir / "compare_methods" / "table2_lowfreq.csv",
+        out_dir / "compare_methods" / "table2_lowfreq.tex",
+        "Table 2: mean low-frequency distortion by method (mass-matched).",
+        log,
+    )
+
+
+def export_table3(out_dir: Path, log: logging.Logger) -> None:
+    path = out_dir / "scalability_reeff" / "table3.json"
+    if not path.exists():
+        log.warning("no %s; skipping Table 3", path)
+        return
+    with path.open(encoding="utf-8") as fh:
+        data = json.load(fh)
+
+    def _fmt(v, spec: str, na: str = "--") -> str:
+        return na if v is None else format(v, spec)
+
+    rows = []
+    for r in data.get("rows", []):
+        rows.append(
+            {
+                "n": r["n"],
+                "k": r["k"],
+                "seconds_exact": _fmt(r.get("seconds_exact"), ".3f"),
+                "seconds_topk": _fmt(r.get("seconds_topk"), ".3f"),
+                "edge_rel_frobenius": _fmt(r.get("edge_rel_frobenius"), ".3f"),
+                "edge_spearman_vs_exact": _fmt(r.get("edge_spearman_vs_exact"), ".3f"),
+                "edge_spearman_vs_kmax": _fmt(r.get("edge_spearman_vs_kmax"), ".3f"),
+                "rel_to_kmax": _fmt(r.get("rel_to_kmax"), ".2e"),
+                "low_freq_rel_vs_exact": _fmt(r.get("low_freq_rel_vs_exact"), ".4f"),
+            }
+        )
+    _write_table(
+        rows,
+        ["n", "k", "seconds_exact", "seconds_topk", "edge_rel_frobenius", "edge_spearman_vs_exact", "edge_spearman_vs_kmax", "rel_to_kmax", "low_freq_rel_vs_exact"],
+        out_dir / "scalability_reeff" / "table3_export.csv",
+        out_dir / "scalability_reeff" / "table3.tex",
+        "Table 3: exact vs top-k effective resistance scalability (SBM, mass-matched).",
+        log,
+    )
+
+
+def export_tables(out_dir: Path, log: logging.Logger) -> None:
+    export_table1(out_dir, log)
+    export_table2(out_dir, log)
+    export_table3(out_dir, log)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--log-level", default="INFO", choices=["DEBUG", "INFO", "WARNING"])
     parser.add_argument("--out", default="logs", help="output directory containing the experiment logs")
+    parser.add_argument("--tables", dest="tables", action="store_true", default=True, help="export Tables 1-3 as CSV + LaTeX")
+    parser.add_argument("--no-tables", dest="tables", action="store_false", help="skip Table 1-3 export")
     args = parser.parse_args()
 
     log = get_logger("reproduce_figures", args.log_level)
@@ -215,6 +405,9 @@ def main() -> int:
         plot_dilution(data, Path(args.out), log)
     if paths["ablation"].exists():
         plot_ablation(Path(args.out), log)
+
+    if args.tables:
+        export_tables(Path(args.out), log)
 
     log.info("done")
     return 0

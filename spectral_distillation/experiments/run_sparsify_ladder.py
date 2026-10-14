@@ -225,8 +225,8 @@ def _positive_control(args, log) -> dict:
             {"oracle": oracle, "uniform": uniform, "random": random, "label_free": uniform},
             cond, split, seed,
         ),
-        n_splits=min(args.splits, 6),
-        n_seeds=min(args.seeds, 2),
+        n_splits=args.splits,
+        n_seeds=args.seeds,
         progress=not args.no_progress,
         progress_desc="D4 control cells",
     )

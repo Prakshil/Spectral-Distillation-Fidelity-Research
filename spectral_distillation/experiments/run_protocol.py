@@ -23,7 +23,10 @@ from spectral_distillation.src.evaluation import (
     run_protocol,
 )
 from spectral_distillation.src.mixture import fit_experts, mixture_accuracy, train_test_split
-from spectral_distillation.src.planted_control import generate_pc_graph
+from spectral_distillation.src.planted_control import (
+    generate_pc_graph,
+    single_m_expert_accuracy,
+)
 from spectral_distillation.src.router_protocol import (
     evaluate_decision_rules,
     label_free_assignment,
@@ -72,9 +75,9 @@ def cell_accuracy(graph: dict, assignments: dict, condition: str, split: int, se
     return float(acc)
 
 
-def _summarize(results, args, graph, assignments) -> dict:
-    comparisons = combine_comparisons(results)
-    pairs = {
+def _pairs_dict(results) -> dict:
+    """Plain-dict comparison table from a :class:`ProtocolResults`."""
+    return {
         name: {
             "mean_diff": c.mean_diff,
             "ci_low": c.ci_low,
@@ -84,17 +87,41 @@ def _summarize(results, args, graph, assignments) -> dict:
             "effect_size_dz": c.effect_size_dz,
             "significant": c.significant,
         }
-        for name, c in comparisons.items()
+        for name, c in combine_comparisons(results).items()
     }
-    # This runner *is* the positive control on the PC-1c-R planted graph, so the
-    # comparisons double as their own control (control_comparisons=pairs). On a
-    # planted graph where routing is provably useful that is intended: D4
-    # (the positive-control rule) intentionally shares D1's numbers here.
-    # On real-data runs (run_fixed_expert_protocol) the control is the separate
-    # frozen-router arm, so do not copy this pattern there.
+
+
+def assert_no_saturation(graph: dict, log, lo: float = 0.3, hi: float = 0.98) -> float | None:
+    """Assert the planted graph is informative: a single-M expert is not perfect.
+
+    The control is only a valid instrument if routing *can* matter, i.e. no arm
+    saturates. If a feature-only expert already scores near the ceiling, the
+    routing signal is unmeasurable and every D-rule is vacuous. Raises if the
+    invariant is violated on a planted graph that carries regimes.
+    """
+    if "regimes" not in graph:
+        return None
+    acc = single_m_expert_accuracy(graph, seed=0)
+    if not (lo < acc < hi):
+        raise AssertionError(
+            f"no-saturation invariant violated: single-M expert accuracy {acc:.3f} "
+            f"not in ({lo}, {hi}); the control cannot support a routing claim."
+        )
+    log.info("no-saturation invariant holds: single-M expert acc=%.3f in (%.2f, %.2f)",
+             acc, lo, hi)
+    return acc
+
+
+def _summarize(results, args, graph, assignments, control_comparisons=None) -> dict:
+    pairs = _pairs_dict(results)
+    # D4 must be an *independent* mechanism-matched positive control: oracle vs
+    # uniform on a fresh PC-1c-R realisation, not the main run's own D1 numbers.
+    # Passing ``pairs`` as its own control (the old behaviour) makes D4 == D1 by
+    # construction, so the "instrument works" rule can never fail independently
+    # and carries no information.
     decisions = evaluate_decision_rules(
         comparisons=pairs,
-        control_comparisons=pairs,
+        control_comparisons=control_comparisons,
     )
     frozen = frozen_intervention(
         learned=assignments["label_free"],
@@ -117,6 +144,7 @@ def _summarize(results, args, graph, assignments) -> dict:
         },
         "findings": decisions.__dict__,
         "comparisons": pairs,
+        "control_comparisons": control_comparisons,
         "frozen": {k: v for k, v in frozen.items() if not isinstance(v, list)},
     }
 
@@ -133,6 +161,24 @@ def _expert_accuracy_from_assignment(graph: dict, assignment: np.ndarray) -> flo
     return float(acc)
 
 
+def build_graph(args, seed: int, pc: dict) -> dict:
+    """Generate the protocol graph (PC-1c-R or ERP-fraud) at ``seed``."""
+    if args.graph == "erp_fraud":
+        from spectral_distillation.src.synthetic import generate_erp_fraud_graph
+
+        return generate_erp_fraud_graph(
+            n_nodes=args.n,
+            n_patches=args.n_patches,
+            seed=seed,
+        )
+    return generate_pc_graph(
+        n_nodes=args.n,
+        n_patches=args.n_patches,
+        regime_ratio=tuple(pc.get("regime_ratio", [0.4, 0.4, 0.2])),
+        seed=seed,
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", default="configs/default.yaml")
@@ -146,6 +192,15 @@ def main() -> None:
     parser.add_argument("--n-layers", type=int, default=None)
     parser.add_argument("--router-seed", type=int, default=0)
     parser.add_argument("--random-seed", type=int, default=1)
+    parser.add_argument("--control-seed", type=int, default=None,
+                        help="seed of the independent PC-1c-R positive control "
+                             "(default: router-seed + 1000)")
+    parser.add_argument("--control-splits", type=int, default=None,
+                        help="splits for the independent D4 control arm "
+                             "(default: same as --splits)")
+    parser.add_argument("--control-seeds", type=int, default=None,
+                        help="seeds for the independent D4 control arm "
+                             "(default: same as --seeds)")
     parser.add_argument("--frozen-perms", type=int, default=20)
     parser.add_argument("--out", default="logs")
     parser.add_argument("--device", default="cpu")
@@ -166,25 +221,18 @@ def main() -> None:
     args.device = device_config(args.device)
 
     set_seed(args.router_seed)
+    if args.control_seed is None:
+        args.control_seed = args.router_seed + 1000
+    if args.control_splits is None:
+        args.control_splits = args.splits
+    if args.control_seeds is None:
+        args.control_seeds = args.seeds
 
     t0 = time.perf_counter()
-    if args.graph == "erp_fraud":
-        from spectral_distillation.src.synthetic import generate_erp_fraud_graph
-
-        graph = generate_erp_fraud_graph(
-            n_nodes=args.n,
-            n_patches=args.n_patches,
-            seed=args.router_seed,
-        )
-        log.info("generated ERP-fraud graph n=%d (%s) in %.1fs", args.n, args.graph, time.perf_counter() - t0)
-    else:
-        graph = generate_pc_graph(
-            n_nodes=args.n,
-            n_patches=args.n_patches,
-            regime_ratio=tuple(pc.get("regime_ratio", [0.4, 0.4, 0.2])),
-            seed=args.router_seed,
-        )
-        log.info("generated PC-1c-R graph n=%d (%d) in %.1fs", args.n, args.n_patches, time.perf_counter() - t0)
+    graph = build_graph(args, args.router_seed, pc)
+    log.info("generated %s graph n=%d (%d patches) in %.1fs",
+             args.graph, args.n, args.n_patches, time.perf_counter() - t0)
+    assert_no_saturation(graph, log)
 
     log.info("computing condition assignments...")
     t0 = time.perf_counter()
@@ -209,7 +257,34 @@ def main() -> None:
             c.significant,
         )
 
-    record = _summarize(results, args, graph, assignments)
+    log.info("running independent D4 control (seed=%d, %d splits x %d seeds)...",
+             args.control_seed, args.control_splits, args.control_seeds)
+    t0 = time.perf_counter()
+    control_graph = build_graph(args, args.control_seed, pc)
+    assert_no_saturation(control_graph, log)
+    # D4 only needs oracle vs uniform, so skip the (expensive) label-free
+    # router training on the control graph.
+    c_oracle = oracle_regime_assignment(control_graph["regimes"], 3)
+    c_uniform = uniform_assignment(control_graph["W"].shape[0], 3)
+    control_assignments = {
+        "oracle": c_oracle,
+        "uniform": c_uniform,
+        "random": random_assignment(c_oracle, rng=args.random_seed),
+        "label_free": c_uniform,
+    }
+    control_results = run_protocol(
+        run_fn=lambda cond, split, seed: cell_accuracy(
+            control_graph, control_assignments, cond, split, seed
+        ),
+        n_splits=args.control_splits,
+        n_seeds=args.control_seeds,
+    )
+    control_comparisons = _pairs_dict(control_results)
+    log.info("control arm ready in %.1fs (oracle_vs_uniform p=%.4g)",
+             time.perf_counter() - t0,
+             control_comparisons.get("oracle_vs_uniform", {}).get("p_wilcoxon", float("nan")))
+
+    record = _summarize(results, args, graph, assignments, control_comparisons)
     out_dir = ensure_dir(Path(args.out) / ("erp_fraud_protocol" if args.graph == "erp_fraud" else "protocol"))
     out_path = out_dir / "protocol_results.json"
     out_path.write_text(json.dumps(record, indent=2, default=str), encoding="utf-8")
@@ -223,6 +298,11 @@ def main() -> None:
             f"{'yes' if c.significant else 'no':>6}"
         )
     print("\nDecision rules:", record["findings"]["verdict"])
+    ctrl = record.get("control_comparisons") or {}
+    cov = ctrl.get("oracle_vs_uniform", {})
+    print("D4 control (seed=%d): oracle_vs_uniform mean_diff=%.4f p=%.4g"
+          % (args.control_seed, cov.get("mean_diff", float("nan")),
+             cov.get("p_wilcoxon", float("nan"))))
     print("Frozen gate (%s perms):" % args.frozen_perms)
     for k, v in record["frozen"].items():
         print(f"  {k:<18}{v:>10.4f}")

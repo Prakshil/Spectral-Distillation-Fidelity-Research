@@ -24,6 +24,7 @@ from spectral_distillation.experiments.run_fixed_expert_protocol import (
     build_expert_factory,
     feature_kmeans_routing,
 )
+from spectral_distillation.src.evaluation import evaluate_comparison
 from spectral_distillation.src.laplacian import normalize_adjacency
 from spectral_distillation.src.mixture import train_test_split
 from spectral_distillation.src.published_routers import evaluate_published_routers
@@ -129,6 +130,22 @@ def main() -> None:
     def wins(field: str) -> int:
         return int(sum(r[field] > 0 for r in per_split))
 
+    def _by_split(metric_key: str) -> dict[int, float]:
+        grouped: dict[int, list[float]] = {}
+        for r in per_split:
+            grouped.setdefault(r["split"], []).append(r["accuracy"][metric_key])
+        return {s: float(np.mean(v)) for s, v in grouped.items()}
+
+    baseline_by_split = _by_split("single_global")
+    paired_tests = {
+        name: evaluate_comparison(_by_split(metric_key), baseline_by_split, f"{name}_vs_no_routing").to_dict()
+        for name, metric_key in (
+            ("router_gnn", "router_gnn"),
+            ("ad_gnn", "ad_gnn"),
+            ("mlp_gate", "mlp_gate"),
+        )
+    }
+
     payload = {
         "config": vars(args),
         "graph": {
@@ -161,6 +178,7 @@ def main() -> None:
             "n_runs_router_gnn_beats_no_routing": wins("router_gnn_minus_no_routing"),
             "n_runs_ad_gnn_beats_no_routing": wins("ad_gnn_minus_no_routing"),
             "n_runs_mlp_gate_beats_no_routing": wins("mlp_gate_minus_no_routing"),
+            "paired_tests": paired_tests,
             "per_run": per_split,
         },
         "interpretation": (
@@ -171,7 +189,9 @@ def main() -> None:
             "is trained with LayerNorm, weight decay and gradient clipping (the raw "
             "unnormalized stack diverges on large graphs); loss first->last, router "
             "fit accuracy and distinct channels emitted are recorded per run so a "
-            "collapsed router is never silently reported as a trained one."
+            "collapsed router is never silently reported as a trained one. "
+            "Significance is a paired Wilcoxon signed-rank test of per-split means "
+            "(router minus no-routing); win-counts alone are not evidence."
         ),
     }
     path = out_dir / "fixed_expert.json"

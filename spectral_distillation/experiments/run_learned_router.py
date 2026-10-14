@@ -23,6 +23,7 @@ from spectral_distillation.experiments.run_fixed_expert_protocol import (
     build_expert_factory,
     feature_kmeans_routing,
 )
+from spectral_distillation.src.evaluation import evaluate_comparison
 from spectral_distillation.src.learned_router import evaluate_learned_routing
 from spectral_distillation.src.laplacian import normalize_adjacency
 from spectral_distillation.src.mixture import train_test_split
@@ -101,6 +102,26 @@ def main() -> None:
     wins = int(sum(r["learned_minus_no_routing"] > 0 for r in per_split))
     ens_wins = int(sum(r.get("learned_minus_ensemble", -1) > 0 for r in per_split))
 
+    def _by_split(metric_key: str) -> dict[int, float]:
+        grouped: dict[int, list[float]] = {}
+        for r in per_split:
+            grouped.setdefault(r["split"], []).append(r["accuracy"][metric_key])
+        return {s: float(np.mean(v)) for s, v in grouped.items()}
+
+    learned_by_split = _by_split("learned_router")
+    paired_tests = {
+        "learned_vs_no_routing": evaluate_comparison(
+            learned_by_split, _by_split("single_global"), "learned_vs_no_routing"
+        ).to_dict(),
+        "learned_vs_random": evaluate_comparison(
+            learned_by_split, _by_split("random"), "learned_vs_random"
+        ).to_dict(),
+    }
+    if "ensemble_uniform" in keys:
+        paired_tests["learned_vs_ensemble"] = evaluate_comparison(
+            learned_by_split, _by_split("ensemble_uniform"), "learned_vs_ensemble"
+        ).to_dict()
+
     payload = {
         "config": vars(args),
         "graph": {
@@ -121,12 +142,15 @@ def main() -> None:
             "n_runs": n,
             "n_runs_learned_beats_no_routing": wins,
             "n_runs_learned_beats_ensemble": ens_wins,
+            "paired_tests": paired_tests,
             "per_run": per_split,
         },
         "interpretation": (
             "Learned routing is scored on the same frozen routing-blind pool as "
             "every baseline, trained on training nodes only. Added Node-MoE gate "
             "[X, |AX-X|, |A2X-X|] and uniform ensemble (Ens-Avg). "
+            "Significance is a paired Wilcoxon signed-rank test of per-split "
+            "means (learned minus baseline); win-counts alone are not evidence. "
             + ("Router mode 'x_only' removes all graph propagation from both the "
                "gate and the expert, so implicit routing through a frozen expert "
                "(EMNLP 2023) cannot explain a null result."

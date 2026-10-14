@@ -357,16 +357,18 @@ How the label-free gain behaves as we erase structure but keep labels:
 | Dilution λ | Oracle gain | Label-free gain |
 |-----------|-------------|-----------------|
 | 0.00 | 0.2591 | **0.2308** |
-| 0.25 | 0.2591 | 0.1974 |
-| 0.50 | 0.2591 | 0.1764 |
-| 0.75 | 0.2591 | 0.1084 |
-| 1.00 | 0.2591 | **0.0147** |
+| 0.25 | 0.2591 | 0.1644 |
+| 0.50 | 0.2591 | 0.0486 |
+| 0.75 | 0.2591 | 0.0293 |
+| 1.00 | 0.2591 | **0.0810** |
 
 This is the **cleanest mechanistic result** in the repo:
 - Oracle gain is **completely flat** (0.259) — it reads labels, and dilution never
   touches labels.
-- Label-free gain **decays monotonically** and collapses to ~0 at full dilution — it
-  reads structure, and we erased structure.
+- Label-free gain decreases up to dilution 0.75 but then increases slightly at λ=1.0
+  (non-monotone under the balanced, class-proportional conversion); it is substantially
+  reduced but does not collapse to ~0. This reflects that full homophilization still
+  leaves a class-based structural signal that the label-free router can exploit.
 
 This is *exactly* the theoretical prediction: distillation erodes the *structural*
 signal but cannot corrupt the entropy/pre-construction signal. It confirms that the

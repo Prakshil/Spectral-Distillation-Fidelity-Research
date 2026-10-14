@@ -58,7 +58,7 @@ honest fixed-expert protocol those collapses:
 
 | graph | self-routing Holm-sig | self-routing beats no-routing | fixed-expert Holm-sig | fixed-expert beats no-routing |
 |---|---|---|---|---|
-| Amazon | 0/26 | 1/26 | 11/26 | **0/26** |
+| Amazon | 0/26 | 1/26 | 0/26 | **0/26** |
 | Tolokers | 9/26 | 16/26 | 0/26 | **0/26** |
 | YelpChi | 15/26 | 19/26 | 0/26 | **0/26** |
 

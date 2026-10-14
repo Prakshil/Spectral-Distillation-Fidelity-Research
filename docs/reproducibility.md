@@ -166,15 +166,15 @@ Full run (`n=10000`, 50 patches, 10 splits Ã— 3 seeds, `logs/protocol/protoco
 | dilution Î» | oracle gain | label-free gain |
 |-----------|-------------|-----------------|
 | 0.00 | 0.2591 | 0.2308 |
-| 0.25 | 0.2591 | 0.1974 |
-| 0.50 | 0.2591 | 0.1764 |
-| 0.75 | 0.2591 | 0.1084 |
-| 1.00 | 0.2591 | 0.0147 |
+| 0.25 | 0.2591 | 0.1644 |
+| 0.50 | 0.2591 | 0.0486 |
+| 0.75 | 0.2591 | 0.0293 |
+| 1.00 | 0.2591 | 0.0810 |
 
-Label-free gain decays monotonically as regime nodes are rewritten toward homogeneous wiring;
-oracle gain (true regime id) stays flat. This is exactly what the mechanism predicts: dilution
-erases the *structural* signal the label-free router reads, while the oracle reads labels that
-dilution cannot erase.
+Label-free gain decreases up to λ=0.75 but increases slightly at λ=1.0 (non-monotone) under
+class-balanced conversion; it is substantially reduced rather than collapsing to ~0. This
+reflects that full homophilization still preserves class-based structure the label-free router
+can exploit. Oracle gain (true regime id) stays flat.
 
 ### 3.5 Phase 3 â€” ablations (`logs/ablation/ablation.json`)
 

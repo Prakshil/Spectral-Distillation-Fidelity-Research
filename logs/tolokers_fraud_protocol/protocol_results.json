@@ -15,7 +15,11 @@
     "random_seed": 1,
     "adaptive_oracle": true,
     "budget_oracle": false,
-    "no_progress": true,
+    "label_free_strategy": "kmeans",
+    "order_feature": "hx",
+    "spectral_k": 8,
+    "max_nodes": null,
+    "no_progress": false,
     "out": "logs",
     "device": "cpu"
   },
@@ -34,9 +38,9 @@
       3922
     ],
     "label_free": [
-      1255,
-      7504,
-      2999
+      1256,
+      7493,
+      3009
     ],
     "random": [
       3962,
@@ -55,9 +59,9 @@
     "D3": true,
     "D4": true,
     "D1_p": 0.001953125,
-    "D2_p": 0.6953125,
+    "D2_p": 0.625,
     "D3_p": 0.001953125,
-    "D4_p": 0.03125,
+    "D4_p": 0.001953125,
     "verdict": "Not supported; failed rule(s): D2."
   },
   "comparisons": {
@@ -71,12 +75,12 @@
       "significant": true
     },
     "label_free_vs_random": {
-      "mean_diff": -0.0002834949254408303,
-      "ci_low": -0.0009127200141615698,
-      "ci_high": 0.00034573016327990916,
-      "p_wilcoxon": 0.6953125,
-      "p_paired_t": 0.3347193681857782,
-      "effect_size_dz": -0.3397353812462635,
+      "mean_diff": 5.1029086579323926e-05,
+      "ci_low": -0.0006448112272389333,
+      "ci_high": 0.0007468694003975812,
+      "p_wilcoxon": 0.625,
+      "p_paired_t": 0.8719071356729029,
+      "effect_size_dz": 0.055298038657697765,
       "significant": false
     },
     "oracle_vs_random": {
@@ -90,26 +94,26 @@
     }
   },
   "frozen": {
-    "learned": 0.780574927708794,
+    "learned": 0.7804048307535295,
     "oracle_onehot": 0.8198673243748937,
     "equal": 0.7824459942167035,
     "global_mean": 0.7824459942167035,
-    "node_shuffled_mean": 0.7805919374043204,
-    "node_shuffled_std": 0.000801263188522817
+    "node_shuffled_mean": 0.7805749277087941,
+    "node_shuffled_std": 0.0009409298646667372
   },
   "control": {
     "pc_n_nodes": 2000,
     "oracle_vs_uniform": {
-      "mean_diff": 0.25341325341325344,
-      "p_wilcoxon": 0.03125
+      "mean_diff": 0.24931734931734928,
+      "p_wilcoxon": 0.001953125
     },
     "label_free_vs_random": {
-      "mean_diff": 0.026473526473526483,
-      "p_wilcoxon": 0.03125
+      "mean_diff": 0.0273726273726274,
+      "p_wilcoxon": 0.001953125
     },
     "oracle_vs_random": {
-      "mean_diff": 0.2798867798867799,
-      "p_wilcoxon": 0.03125
+      "mean_diff": 0.27668997668997675,
+      "p_wilcoxon": 0.001953125
     }
   }
 }

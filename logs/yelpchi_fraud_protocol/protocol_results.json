@@ -19,7 +19,7 @@
     "order_feature": "hx",
     "spectral_k": 8,
     "max_nodes": null,
-    "no_progress": true,
+    "no_progress": false,
     "out": "logs",
     "device": "cpu"
   },
@@ -61,17 +61,17 @@
     "D1_p": 0.001953125,
     "D2_p": 0.001953125,
     "D3_p": 0.001953125,
-    "D4_p": 0.03125,
+    "D4_p": 0.001953125,
     "verdict": "Supported: signal exists, router finds it, not capacity, instrument valid."
   },
   "comparisons": {
     "oracle_vs_uniform": {
-      "mean_diff": 0.042623539982030556,
-      "ci_low": 0.041377906132110634,
-      "ci_high": 0.04386917383195048,
+      "mean_diff": 0.04263252470799641,
+      "ci_low": 0.04138374426752185,
+      "ci_high": 0.04388130514847097,
       "p_wilcoxon": 0.001953125,
-      "p_paired_t": 5.071859475538337e-14,
-      "effect_size_dz": 25.802431504449686,
+      "p_paired_t": 5.1783596454583795e-14,
+      "effect_size_dz": 25.742841579127475,
       "significant": true
     },
     "label_free_vs_random": {
@@ -98,22 +98,22 @@
     "oracle_onehot": 0.9016172506738545,
     "equal": 0.8599730458221024,
     "global_mean": 0.8599730458221024,
-    "node_shuffled_mean": 0.8593396226415093,
-    "node_shuffled_std": 0.0010282409466421886
+    "node_shuffled_mean": 0.8593328840970349,
+    "node_shuffled_std": 0.0010236157365878307
   },
   "control": {
     "pc_n_nodes": 2000,
     "oracle_vs_uniform": {
-      "mean_diff": 0.25341325341325344,
-      "p_wilcoxon": 0.03125
+      "mean_diff": 0.24931734931734928,
+      "p_wilcoxon": 0.001953125
     },
     "label_free_vs_random": {
-      "mean_diff": 0.026473526473526483,
-      "p_wilcoxon": 0.03125
+      "mean_diff": 0.0273726273726274,
+      "p_wilcoxon": 0.001953125
     },
     "oracle_vs_random": {
-      "mean_diff": 0.2798867798867799,
-      "p_wilcoxon": 0.03125
+      "mean_diff": 0.27668997668997675,
+      "p_wilcoxon": 0.001953125
     }
   }
 }

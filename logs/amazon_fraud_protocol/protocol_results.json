@@ -1,7 +1,9 @@
 {
   "config": {
     "config": "configs/default.yaml",
+    "dataset": "amazon",
     "amazon_mat": null,
+    "data_path": null,
     "top_k": 32,
     "splits": 10,
     "seeds": 3,
@@ -13,6 +15,10 @@
     "random_seed": 1,
     "adaptive_oracle": true,
     "budget_oracle": false,
+    "label_free_strategy": "kmeans",
+    "order_feature": "hx",
+    "spectral_k": 8,
+    "max_nodes": null,
     "no_progress": false,
     "out": "logs",
     "device": "cpu"
@@ -32,9 +38,9 @@
       2880
     ],
     "label_free": [
-      3673,
-      400,
-      4566
+      4038,
+      70,
+      4531
     ],
     "random": [
       2926,
@@ -53,61 +59,61 @@
     "D3": true,
     "D4": true,
     "D1_p": 0.001953125,
-    "D2_p": 0.845703125,
+    "D2_p": 1.0,
     "D3_p": 0.001953125,
-    "D4_p": 0.03125,
+    "D4_p": 0.001953125,
     "verdict": "Not supported; failed rule(s): D2."
   },
   "comparisons": {
     "oracle_vs_uniform": {
-      "mean_diff": 0.002800925925925901,
-      "ci_low": 0.002013388675096645,
-      "ci_high": 0.0035884631767551575,
+      "mean_diff": 0.002800925925925979,
+      "ci_low": 0.0020878333073709437,
+      "ci_high": 0.003514018544481014,
       "p_wilcoxon": 0.001953125,
-      "p_paired_t": 2.1153550858527245e-05,
-      "effect_size_dz": 2.6818348970308983,
+      "p_paired_t": 9.4803192814759e-06,
+      "effect_size_dz": 2.9618100468708337,
       "significant": true
     },
     "label_free_vs_random": {
-      "mean_diff": -0.0001543209876543439,
-      "ci_low": -0.0008293447291735875,
-      "ci_high": 0.0005207027538648996,
-      "p_wilcoxon": 0.845703125,
-      "p_paired_t": 0.6175101403660044,
-      "effect_size_dz": -0.1723881725084682,
+      "mean_diff": 7.716049382711088e-06,
+      "ci_low": -0.0008896809458636769,
+      "ci_high": 0.0009051130446290991,
+      "p_wilcoxon": 1.0,
+      "p_paired_t": 0.9849060283654985,
+      "effect_size_dz": 0.0064835357047462365,
       "significant": false
     },
     "oracle_vs_random": {
-      "mean_diff": 0.003834876543209875,
-      "ci_low": 0.0029905002880184954,
-      "ci_high": 0.004679252798401255,
+      "mean_diff": 0.0037885802469136308,
+      "ci_low": 0.0030639967874628833,
+      "ci_high": 0.004513163706364378,
       "p_wilcoxon": 0.001953125,
-      "p_paired_t": 2.856085487171837e-06,
-      "effect_size_dz": 3.4246555322335364,
+      "p_paired_t": 8.706748983812277e-07,
+      "effect_size_dz": 3.9426624270905366,
       "significant": true
     }
   },
   "frozen": {
-    "learned": 0.9706018518518519,
-    "oracle_onehot": 0.9761574074074074,
-    "equal": 0.9738425925925925,
-    "global_mean": 0.9738425925925925,
-    "node_shuffled_mean": 0.9720949074074072,
-    "node_shuffled_std": 0.001051840746387635
+    "learned": 0.9722222222222222,
+    "oracle_onehot": 0.9770833333333333,
+    "equal": 0.9731481481481481,
+    "global_mean": 0.9731481481481481,
+    "node_shuffled_mean": 0.9722106481481481,
+    "node_shuffled_std": 0.0009585541658249181
   },
   "control": {
     "pc_n_nodes": 2000,
     "oracle_vs_uniform": {
-      "mean_diff": 0.25341325341325344,
-      "p_wilcoxon": 0.03125
+      "mean_diff": 0.24931734931734928,
+      "p_wilcoxon": 0.001953125
     },
     "label_free_vs_random": {
-      "mean_diff": 0.026473526473526483,
-      "p_wilcoxon": 0.03125
+      "mean_diff": 0.0273726273726274,
+      "p_wilcoxon": 0.001953125
     },
     "oracle_vs_random": {
-      "mean_diff": 0.2798867798867799,
-      "p_wilcoxon": 0.03125
+      "mean_diff": 0.27668997668997675,
+      "p_wilcoxon": 0.001953125
     }
   }
 }

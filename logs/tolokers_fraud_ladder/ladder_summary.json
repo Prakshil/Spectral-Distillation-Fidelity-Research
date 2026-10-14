@@ -16,25 +16,16 @@
     "random_seed": 1,
     "adaptive_oracle": true,
     "budget_oracle": false,
+    "label_free_strategy": "kmeans",
+    "order_feature": "hx",
+    "spectral_k": 8,
+    "out_suffix": "",
+    "max_nodes": null,
     "skip_sd": true,
-    "no_progress": true,
+    "resume": false,
+    "no_progress": false,
     "out": "logs",
-    "device": "cpu",
-    "_er_resistance": "[[0.         0.06871606 0.06403165 ... 0.02047259 0.00615729 0.00358515]\n [0.06871606 0.         0.13023701 ... 0.08674273 0.07242455 0.06985211]\n [0.06403165 0.13023701 0.         ... 0.08205864 0.06774029 0.06516747]\n ...\n [0.02047259 0.08674273 0.08205864 ... 0.         0.0241575  0.02158698]\n [0.00615729 0.07242455 0.06774029 ... 0.0241575  0.         0.00726095]\n [0.00358515 0.06985211 0.06516747 ... 0.02158698 0.00726095 0.        ]]",
-    "_pc_control": {
-      "oracle_vs_uniform": {
-        "mean_diff": 0.25341325341325344,
-        "p_wilcoxon": 0.03125
-      },
-      "label_free_vs_random": {
-        "mean_diff": 0.026473526473526483,
-        "p_wilcoxon": 0.03125
-      },
-      "oracle_vs_random": {
-        "mean_diff": 0.2798867798867799,
-        "p_wilcoxon": 0.03125
-      }
-    }
+    "device": "cpu"
   },
   "graph": {
     "n_nodes": 11758,
@@ -46,16 +37,16 @@
   "control": {
     "pc_n_nodes": 2000,
     "oracle_vs_uniform": {
-      "mean_diff": 0.25341325341325344,
-      "p_wilcoxon": 0.03125
+      "mean_diff": 0.24931734931734928,
+      "p_wilcoxon": 0.001953125
     },
     "label_free_vs_random": {
-      "mean_diff": 0.026473526473526483,
-      "p_wilcoxon": 0.03125
+      "mean_diff": 0.0273726273726274,
+      "p_wilcoxon": 0.001953125
     },
     "oracle_vs_random": {
-      "mean_diff": 0.2798867798867799,
-      "p_wilcoxon": 0.03125
+      "mean_diff": 0.27668997668997675,
+      "p_wilcoxon": 0.001953125
     }
   },
   "points": [
@@ -65,7 +56,8 @@
       "n_edges_kept": 311400,
       "n_edges_orig": 519000,
       "fraction_kept": 0.6,
-      "sd_laplacian": 0.0,
+      "sd_laplacian": null,
+      "sd_profile": {},
       "edge_label_homophily": 0.6317204355285926,
       "assignments_usage": {
         "oracle": [
@@ -74,9 +66,9 @@
           3814
         ],
         "label_free": [
-          945,
-          7488,
-          3325
+          6905,
+          4415,
+          438
         ],
         "random": [
           4009,
@@ -100,12 +92,12 @@
           "significant": true
         },
         "label_free_vs_random": {
-          "mean_diff": 0.0004932811702670125,
-          "ci_low": -0.0005583369990770183,
-          "ci_high": 0.0015448993396110435,
-          "p_wilcoxon": 0.431640625,
-          "p_paired_t": 0.3162849636594373,
-          "effect_size_dz": 0.3537023751109931,
+          "mean_diff": 0.00018143675228211588,
+          "ci_low": -0.0005840390546042453,
+          "ci_high": 0.0009469125591684772,
+          "p_wilcoxon": 0.845703125,
+          "p_paired_t": 0.6048261578113705,
+          "effect_size_dz": 0.17872911858114623,
           "significant": false
         },
         "oracle_vs_random": {
@@ -124,9 +116,9 @@
         "D3": true,
         "D4": true,
         "D1_p": 0.001953125,
-        "D2_p": 0.431640625,
+        "D2_p": 0.845703125,
         "D3_p": 0.001953125,
-        "D4_p": 0.03125,
+        "D4_p": 0.001953125,
         "verdict": "Not supported; failed rule(s): D2."
       }
     },
@@ -136,7 +128,8 @@
       "n_edges_kept": 311400,
       "n_edges_orig": 519000,
       "fraction_kept": 0.6,
-      "sd_laplacian": 0.0,
+      "sd_laplacian": null,
+      "sd_profile": {},
       "edge_label_homophily": 0.6355886995081903,
       "assignments_usage": {
         "oracle": [
@@ -145,9 +138,9 @@
           3838
         ],
         "label_free": [
-          1413,
-          7881,
-          2464
+          7382,
+          4131,
+          245
         ],
         "random": [
           4102,
@@ -171,12 +164,12 @@
           "significant": true
         },
         "label_free_vs_random": {
-          "mean_diff": 0.00052163066281109,
-          "ci_low": -0.00032091617064767197,
-          "ci_high": 0.0013641774962698519,
-          "p_wilcoxon": 0.375,
-          "p_paired_t": 0.19487561757234978,
-          "effect_size_dz": 0.46684270966016417,
+          "mean_diff": -5.6698985088243783e-05,
+          "ci_low": -0.0007234421769984206,
+          "ci_high": 0.000610044206821933,
+          "p_wilcoxon": 0.76953125,
+          "p_paired_t": 0.8517223153486432,
+          "effect_size_dz": -0.06412364700541144,
           "significant": false
         },
         "oracle_vs_random": {
@@ -195,9 +188,9 @@
         "D3": true,
         "D4": true,
         "D1_p": 0.001953125,
-        "D2_p": 0.375,
+        "D2_p": 0.76953125,
         "D3_p": 0.001953125,
-        "D4_p": 0.03125,
+        "D4_p": 0.001953125,
         "verdict": "Not supported; failed rule(s): D2."
       }
     },
@@ -207,7 +200,8 @@
       "n_edges_kept": 311400,
       "n_edges_orig": 519000,
       "fraction_kept": 0.6,
-      "sd_laplacian": 0.0,
+      "sd_laplacian": null,
+      "sd_profile": {},
       "edge_label_homophily": 0.517890402609887,
       "assignments_usage": {
         "oracle": [
@@ -216,9 +210,9 @@
           2080
         ],
         "label_free": [
-          652,
-          4551,
-          6555
+          650,
+          4548,
+          6560
         ],
         "random": [
           3965,
@@ -242,12 +236,12 @@
           "significant": false
         },
         "label_free_vs_random": {
-          "mean_diff": -0.0002664852299143816,
-          "ci_low": -0.0011616789571842396,
-          "ci_high": 0.0006287084973554763,
-          "p_wilcoxon": 0.5703125,
-          "p_paired_t": 0.5176048640877571,
-          "effect_size_dz": -0.22446965138452654,
+          "mean_diff": -0.00034586380903784965,
+          "ci_low": -0.00129254407088692,
+          "ci_high": 0.0006008164528112209,
+          "p_wilcoxon": 0.431640625,
+          "p_paired_t": 0.4299051963619327,
+          "effect_size_dz": -0.27548840036683603,
           "significant": false
         },
         "oracle_vs_random": {
@@ -261,15 +255,15 @@
         }
       },
       "findings": {
-        "D1": true,
+        "D1": false,
         "D2": false,
         "D3": true,
         "D4": true,
         "D1_p": 0.0390625,
-        "D2_p": 0.5703125,
+        "D2_p": 0.431640625,
         "D3_p": 0.009765625,
-        "D4_p": 0.03125,
-        "verdict": "Not supported; failed rule(s): D2."
+        "D4_p": 0.001953125,
+        "verdict": "Not supported; failed rule(s): D1, D2."
       }
     },
     {
@@ -278,7 +272,8 @@
       "n_edges_kept": 155700,
       "n_edges_orig": 519000,
       "fraction_kept": 0.3,
-      "sd_laplacian": 0.0,
+      "sd_laplacian": null,
+      "sd_profile": {},
       "edge_label_homophily": 0.6572329893599345,
       "assignments_usage": {
         "oracle": [
@@ -287,9 +282,9 @@
           3442
         ],
         "label_free": [
-          5329,
-          4839,
-          1590
+          6582,
+          40,
+          5136
         ],
         "random": [
           4011,
@@ -313,12 +308,12 @@
           "significant": true
         },
         "label_free_vs_random": {
-          "mean_diff": 0.0008788342688665907,
-          "ci_low": -0.00013042290037188452,
-          "ci_high": 0.0018880914381050658,
-          "p_wilcoxon": 0.083984375,
-          "p_paired_t": 0.08036458395759531,
-          "effect_size_dz": 0.6566087405249,
+          "mean_diff": 0.0006917276180756326,
+          "ci_low": -0.0002809236483988528,
+          "ci_high": 0.001664378884550118,
+          "p_wilcoxon": 0.193359375,
+          "p_paired_t": 0.14212226462644223,
+          "effect_size_dz": 0.536265031435034,
           "significant": false
         },
         "oracle_vs_random": {
@@ -337,9 +332,9 @@
         "D3": true,
         "D4": true,
         "D1_p": 0.001953125,
-        "D2_p": 0.083984375,
+        "D2_p": 0.193359375,
         "D3_p": 0.001953125,
-        "D4_p": 0.03125,
+        "D4_p": 0.001953125,
         "verdict": "Not supported; failed rule(s): D2."
       }
     },
@@ -349,7 +344,8 @@
       "n_edges_kept": 155700,
       "n_edges_orig": 519000,
       "fraction_kept": 0.3,
-      "sd_laplacian": 0.0,
+      "sd_laplacian": null,
+      "sd_profile": {},
       "edge_label_homophily": 0.637173329160217,
       "assignments_usage": {
         "oracle": [
@@ -358,9 +354,9 @@
           3745
         ],
         "label_free": [
-          1839,
-          8570,
-          1349
+          9450,
+          70,
+          2238
         ],
         "random": [
           3992,
@@ -384,12 +380,12 @@
           "significant": true
         },
         "label_free_vs_random": {
-          "mean_diff": -0.00034586380903779413,
-          "ci_low": -0.0006897346732398003,
-          "ci_high": -1.9929448357880355e-06,
-          "p_wilcoxon": 0.07421875,
-          "p_paired_t": 0.04893973844639631,
-          "effect_size_dz": -0.7584225886680824,
+          "mean_diff": 2.2679594035268645e-05,
+          "ci_low": -0.000622948352160667,
+          "ci_high": 0.0006683075402312042,
+          "p_wilcoxon": 1.0,
+          "p_paired_t": 0.9384016598059461,
+          "effect_size_dz": 0.02648832370603737,
           "significant": false
         },
         "oracle_vs_random": {
@@ -408,9 +404,9 @@
         "D3": true,
         "D4": true,
         "D1_p": 0.001953125,
-        "D2_p": 0.07421875,
+        "D2_p": 1.0,
         "D3_p": 0.001953125,
-        "D4_p": 0.03125,
+        "D4_p": 0.001953125,
         "verdict": "Not supported; failed rule(s): D2."
       }
     },
@@ -420,7 +416,8 @@
       "n_edges_kept": 155700,
       "n_edges_orig": 519000,
       "fraction_kept": 0.3,
-      "sd_laplacian": 0.0,
+      "sd_laplacian": null,
+      "sd_profile": {},
       "edge_label_homophily": 0.45901644785172485,
       "assignments_usage": {
         "oracle": [
@@ -430,8 +427,8 @@
         ],
         "label_free": [
           323,
-          2457,
-          8978
+          2460,
+          8975
         ],
         "random": [
           3962,
@@ -455,12 +452,12 @@
           "significant": false
         },
         "label_free_vs_random": {
-          "mean_diff": 0.002993706412655217,
-          "ci_low": 0.0021975630080910496,
-          "ci_high": 0.0037898498172193843,
+          "mean_diff": 0.0030277258037081254,
+          "ci_low": 0.0022681470266402944,
+          "ci_high": 0.0037873045807759564,
           "p_wilcoxon": 0.001953125,
-          "p_paired_t": 1.3512811420292863e-05,
-          "effect_size_dz": 2.8354332339484207,
+          "p_paired_t": 8.40653296894677e-06,
+          "effect_size_dz": 3.005697289426717,
           "significant": true
         },
         "oracle_vs_random": {
@@ -481,7 +478,7 @@
         "D1_p": 0.048828125,
         "D2_p": 0.001953125,
         "D3_p": 0.083984375,
-        "D4_p": 0.03125,
+        "D4_p": 0.001953125,
         "verdict": "Not supported; failed rule(s): D1, D3."
       }
     },
@@ -491,7 +488,8 @@
       "n_edges_kept": 77850,
       "n_edges_orig": 519000,
       "fraction_kept": 0.15,
-      "sd_laplacian": 0.0,
+      "sd_laplacian": null,
+      "sd_profile": {},
       "edge_label_homophily": 0.6475510927690562,
       "assignments_usage": {
         "oracle": [
@@ -501,8 +499,8 @@
         ],
         "label_free": [
           3982,
-          4841,
-          2935
+          4964,
+          2812
         ],
         "random": [
           3978,
@@ -526,12 +524,12 @@
           "significant": false
         },
         "label_free_vs_random": {
-          "mean_diff": 0.00025514543289677504,
-          "ci_low": -0.0005109151941779238,
-          "ci_high": 0.0010212060599714737,
-          "p_wilcoxon": 0.49609375,
-          "p_paired_t": 0.47043675404262153,
-          "effect_size_dz": 0.2511459485919899,
+          "mean_diff": 0.00033452401202020975,
+          "ci_low": -0.0005011937648230667,
+          "ci_high": 0.001170241788863486,
+          "p_wilcoxon": 0.375,
+          "p_paired_t": 0.3887960917990624,
+          "effect_size_dz": 0.3018347066065909,
           "significant": false
         },
         "oracle_vs_random": {
@@ -547,13 +545,13 @@
       "findings": {
         "D1": false,
         "D2": false,
-        "D3": true,
+        "D3": false,
         "D4": true,
         "D1_p": 0.16015625,
-        "D2_p": 0.49609375,
+        "D2_p": 0.375,
         "D3_p": 0.037109375,
-        "D4_p": 0.03125,
-        "verdict": "Not supported; failed rule(s): D1, D2."
+        "D4_p": 0.001953125,
+        "verdict": "Not supported; failed rule(s): D1, D2, D3."
       }
     },
     {
@@ -562,7 +560,8 @@
       "n_edges_kept": 77850,
       "n_edges_orig": 519000,
       "fraction_kept": 0.15,
-      "sd_laplacian": 0.0,
+      "sd_laplacian": null,
+      "sd_profile": {},
       "edge_label_homophily": 0.6377520743943347,
       "assignments_usage": {
         "oracle": [
@@ -571,9 +570,9 @@
           3620
         ],
         "label_free": [
-          1344,
-          8585,
-          1829
+          1345,
+          8602,
+          1811
         ],
         "random": [
           3962,
@@ -597,12 +596,12 @@
           "significant": true
         },
         "label_free_vs_random": {
-          "mean_diff": 2.834949254406638e-05,
-          "ci_low": -0.0006565824789265676,
-          "ci_high": 0.0007132814640147004,
-          "p_wilcoxon": 1.0,
-          "p_paired_t": 0.9274534085393286,
-          "effect_size_dz": 0.031210402537807953,
+          "mean_diff": -0.00010205817315869225,
+          "ci_low": -0.0007286049528701001,
+          "ci_high": 0.0005244886065527155,
+          "p_wilcoxon": 0.65234375,
+          "p_paired_t": 0.7210317435454014,
+          "effect_size_dz": -0.12282755516147353,
           "significant": false
         },
         "oracle_vs_random": {
@@ -621,9 +620,9 @@
         "D3": true,
         "D4": true,
         "D1_p": 0.001953125,
-        "D2_p": 1.0,
+        "D2_p": 0.65234375,
         "D3_p": 0.001953125,
-        "D4_p": 0.03125,
+        "D4_p": 0.001953125,
         "verdict": "Not supported; failed rule(s): D2."
       }
     },
@@ -633,7 +632,8 @@
       "n_edges_kept": 77850,
       "n_edges_orig": 519000,
       "fraction_kept": 0.15,
-      "sd_laplacian": 0.0,
+      "sd_laplacian": null,
+      "sd_profile": {},
       "edge_label_homophily": 0.43308121684244966,
       "assignments_usage": {
         "oracle": [
@@ -642,9 +642,9 @@
           698
         ],
         "label_free": [
-          180,
-          1498,
-          10080
+          193,
+          1582,
+          9983
         ],
         "random": [
           3965,
@@ -668,12 +668,12 @@
           "significant": false
         },
         "label_free_vs_random": {
-          "mean_diff": 0.004087996824856799,
-          "ci_low": 0.0033570533674142523,
-          "ci_high": 0.004818940282299346,
+          "mean_diff": 0.003923569768101131,
+          "ci_low": 0.002900006383927231,
+          "ci_high": 0.004947133152275032,
           "p_wilcoxon": 0.001953125,
-          "p_paired_t": 4.901161796068704e-07,
-          "effect_size_dz": 4.217239698873017,
+          "p_paired_t": 1.1562397084249783e-05,
+          "effect_size_dz": 2.89046794499239,
           "significant": true
         },
         "oracle_vs_random": {
@@ -694,7 +694,7 @@
         "D1_p": 0.001953125,
         "D2_p": 0.001953125,
         "D3_p": 0.009765625,
-        "D4_p": 0.03125,
+        "D4_p": 0.001953125,
         "verdict": "Not supported; failed rule(s): D1, D3."
       }
     },
@@ -704,7 +704,8 @@
       "n_edges_kept": 41520,
       "n_edges_orig": 519000,
       "fraction_kept": 0.08,
-      "sd_laplacian": 0.0,
+      "sd_laplacian": null,
+      "sd_profile": {},
       "edge_label_homophily": 0.6267054746208912,
       "assignments_usage": {
         "oracle": [
@@ -714,8 +715,8 @@
         ],
         "label_free": [
           2994,
-          4556,
-          4208
+          4629,
+          4135
         ],
         "random": [
           3965,
@@ -739,12 +740,12 @@
           "significant": false
         },
         "label_free_vs_random": {
-          "mean_diff": 6.803878210586145e-05,
-          "ci_low": -0.0007301683022663657,
-          "ci_high": 0.0008662458664780887,
-          "p_wilcoxon": 0.6953125,
-          "p_paired_t": 0.8513769760210745,
-          "effect_size_dz": 0.06427505731535578,
+          "mean_diff": 7.937857912346802e-05,
+          "ci_low": -0.0007439441230042317,
+          "ci_high": 0.0009027012812511676,
+          "p_wilcoxon": 0.556640625,
+          "p_paired_t": 0.8322159711937445,
+          "effect_size_dz": 0.07270005668384234,
           "significant": false
         },
         "oracle_vs_random": {
@@ -763,9 +764,9 @@
         "D3": false,
         "D4": true,
         "D1_p": 0.0546875,
-        "D2_p": 0.6953125,
+        "D2_p": 0.556640625,
         "D3_p": 0.0546875,
-        "D4_p": 0.03125,
+        "D4_p": 0.001953125,
         "verdict": "Not supported; failed rule(s): D1, D2, D3."
       }
     },
@@ -775,7 +776,8 @@
       "n_edges_kept": 41520,
       "n_edges_orig": 519000,
       "fraction_kept": 0.08,
-      "sd_laplacian": 0.0,
+      "sd_laplacian": null,
+      "sd_profile": {},
       "edge_label_homophily": 0.6405565216617497,
       "assignments_usage": {
         "oracle": [
@@ -836,7 +838,7 @@
         "D1_p": 0.037109375,
         "D2_p": 1.0,
         "D3_p": 0.10546875,
-        "D4_p": 0.03125,
+        "D4_p": 0.001953125,
         "verdict": "Not supported; failed rule(s): D1, D2, D3."
       }
     },
@@ -846,7 +848,8 @@
       "n_edges_kept": 41520,
       "n_edges_orig": 519000,
       "fraction_kept": 0.08,
-      "sd_laplacian": 0.0,
+      "sd_laplacian": null,
+      "sd_profile": {},
       "edge_label_homophily": 0.42182507449001605,
       "assignments_usage": {
         "oracle": [
@@ -855,9 +858,9 @@
           458
         ],
         "label_free": [
-          130,
-          960,
-          10668
+          169,
+          1193,
+          10396
         ],
         "random": [
           3961,
@@ -881,12 +884,12 @@
           "significant": false
         },
         "label_free_vs_random": {
-          "mean_diff": 0.005454442365481704,
-          "ci_low": 0.004866112456821273,
-          "ci_high": 0.006042772274142135,
+          "mean_diff": 0.004983840789249872,
+          "ci_low": 0.004499586800006544,
+          "ci_high": 0.005468094778493199,
           "p_wilcoxon": 0.001953125,
-          "p_paired_t": 5.970485392380188e-09,
-          "effect_size_dz": 6.990865547157342,
+          "p_paired_t": 2.3685705909499716e-09,
+          "effect_size_dz": 7.760549484608688,
           "significant": true
         },
         "oracle_vs_random": {
@@ -907,7 +910,7 @@
         "D1_p": 0.013671875,
         "D2_p": 0.001953125,
         "D3_p": 0.0234375,
-        "D4_p": 0.03125,
+        "D4_p": 0.001953125,
         "verdict": "Not supported; failed rule(s): D1, D3."
       }
     },
@@ -917,7 +920,8 @@
       "n_edges_kept": 20760,
       "n_edges_orig": 519000,
       "fraction_kept": 0.04,
-      "sd_laplacian": 0.0,
+      "sd_laplacian": null,
+      "sd_profile": {},
       "edge_label_homophily": 0.607404791580417,
       "assignments_usage": {
         "oracle": [
@@ -927,8 +931,8 @@
         ],
         "label_free": [
           99,
-          6391,
-          5268
+          6520,
+          5139
         ],
         "random": [
           4106,
@@ -952,12 +956,12 @@
           "significant": false
         },
         "label_free_vs_random": {
-          "mean_diff": 3.968928956173956e-05,
-          "ci_low": -0.0008854287444576247,
-          "ci_high": 0.0009648073235811039,
-          "p_wilcoxon": 0.5703125,
-          "p_paired_t": 0.9248129576608822,
-          "effect_size_dz": 0.03235025419066336,
+          "mean_diff": -6.803878210580594e-05,
+          "ci_low": -0.0009541509931329873,
+          "ci_high": 0.0008180734289213753,
+          "p_wilcoxon": 0.556640625,
+          "p_paired_t": 0.8659481650361395,
+          "effect_size_dz": -0.05789876886814768,
           "significant": false
         },
         "oracle_vs_random": {
@@ -976,9 +980,9 @@
         "D3": false,
         "D4": true,
         "D1_p": 0.00390625,
-        "D2_p": 0.5703125,
+        "D2_p": 0.556640625,
         "D3_p": 0.013671875,
-        "D4_p": 0.03125,
+        "D4_p": 0.001953125,
         "verdict": "Not supported; failed rule(s): D1, D2, D3."
       }
     },
@@ -988,7 +992,8 @@
       "n_edges_kept": 20760,
       "n_edges_orig": 519000,
       "fraction_kept": 0.04,
-      "sd_laplacian": 0.0,
+      "sd_laplacian": null,
+      "sd_profile": {},
       "edge_label_homophily": 0.6394163594820631,
       "assignments_usage": {
         "oracle": [
@@ -997,8 +1002,8 @@
           2886
         ],
         "label_free": [
-          869,
-          6521,
+          7234,
+          156,
           4368
         ],
         "random": [
@@ -1023,12 +1028,12 @@
           "significant": false
         },
         "label_free_vs_random": {
-          "mean_diff": -0.0016045812779951097,
-          "ci_low": -0.0021584230692508685,
-          "ci_high": -0.0010507394867393508,
-          "p_wilcoxon": 0.001953125,
-          "p_paired_t": 0.00010469965004129193,
-          "effect_size_dz": -2.1846281066223643,
+          "mean_diff": -0.0008221352837784023,
+          "ci_low": -0.001454909002736727,
+          "ci_high": -0.00018936156482007762,
+          "p_wilcoxon": 0.013671875,
+          "p_paired_t": 0.016510283057435744,
+          "effect_size_dz": -0.9797073663215191,
           "significant": false
         },
         "oracle_vs_random": {
@@ -1047,9 +1052,9 @@
         "D3": false,
         "D4": true,
         "D1_p": 0.130859375,
-        "D2_p": 0.001953125,
+        "D2_p": 0.013671875,
         "D3_p": 0.083984375,
-        "D4_p": 0.03125,
+        "D4_p": 0.001953125,
         "verdict": "Not supported; failed rule(s): D1, D2, D3."
       }
     },
@@ -1059,7 +1064,8 @@
       "n_edges_kept": 20760,
       "n_edges_orig": 519000,
       "fraction_kept": 0.04,
-      "sd_laplacian": 0.0,
+      "sd_laplacian": null,
+      "sd_profile": {},
       "edge_label_homophily": 0.41922894034586233,
       "assignments_usage": {
         "oracle": [
@@ -1068,9 +1074,9 @@
           316
         ],
         "label_free": [
-          118,
-          623,
-          11017
+          166,
+          700,
+          10892
         ],
         "random": [
           3962,
@@ -1094,12 +1100,12 @@
           "significant": false
         },
         "label_free_vs_random": {
-          "mean_diff": 0.004779724442932431,
-          "ci_low": 0.00433621474549393,
-          "ci_high": 0.005223234140370932,
+          "mean_diff": 0.004910132108635223,
+          "ci_low": 0.004506248167655255,
+          "ci_high": 0.005314016049615192,
           "p_wilcoxon": 0.001953125,
-          "p_paired_t": 1.5738523867755106e-09,
-          "effect_size_dz": 8.126457322501373,
+          "p_paired_t": 5.390368730871326e-10,
+          "effect_size_dz": 9.167229652787796,
           "significant": true
         },
         "oracle_vs_random": {
@@ -1120,7 +1126,7 @@
         "D1_p": 0.10546875,
         "D2_p": 0.001953125,
         "D3_p": 0.193359375,
-        "D4_p": 0.03125,
+        "D4_p": 0.001953125,
         "verdict": "Not supported; failed rule(s): D1, D3."
       }
     }

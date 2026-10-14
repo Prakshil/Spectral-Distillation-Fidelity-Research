@@ -35,6 +35,44 @@
     "n_runs": 3,
     "n_runs_learned_beats_no_routing": 1,
     "n_runs_learned_beats_ensemble": 2,
+    "paired_tests": {
+      "learned_vs_no_routing": {
+        "name": "learned_vs_no_routing",
+        "mean_diff": 0.00015432098765433278,
+        "ci_low": -0.0010427033207896495,
+        "ci_high": 0.001351345296098315,
+        "p_wilcoxon": 1.0,
+        "p_paired_t": 0.6348516283298542,
+        "effect_size_dz": 0.39223227027641144,
+        "n_pairs": 3,
+        "alpha_corrected": 0.05,
+        "significant": false
+      },
+      "learned_vs_random": {
+        "name": "learned_vs_random",
+        "mean_diff": 0.041589506172839484,
+        "ci_low": -0.007353555525316198,
+        "ci_high": 0.09053256787099517,
+        "p_wilcoxon": 0.25,
+        "p_paired_t": 0.06733864130051598,
+        "effect_size_dz": 2.5853177465707917,
+        "n_pairs": 3,
+        "alpha_corrected": 0.05,
+        "significant": false
+      },
+      "learned_vs_ensemble": {
+        "name": "learned_vs_ensemble",
+        "mean_diff": 0.005324074074074055,
+        "ci_low": -0.006641564185004493,
+        "ci_high": 0.0172897123331526,
+        "p_wilcoxon": 0.5,
+        "p_paired_t": 0.19565995837066097,
+        "effect_size_dz": 1.3537220949635984,
+        "n_pairs": 3,
+        "alpha_corrected": 0.05,
+        "significant": false
+      }
+    },
     "per_run": [
       {
         "accuracy": {
@@ -101,5 +139,5 @@
       }
     ]
   },
-  "interpretation": "Learned routing is scored on the same frozen routing-blind pool as every baseline, trained on training nodes only. Added Node-MoE gate [X, |AX-X|, |A2X-X|] and uniform ensemble (Ens-Avg). Router mode 'x_only' removes all graph propagation from both the gate and the expert, so implicit routing through a frozen expert (EMNLP 2023) cannot explain a null result."
+  "interpretation": "Learned routing is scored on the same frozen routing-blind pool as every baseline, trained on training nodes only. Added Node-MoE gate [X, |AX-X|, |A2X-X|] and uniform ensemble (Ens-Avg). Significance is a paired Wilcoxon signed-rank test of per-split means (learned minus baseline); win-counts alone are not evidence. Router mode 'x_only' removes all graph propagation from both the gate and the expert, so implicit routing through a frozen expert (EMNLP 2023) cannot explain a null result."
 }

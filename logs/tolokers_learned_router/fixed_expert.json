@@ -8,6 +8,7 @@
     "epochs": 100,
     "router_frac": 0.35,
     "expert": "logistic",
+    "router_mode": "nodemoe",
     "out": "logs",
     "device": "cpu"
   },
@@ -34,6 +35,44 @@
     "n_runs": 3,
     "n_runs_learned_beats_no_routing": 1,
     "n_runs_learned_beats_ensemble": 1,
+    "paired_tests": {
+      "learned_vs_no_routing": {
+        "name": "learned_vs_no_routing",
+        "mean_diff": -0.00062368883596986,
+        "ci_low": -0.0031706646991794224,
+        "ci_high": 0.0019232870272397023,
+        "p_wilcoxon": 0.5,
+        "p_paired_t": 0.4025620087470486,
+        "effect_size_dz": -0.7450140076265065,
+        "n_pairs": 3,
+        "alpha_corrected": 0.05,
+        "significant": false
+      },
+      "learned_vs_random": {
+        "name": "learned_vs_random",
+        "mean_diff": 0.00028349492544081184,
+        "ci_low": -0.0005961010964128646,
+        "ci_high": 0.0011630909472944884,
+        "p_wilcoxon": 0.5,
+        "p_paired_t": 0.2998599579859951,
+        "effect_size_dz": 0.9805806756909201,
+        "n_pairs": 3,
+        "alpha_corrected": 0.05,
+        "significant": false
+      },
+      "learned_vs_ensemble": {
+        "name": "learned_vs_ensemble",
+        "mean_diff": 0.0001700969552644871,
+        "ci_low": -0.0005617711736172608,
+        "ci_high": 0.000901965084146235,
+        "p_wilcoxon": 1.0,
+        "p_paired_t": 0.42264973081037427,
+        "effect_size_dz": 0.7071067811865476,
+        "n_pairs": 3,
+        "alpha_corrected": 0.05,
+        "significant": false
+      }
+    },
     "per_run": [
       {
         "accuracy": {
@@ -49,6 +88,7 @@
         "learned_minus_ensemble": 0.0005102908657934613,
         "ensemble_minus_no_routing": -0.0010205817315870336,
         "router_vs_kmeans_agreement": 0.28321143051539377,
+        "router_feature_mode": "nodemoe",
         "final_train_loss": 1.0984621047973633,
         "n_fit_nodes": 3821,
         "n_router_nodes": 2058,
@@ -69,6 +109,7 @@
         "learned_minus_ensemble": 0.0,
         "ensemble_minus_no_routing": -0.001700969552644982,
         "router_vs_kmeans_agreement": 0.32896751148154446,
+        "router_feature_mode": "nodemoe",
         "final_train_loss": 1.0986164808273315,
         "n_fit_nodes": 3821,
         "n_router_nodes": 2058,
@@ -89,6 +130,7 @@
         "learned_minus_ensemble": 0.0,
         "ensemble_minus_no_routing": 0.0003401939105289742,
         "router_vs_kmeans_agreement": 0.331178771899983,
+        "router_feature_mode": "nodemoe",
         "final_train_loss": 1.0986164808273315,
         "n_fit_nodes": 3821,
         "n_router_nodes": 2058,
@@ -97,5 +139,5 @@
       }
     ]
   },
-  "interpretation": "Learned routing is scored on the same frozen routing-blind pool as every baseline, trained on training nodes only. Added Node-MoE gate [X, |AX-X|, |A2X-X|] and uniform ensemble (Ens-Avg)."
+  "interpretation": "Learned routing is scored on the same frozen routing-blind pool as every baseline, trained on training nodes only. Added Node-MoE gate [X, |AX-X|, |A2X-X|] and uniform ensemble (Ens-Avg). Significance is a paired Wilcoxon signed-rank test of per-split means (learned minus baseline); win-counts alone are not evidence. "
 }

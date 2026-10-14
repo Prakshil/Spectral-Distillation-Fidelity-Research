@@ -11,6 +11,9 @@
     "n_layers": 3,
     "router_seed": 0,
     "random_seed": 1,
+    "control_seed": 1000,
+    "control_splits": 10,
+    "control_seeds": 3,
     "frozen_perms": 20,
     "out": "logs",
     "device": "cpu"
@@ -83,6 +86,35 @@
       "p_wilcoxon": 0.001953125,
       "p_paired_t": 7.630702624399833e-17,
       "effect_size_dz": 53.15077230510551,
+      "significant": true
+    }
+  },
+  "control_comparisons": {
+    "oracle_vs_uniform": {
+      "mean_diff": 0.15757777777777776,
+      "ci_low": 0.15249054695344325,
+      "ci_high": 0.16266500860211228,
+      "p_wilcoxon": 0.001953125,
+      "p_paired_t": 1.2410531403579483e-13,
+      "effect_size_dz": 23.35689172987752,
+      "significant": true
+    },
+    "label_free_vs_random": {
+      "mean_diff": 0.010888888888888948,
+      "ci_low": 0.008372031817472488,
+      "ci_high": 0.013405745960305408,
+      "p_wilcoxon": 0.001953125,
+      "p_paired_t": 4.279437347953724e-06,
+      "effect_size_dz": 3.2623198029092824,
+      "significant": true
+    },
+    "oracle_vs_random": {
+      "mean_diff": 0.16846666666666668,
+      "ci_low": 0.16344722490691166,
+      "ci_high": 0.1734861084264217,
+      "p_wilcoxon": 0.001953125,
+      "p_paired_t": 6.03485820328598e-14,
+      "effect_size_dz": 25.3081315242218,
       "significant": true
     }
   },

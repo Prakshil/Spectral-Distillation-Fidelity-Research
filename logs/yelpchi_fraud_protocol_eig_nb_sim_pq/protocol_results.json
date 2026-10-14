@@ -18,7 +18,8 @@
     "label_free_strategy": "proxy_quantile",
     "order_feature": "eig_nb_sim",
     "spectral_k": 8,
-    "no_progress": true,
+    "max_nodes": null,
+    "no_progress": false,
     "out": "logs",
     "device": "cpu"
   },
@@ -60,7 +61,7 @@
     "D1_p": 0.001953125,
     "D2_p": 0.001953125,
     "D3_p": 0.001953125,
-    "D4_p": 0.03125,
+    "D4_p": 0.001953125,
     "verdict": "Supported: signal exists, router finds it, not capacity, instrument valid."
   },
   "comparisons": {
@@ -103,16 +104,16 @@
   "control": {
     "pc_n_nodes": 2000,
     "oracle_vs_uniform": {
-      "mean_diff": 0.25341325341325344,
-      "p_wilcoxon": 0.03125
+      "mean_diff": 0.24931734931734928,
+      "p_wilcoxon": 0.001953125
     },
     "label_free_vs_random": {
-      "mean_diff": 0.026473526473526483,
-      "p_wilcoxon": 0.03125
+      "mean_diff": 0.0273726273726274,
+      "p_wilcoxon": 0.001953125
     },
     "oracle_vs_random": {
-      "mean_diff": 0.2798867798867799,
-      "p_wilcoxon": 0.03125
+      "mean_diff": 0.27668997668997675,
+      "p_wilcoxon": 0.001953125
     }
   }
 }

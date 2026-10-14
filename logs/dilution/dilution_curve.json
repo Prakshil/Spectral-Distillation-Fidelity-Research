@@ -9,22 +9,22 @@
     {
       "dilution": 0.25,
       "oracle_gain": 0.25909181836367273,
-      "label_free_gain": 0.19741281589651258
+      "label_free_gain": 0.16436620657464826
     },
     {
       "dilution": 0.5,
       "oracle_gain": 0.25909181836367273,
-      "label_free_gain": 0.1764486230579449
+      "label_free_gain": 0.04860972194438888
     },
     {
       "dilution": 0.75,
       "oracle_gain": 0.25909181836367273,
-      "label_free_gain": 0.10837500833500033
+      "label_free_gain": 0.02925251717010068
     },
     {
       "dilution": 1.0,
       "oracle_gain": 0.25909181836367273,
-      "label_free_gain": 0.01474961658998466
+      "label_free_gain": 0.081042875241715
     }
   ]
 }

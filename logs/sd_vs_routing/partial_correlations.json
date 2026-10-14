@@ -5,25 +5,25 @@
       "label": "amazon (n=2000)",
       "n_points": 15,
       "collapse_affected": 0,
-      "lowfreq_max": 0.006389339478695334,
-      "density": 0.1485447723861931,
-      "rho_lowfreq_stability_collapsefree": -0.4244604316546763,
-      "p_lowfreq_stability_collapsefree": 0.11480531996282868,
+      "lowfreq_max": 0.0051542602439234786,
+      "density": 0.09019409704852427,
+      "rho_lowfreq_stability_collapsefree": -0.4928057553956834,
+      "p_lowfreq_stability_collapsefree": 0.06198239895129874,
       "rho_lowfreq_stability_bootstrap_ci": [
-        -0.8432630909458505,
-        0.2271625163826995
+        -0.8918011013704711,
+        0.15643602693602654
       ],
       "rho_survival_stability_bootstrap_ci": [
-        0.2880533778148457,
-        0.966551976273781
+        -0.10313365115896761,
+        0.8722752898666393
       ],
-      "partial_rho_lowfreq_stability_given_isolation": -0.09540473818686107,
-      "p_partial_lowfreq_stability_given_isolation": 0.7456117630456816,
-      "partial_rho_survival_stability_given_lowfreq": 0.7218056808762559,
-      "p_partial_survival_stability_given_lowfreq": 0.0035612400232688346
+      "partial_rho_lowfreq_stability_given_isolation": -0.4062247979605042,
+      "p_partial_lowfreq_stability_given_isolation": 0.1495065645442036,
+      "partial_rho_survival_stability_given_lowfreq": 0.3769259687686073,
+      "p_partial_survival_stability_given_lowfreq": 0.1840204131528116
     },
     {
-      "label": "llm:HuggingFaceTB/SmolLM2-1.7B (n=2000)",
+      "label": "SmolLM2-1.7B (n=2000)",
       "n_points": 15,
       "collapse_affected": 5,
       "lowfreq_max": 0.0034179245679392053,
@@ -47,86 +47,86 @@
       "label": "tolokers (n=2000)",
       "n_points": 15,
       "collapse_affected": 2,
-      "lowfreq_max": 0.009048937330089409,
-      "density": 0.007190595297648824,
-      "rho_lowfreq_stability_collapsefree": -0.6,
-      "p_lowfreq_stability_collapsefree": 0.03017079516557383,
+      "lowfreq_max": 0.0060891941992005285,
+      "density": 0.007158579289644822,
+      "rho_lowfreq_stability_collapsefree": -0.7333333333333333,
+      "p_lowfreq_stability_collapsefree": 0.004338087441744078,
       "rho_lowfreq_stability_bootstrap_ci": [
-        -0.926170731707317,
-        -0.04444444444444443
+        -0.9710055109461404,
+        -0.28446719532883596
       ],
       "rho_survival_stability_bootstrap_ci": [
-        0.8599366062214359,
+        0.7590867245774715,
         1.0
       ],
-      "partial_rho_lowfreq_stability_given_isolation": 0.4452309354939343,
-      "p_partial_lowfreq_stability_given_isolation": 0.14693499336271654,
-      "partial_rho_survival_stability_given_lowfreq": 0.9720803555807415,
-      "p_partial_survival_stability_given_lowfreq": 1.2749199814937263e-07
+      "partial_rho_lowfreq_stability_given_isolation": -0.4034103882482044,
+      "p_partial_lowfreq_stability_given_isolation": 0.19346594105717682,
+      "partial_rho_survival_stability_given_lowfreq": 0.9283610970919168,
+      "p_partial_survival_stability_given_lowfreq": 1.3165044437217827e-05
     },
     {
       "label": "yelpchi (n=2000)",
       "n_points": 15,
       "collapse_affected": 2,
-      "lowfreq_max": 0.40737189164916154,
-      "density": 0.005125062531265633,
-      "rho_lowfreq_stability_collapsefree": -0.7111111111111109,
-      "p_lowfreq_stability_collapsefree": 0.006426039332004917,
+      "lowfreq_max": 0.7223389925239843,
+      "density": 0.003736368184092046,
+      "rho_lowfreq_stability_collapsefree": -0.8666666666666666,
+      "p_lowfreq_stability_collapsefree": 0.00012619391902928456,
       "rho_lowfreq_stability_bootstrap_ci": [
-        -0.9590848539687327,
-        -0.17083640473733372
+        -0.9825110804024335,
+        -0.5750708215297451
       ],
       "rho_survival_stability_bootstrap_ci": [
-        0.2423308997295695,
+        0.8422535211267606,
         1.0
       ],
-      "partial_rho_lowfreq_stability_given_isolation": -0.022554388919056697,
-      "p_partial_lowfreq_stability_given_isolation": 0.9445326884733056,
-      "partial_rho_survival_stability_given_lowfreq": 0.4481547005502054,
-      "p_partial_survival_stability_given_lowfreq": 0.14398096709238484
+      "partial_rho_lowfreq_stability_given_isolation": 0.23832426093938186,
+      "p_partial_lowfreq_stability_given_isolation": 0.4557055873391417,
+      "partial_rho_survival_stability_given_lowfreq": 0.9032863049881666,
+      "p_partial_survival_stability_given_lowfreq": 5.654173901848198e-05
     },
     {
       "label": "POOLED (all graphs)",
       "n_points": 60,
       "collapse_affected": 9,
-      "lowfreq_max": 0.40737189164916154,
-      "density": 0.1485447723861931,
-      "rho_lowfreq_stability_collapsefree": -0.5493175614194722,
-      "p_lowfreq_stability_collapsefree": 2.9864702061525828e-05,
+      "lowfreq_max": 0.7223389925239843,
+      "density": 0.09019409704852427,
+      "rho_lowfreq_stability_collapsefree": -0.6872611464968152,
+      "p_lowfreq_stability_collapsefree": 2.5489811684318326e-08,
       "rho_lowfreq_stability_bootstrap_ci": [
-        -0.7670358049916123,
-        -0.2713137410736902
+        -0.8498242444154064,
+        -0.45578757278088333
       ],
       "rho_survival_stability_bootstrap_ci": [
-        0.727338039729887,
-        0.9619318923846584
+        0.5610213221527266,
+        0.89260359532963
       ],
-      "partial_rho_lowfreq_stability_given_isolation": -0.19967680695501616,
-      "p_partial_lowfreq_stability_given_isolation": 0.1644491811965713,
-      "partial_rho_survival_stability_given_lowfreq": 0.8289370828681217,
-      "p_partial_survival_stability_given_lowfreq": 1.0596810001316013e-13
+      "partial_rho_lowfreq_stability_given_isolation": -0.6184633313819674,
+      "p_partial_lowfreq_stability_given_isolation": 1.6982765735360176e-06,
+      "partial_rho_survival_stability_given_lowfreq": 0.7101937018256441,
+      "p_partial_survival_stability_given_lowfreq": 7.641679390361639e-09
     }
   ],
   "leave_one_graph_out": {
-    "llm:HuggingFaceTB/SmolLM2-1.7B": {
+    "SmolLM2-1.7B": {
       "n_points": 41,
-      "rho_lowfreq_stability": -0.6461267605633804,
-      "rho_survival_stability": 0.8823943661971833
+      "rho_lowfreq_stability": -0.8126760563380283,
+      "rho_survival_stability": 0.7808098591549296
     },
     "amazon": {
       "n_points": 36,
-      "rho_lowfreq_stability": -0.6449903038138332,
-      "rho_survival_stability": 0.8425339366515836
+      "rho_lowfreq_stability": -0.7070458952811892,
+      "rho_survival_stability": 0.9089851325145442
     },
     "tolokers": {
       "n_points": 38,
-      "rho_lowfreq_stability": -0.5303163444639719,
-      "rho_survival_stability": 0.8532513181019332
+      "rho_lowfreq_stability": -0.6592706502636204,
+      "rho_survival_stability": 0.7166080843585237
     },
     "yelpchi": {
       "n_points": 38,
-      "rho_lowfreq_stability": -0.3807117750439368,
-      "rho_survival_stability": 0.9255272407732865
+      "rho_lowfreq_stability": -0.5445957820738137,
+      "rho_survival_stability": 0.6812390158172232
     }
   }
 }

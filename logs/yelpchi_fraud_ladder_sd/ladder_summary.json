@@ -23,7 +23,7 @@
     "max_nodes": null,
     "skip_sd": false,
     "resume": false,
-    "no_progress": true,
+    "no_progress": false,
     "out": "logs",
     "device": "cpu"
   },
@@ -37,16 +37,16 @@
   "control": {
     "pc_n_nodes": 2000,
     "oracle_vs_uniform": {
-      "mean_diff": 0.25341325341325344,
-      "p_wilcoxon": 0.03125
+      "mean_diff": 0.24931734931734928,
+      "p_wilcoxon": 0.001953125
     },
     "label_free_vs_random": {
-      "mean_diff": 0.026473526473526483,
-      "p_wilcoxon": 0.03125
+      "mean_diff": 0.0273726273726274,
+      "p_wilcoxon": 0.001953125
     },
     "oracle_vs_random": {
-      "mean_diff": 0.2798867798867799,
-      "p_wilcoxon": 0.03125
+      "mean_diff": 0.27668997668997675,
+      "p_wilcoxon": 0.001953125
     }
   },
   "points": [
@@ -56,18 +56,37 @@
       "n_edges_kept": 61679,
       "n_edges_orig": 411194,
       "fraction_kept": 0.14999975680578997,
-      "sd_laplacian": 0.9999999993274756,
+      "sd_laplacian": 0.9999999993274769,
       "sd_profile": {
-        "SD": 0.9999999993274756,
+        "SD": 0.9999999993274769,
         "argmax_index": 1643,
-        "median_relative_error": 0.93935579493681,
-        "p90_relative_error": 0.9999999878498895,
-        "p99_relative_error": 0.9999999992685096,
-        "low_mode_mean_error": 0.9999998892897359,
+        "median_relative_error": 0.9393557949368099,
+        "p90_relative_error": 0.9999999878498993,
+        "p99_relative_error": 0.9999999992685099,
+        "low_mode_mean_error": 0.9999998892898401,
         "min_eigengap": 0.0,
-        "fragility_score": 99999999.93274756,
+        "fragility_score": 99999999.93274768,
         "lambda_max_ref": 176.06759644165987,
-        "lambda_max_perturbed": 171.0407765550971
+        "lambda_max_perturbed": 171.04077655509707,
+        "low_frequency": {
+          "low_freq_k": 32,
+          "low_freq_mean_error": 0.00041419416966102866,
+          "low_freq_median_error": 0.0004184156005945825,
+          "low_freq_p90_error": 0.0006804708206854204,
+          "low_freq_max_error": 0.0007450627719331905,
+          "low_freq_gap_ref": 0.00012673225165448637,
+          "normalisation": 176.06759644165987,
+          "n_matched_modes_ref": 14839,
+          "n_matched_modes_perturbed": 13196
+        },
+        "connectivity": {
+          "n_components_ref": 1,
+          "n_components_perturbed": 1644,
+          "n_isolated_perturbed": 1643,
+          "largest_ref": 176.06759644165987,
+          "largest_perturbed": 171.04077655509707
+        },
+        "routing_survival": 0.8889173773276943
       },
       "edge_label_homophily": 0.8394087300187126,
       "assignments_usage": {
@@ -77,8 +96,8 @@
           1872
         ],
         "label_free": [
-          2173,
-          11025,
+          2001,
+          11197,
           1642
         ],
         "random": [
@@ -94,30 +113,30 @@
       },
       "comparisons": {
         "oracle_vs_uniform": {
-          "mean_diff": 0.09803234501347707,
-          "ci_low": 0.09701714126126905,
-          "ci_high": 0.0990475487656851,
+          "mean_diff": 0.09804582210242588,
+          "ci_low": 0.09702853505653491,
+          "ci_high": 0.09906310914831684,
           "p_wilcoxon": 0.001953125,
-          "p_paired_t": 4.4924701980971125e-18,
-          "effect_size_dz": 72.81447065225173,
+          "p_paired_t": 4.570453684134474e-18,
+          "effect_size_dz": 72.6753442412669,
           "significant": true
         },
         "label_free_vs_random": {
-          "mean_diff": 0.004254267744833784,
-          "ci_low": 0.0035723744237114146,
-          "ci_high": 0.004936161065956153,
+          "mean_diff": 0.003975741239892183,
+          "ci_low": 0.0033160523740618604,
+          "ci_high": 0.004635430105722506,
           "p_wilcoxon": 0.001953125,
-          "p_paired_t": 1.912718279246324e-07,
-          "effect_size_dz": 4.704461315559089,
+          "p_paired_t": 2.578793579251371e-07,
+          "effect_size_dz": 4.54444106877388,
           "significant": true
         },
         "oracle_vs_random": {
-          "mean_diff": 0.09919586702605568,
-          "ci_low": 0.09828471126433273,
-          "ci_high": 0.10010702278777862,
+          "mean_diff": 0.09920035938903862,
+          "ci_low": 0.09829067199934415,
+          "ci_high": 0.1001100467787331,
           "p_wilcoxon": 0.001953125,
-          "p_paired_t": 1.526840541357068e-18,
-          "effect_size_dz": 82.09230903769674,
+          "p_paired_t": 1.5042273594443884e-18,
+          "effect_size_dz": 82.22854213137296,
           "significant": true
         }
       },
@@ -129,7 +148,7 @@
         "D1_p": 0.001953125,
         "D2_p": 0.001953125,
         "D3_p": 0.001953125,
-        "D4_p": 0.03125,
+        "D4_p": 0.001953125,
         "verdict": "Supported: signal exists, router finds it, not capacity, instrument valid."
       }
     },
@@ -139,18 +158,37 @@
       "n_edges_kept": 61679,
       "n_edges_orig": 411194,
       "fraction_kept": 0.14999975680578997,
-      "sd_laplacian": 0.9999999984292085,
+      "sd_laplacian": 0.9999999984292195,
       "sd_profile": {
-        "SD": 0.9999999984292085,
+        "SD": 0.9999999984292195,
         "argmax_index": 613,
-        "median_relative_error": 0.13363134974719945,
-        "p90_relative_error": 0.5316246543554476,
-        "p99_relative_error": 0.9999999979999945,
-        "low_mode_mean_error": 0.9999998892904759,
+        "median_relative_error": 0.13363134974720028,
+        "p90_relative_error": 0.5316246543554543,
+        "p99_relative_error": 0.9999999979999951,
+        "low_mode_mean_error": 0.9999998892903146,
         "min_eigengap": 0.0,
-        "fragility_score": 99999999.84292085,
+        "fragility_score": 99999999.84292194,
         "lambda_max_ref": 176.06759644165987,
-        "lambda_max_perturbed": 267.90730286307814
+        "lambda_max_perturbed": 267.90730286307917,
+        "low_frequency": {
+          "low_freq_k": 32,
+          "low_freq_mean_error": 0.0001822933818922664,
+          "low_freq_median_error": 0.00010991557935812157,
+          "low_freq_p90_error": 0.000377703701867012,
+          "low_freq_max_error": 0.00039576915197863386,
+          "low_freq_gap_ref": 0.00012673225165448637,
+          "normalisation": 176.06759644165987,
+          "n_matched_modes_ref": 14839,
+          "n_matched_modes_perturbed": 14226
+        },
+        "connectivity": {
+          "n_components_ref": 1,
+          "n_components_perturbed": 614,
+          "n_isolated_perturbed": 613,
+          "largest_ref": 176.06759644165987,
+          "largest_perturbed": 267.90730286307917
+        },
+        "routing_survival": 0.958517959033411
       },
       "edge_label_homophily": 0.7642830364598532,
       "assignments_usage": {
@@ -177,30 +215,30 @@
       },
       "comparisons": {
         "oracle_vs_uniform": {
-          "mean_diff": 0.036936208445642396,
-          "ci_low": 0.03584327584580018,
-          "ci_high": 0.03802914104548461,
+          "mean_diff": 0.03694519317160825,
+          "ci_low": 0.035848340871485286,
+          "ci_high": 0.03804204547173121,
           "p_wilcoxon": 0.001953125,
-          "p_paired_t": 5.671549877943878e-14,
-          "effect_size_dz": 25.483580755130667,
+          "p_paired_t": 5.8442089232196e-14,
+          "effect_size_dz": 25.398689612938366,
           "significant": true
         },
         "label_free_vs_random": {
-          "mean_diff": 0.0019092542677448421,
-          "ci_low": 0.0011589070768018373,
-          "ci_high": 0.002659601458687847,
+          "mean_diff": 0.0019137466307277639,
+          "ci_low": 0.001167547641446946,
+          "ci_high": 0.0026599456200085817,
           "p_wilcoxon": 0.001953125,
-          "p_paired_t": 0.0002742007578872403,
-          "effect_size_dz": 1.9186821201443969,
+          "p_paired_t": 0.00025893432995236485,
+          "effect_size_dz": 1.9338879265798181,
           "significant": true
         },
         "oracle_vs_random": {
-          "mean_diff": 0.038288409703504056,
-          "ci_low": 0.03731743208866861,
-          "ci_high": 0.0392593873183395,
+          "mean_diff": 0.03829290206648698,
+          "ci_low": 0.037320607639033665,
+          "ci_high": 0.039265196493940294,
           "p_wilcoxon": 0.001953125,
-          "p_paired_t": 1.4172109568868043e-14,
-          "effect_size_dz": 29.734430860095202,
+          "p_paired_t": 1.4330725026397715e-14,
+          "effect_size_dz": 29.69764447554083,
           "significant": true
         }
       },
@@ -212,7 +250,7 @@
         "D1_p": 0.001953125,
         "D2_p": 0.001953125,
         "D3_p": 0.001953125,
-        "D4_p": 0.03125,
+        "D4_p": 0.001953125,
         "verdict": "Supported: signal exists, router finds it, not capacity, instrument valid."
       }
     },
@@ -222,18 +260,37 @@
       "n_edges_kept": 61679,
       "n_edges_orig": 411194,
       "fraction_kept": 0.14999975680578997,
-      "sd_laplacian": 0.9999999998919173,
+      "sd_laplacian": 0.9999999998919166,
       "sd_profile": {
-        "SD": 0.9999999998919173,
+        "SD": 0.9999999998919166,
         "argmax_index": 12981,
         "median_relative_error": 0.999999999754664,
         "p90_relative_error": 0.999999999877173,
         "p99_relative_error": 0.9999999998903935,
-        "low_mode_mean_error": 0.9999998892903678,
+        "low_mode_mean_error": 0.999999889290426,
         "min_eigengap": 0.0,
-        "fragility_score": 99999999.98919173,
+        "fragility_score": 99999999.98919165,
         "lambda_max_ref": 176.06759644165987,
-        "lambda_max_perturbed": 174.0336616279993
+        "lambda_max_perturbed": 174.03366162799847,
+        "low_frequency": {
+          "low_freq_k": 32,
+          "low_freq_mean_error": 0.002088104657425707,
+          "low_freq_median_error": 0.0002939871176341826,
+          "low_freq_p90_error": 0.004730615794712153,
+          "low_freq_max_error": 0.0047716723170214085,
+          "low_freq_gap_ref": 0.00012673225165448637,
+          "normalisation": 176.06759644165987,
+          "n_matched_modes_ref": 14839,
+          "n_matched_modes_perturbed": 1858
+        },
+        "connectivity": {
+          "n_components_ref": 1,
+          "n_components_perturbed": 12982,
+          "n_isolated_perturbed": 12981,
+          "largest_ref": 176.06759644165987,
+          "largest_perturbed": 174.03366162799847
+        },
+        "routing_survival": 0.12500796586535348
       },
       "edge_label_homophily": 0.7691135918824593,
       "assignments_usage": {
@@ -260,30 +317,30 @@
       },
       "comparisons": {
         "oracle_vs_uniform": {
-          "mean_diff": 0.0007681940700808521,
-          "ci_low": 0.0004147095837281542,
-          "ci_high": 0.00112167855643355,
+          "mean_diff": 0.000777178796046707,
+          "ci_low": 0.00044011206459943766,
+          "ci_high": 0.0011142455274939763,
           "p_wilcoxon": 0.00390625,
-          "p_paired_t": 0.0008290120222505896,
-          "effect_size_dz": 1.6387100284806038,
+          "p_paired_t": 0.0005522217934787259,
+          "effect_size_dz": 1.7386276131401797,
           "significant": true
         },
         "label_free_vs_random": {
-          "mean_diff": 8.212155150767453e-05,
-          "ci_low": -0.000902504071441665,
-          "ci_high": 0.001066747174457014,
-          "p_wilcoxon": 1.0,
-          "p_paired_t": 0.8545353145345445,
-          "effect_size_dz": 0.06289085978056591,
+          "mean_diff": 0.00014824797843667747,
+          "ci_low": -0.0008406458634414882,
+          "ci_high": 0.0011371418203148431,
+          "p_wilcoxon": 0.845703125,
+          "p_paired_t": 0.7422930504123657,
+          "effect_size_dz": 0.11304220672201915,
           "significant": false
         },
         "oracle_vs_random": {
           "mean_diff": 0.002079964061096162,
-          "ci_low": 0.0012215142857294088,
-          "ci_high": 0.0029384138364629154,
+          "ci_low": 0.0012356664148484155,
+          "ci_high": 0.0029242617073439088,
           "p_wilcoxon": 0.001953125,
-          "p_paired_t": 0.0003896335874232844,
-          "effect_size_dz": 1.827016456215155,
+          "p_paired_t": 0.00034608006367395865,
+          "effect_size_dz": 1.8576409319623248,
           "significant": true
         }
       },
@@ -293,9 +350,9 @@
         "D3": true,
         "D4": true,
         "D1_p": 0.00390625,
-        "D2_p": 1.0,
+        "D2_p": 0.845703125,
         "D3_p": 0.001953125,
-        "D4_p": 0.03125,
+        "D4_p": 0.001953125,
         "verdict": "Not supported; failed rule(s): D2."
       }
     },
@@ -305,18 +362,37 @@
       "n_edges_kept": 32896,
       "n_edges_orig": 411194,
       "fraction_kept": 0.08000116733220815,
-      "sd_laplacian": 0.9999999996662015,
+      "sd_laplacian": 0.9999999996662017,
       "sd_profile": {
-        "SD": 0.9999999996662015,
+        "SD": 0.9999999996662017,
         "argmax_index": 3951,
-        "median_relative_error": 0.9702476399985663,
+        "median_relative_error": 0.9702476399985659,
         "p90_relative_error": 0.9999999995,
         "p99_relative_error": 0.9999999996528617,
-        "low_mode_mean_error": 0.9999998892893671,
+        "low_mode_mean_error": 0.9999998892894264,
         "min_eigengap": 0.0,
-        "fragility_score": 99999999.96662015,
+        "fragility_score": 99999999.96662016,
         "lambda_max_ref": 176.06759644165987,
-        "lambda_max_perturbed": 171.00479750927747
+        "lambda_max_perturbed": 171.00479750927738,
+        "low_frequency": {
+          "low_freq_k": 32,
+          "low_freq_mean_error": 0.0005328555963859525,
+          "low_freq_median_error": 0.0005573959899442546,
+          "low_freq_p90_error": 0.0008264431440226758,
+          "low_freq_max_error": 0.0008797318265477731,
+          "low_freq_gap_ref": 0.00012673225165448637,
+          "normalisation": 176.06759644165987,
+          "n_matched_modes_ref": 14839,
+          "n_matched_modes_perturbed": 10888
+        },
+        "connectivity": {
+          "n_components_ref": 1,
+          "n_components_perturbed": 3952,
+          "n_isolated_perturbed": 3951,
+          "largest_ref": 176.06759644165987,
+          "largest_perturbed": 171.00479750927738
+        },
+        "routing_survival": 0.7333691196368567
       },
       "edge_label_homophily": 0.8439784430640465,
       "assignments_usage": {
@@ -326,8 +402,8 @@
           1533
         ],
         "label_free": [
-          1752,
-          9145,
+          1584,
+          9313,
           3943
         ],
         "random": [
@@ -343,30 +419,30 @@
       },
       "comparisons": {
         "oracle_vs_uniform": {
-          "mean_diff": 0.053926325247079944,
-          "ci_low": 0.05267991781442568,
-          "ci_high": 0.05517273267973421,
+          "mean_diff": 0.05394878706199459,
+          "ci_low": 0.052677742662024206,
+          "ci_high": 0.05521983146196497,
           "p_wilcoxon": 0.001953125,
-          "p_paired_t": 6.155030714213028e-15,
-          "effect_size_dz": 32.62438368281667,
+          "p_paired_t": 7.312124697981256e-15,
+          "effect_size_dz": 32.005342767051864,
           "significant": true
         },
         "label_free_vs_random": {
-          "mean_diff": 0.0055211141060197534,
-          "ci_low": 0.004943363040295372,
-          "ci_high": 0.006098865171744135,
+          "mean_diff": 0.004752920035938924,
+          "ci_low": 0.004121030708079448,
+          "ci_high": 0.005384809363798399,
           "p_wilcoxon": 0.001953125,
-          "p_paired_t": 4.567693301092409e-09,
-          "effect_size_dz": 7.205887658097158,
+          "p_paired_t": 3.75743477249734e-08,
+          "effect_size_dz": 5.671801284250138,
           "significant": true
         },
         "oracle_vs_random": {
-          "mean_diff": 0.0549101527403414,
-          "ci_low": 0.05369169180158875,
-          "ci_high": 0.05612861367909405,
+          "mean_diff": 0.05492362982929019,
+          "ci_low": 0.053696988893481665,
+          "ci_high": 0.05615027076509871,
           "p_wilcoxon": 0.001953125,
-          "p_paired_t": 4.266370611818086e-15,
-          "effect_size_dz": 33.981501139225884,
+          "p_paired_t": 4.520973921750725e-15,
+          "effect_size_dz": 33.76317633010276,
           "significant": true
         }
       },
@@ -378,7 +454,7 @@
         "D1_p": 0.001953125,
         "D2_p": 0.001953125,
         "D3_p": 0.001953125,
-        "D4_p": 0.03125,
+        "D4_p": 0.001953125,
         "verdict": "Supported: signal exists, router finds it, not capacity, instrument valid."
       }
     },
@@ -388,18 +464,37 @@
       "n_edges_kept": 32896,
       "n_edges_orig": 411194,
       "fraction_kept": 0.08000116733220815,
-      "sd_laplacian": 0.9999999992682422,
+      "sd_laplacian": 0.9999999992682416,
       "sd_profile": {
-        "SD": 0.9999999992682422,
+        "SD": 0.9999999992682416,
         "argmax_index": 1494,
-        "median_relative_error": 0.2579351993727048,
-        "p90_relative_error": 0.9999998586804135,
-        "p99_relative_error": 0.9999999991952326,
-        "low_mode_mean_error": 0.999999889290867,
+        "median_relative_error": 0.2579351993727073,
+        "p90_relative_error": 0.9999998586799801,
+        "p99_relative_error": 0.9999999991952327,
+        "low_mode_mean_error": 0.9999998892905699,
         "min_eigengap": 0.0,
-        "fragility_score": 99999999.92682423,
+        "fragility_score": 99999999.92682415,
         "lambda_max_ref": 176.06759644165987,
-        "lambda_max_perturbed": 321.7358431589316
+        "lambda_max_perturbed": 321.7358431589305,
+        "low_frequency": {
+          "low_freq_k": 32,
+          "low_freq_mean_error": 0.00024724331597828273,
+          "low_freq_median_error": 0.00027301818856883766,
+          "low_freq_p90_error": 0.00035477344070094824,
+          "low_freq_max_error": 0.0003599253109308571,
+          "low_freq_gap_ref": 0.00012673225165448637,
+          "normalisation": 176.06759644165987,
+          "n_matched_modes_ref": 14839,
+          "n_matched_modes_perturbed": 13345
+        },
+        "connectivity": {
+          "n_components_ref": 1,
+          "n_components_perturbed": 1495,
+          "n_isolated_perturbed": 1494,
+          "largest_ref": 176.06759644165987,
+          "largest_perturbed": 321.7358431589305
+        },
+        "routing_survival": 0.8991037931741883
       },
       "edge_label_homophily": 0.7658756822997735,
       "assignments_usage": {
@@ -426,12 +521,12 @@
       },
       "comparisons": {
         "oracle_vs_uniform": {
-          "mean_diff": 0.027394429469901137,
-          "ci_low": 0.026195932627382436,
-          "ci_high": 0.028592926312419838,
+          "mean_diff": 0.02739892183288408,
+          "ci_low": 0.026197302984433134,
+          "ci_high": 0.028600540681335027,
           "p_wilcoxon": 0.001953125,
-          "p_paired_t": 1.9009329454154594e-12,
-          "effect_size_dz": 17.235618999046665,
+          "p_paired_t": 1.942966384466851e-12,
+          "effect_size_dz": 17.193657084257623,
           "significant": true
         },
         "label_free_vs_random": {
@@ -444,12 +539,12 @@
           "significant": true
         },
         "oracle_vs_random": {
-          "mean_diff": 0.028944294699011643,
-          "ci_low": 0.027796239800581657,
-          "ci_high": 0.03009234959744163,
+          "mean_diff": 0.02893980233602873,
+          "ci_low": 0.02779037392373496,
+          "ci_high": 0.0300892307483225,
           "p_wilcoxon": 0.001953125,
-          "p_paired_t": 7.885946888998503e-13,
-          "effect_size_dz": 19.010863117745558,
+          "p_paired_t": 7.982165567216005e-13,
+          "effect_size_dz": 18.985198917372085,
           "significant": true
         }
       },
@@ -461,7 +556,7 @@
         "D1_p": 0.001953125,
         "D2_p": 0.001953125,
         "D3_p": 0.001953125,
-        "D4_p": 0.03125,
+        "D4_p": 0.001953125,
         "verdict": "Supported: signal exists, router finds it, not capacity, instrument valid."
       }
     },
@@ -471,18 +566,37 @@
       "n_edges_kept": 32896,
       "n_edges_orig": 411194,
       "fraction_kept": 0.08000116733220815,
-      "sd_laplacian": 0.9999999999037058,
+      "sd_laplacian": 0.9999999999037056,
       "sd_profile": {
-        "SD": 0.9999999999037058,
+        "SD": 0.9999999999037056,
         "argmax_index": 14074,
         "median_relative_error": 0.9999999998,
         "p90_relative_error": 0.9999999998877703,
         "p99_relative_error": 0.9999999999011702,
-        "low_mode_mean_error": 0.9999998892901131,
+        "low_mode_mean_error": 0.9999998892900873,
         "min_eigengap": 0.0,
-        "fragility_score": 99999999.99037057,
+        "fragility_score": 99999999.99037056,
         "lambda_max_ref": 176.06759644165987,
-        "lambda_max_perturbed": 174.01748435598296
+        "lambda_max_perturbed": 174.01748435598287,
+        "low_frequency": {
+          "low_freq_k": 32,
+          "low_freq_mean_error": 0.004501261176733743,
+          "low_freq_median_error": 0.004899449430256922,
+          "low_freq_p90_error": 0.0052688604544065725,
+          "low_freq_max_error": 0.005273691246519352,
+          "low_freq_gap_ref": 0.00012673225165448637,
+          "normalisation": 176.06759644165987,
+          "n_matched_modes_ref": 14839,
+          "n_matched_modes_perturbed": 765
+        },
+        "connectivity": {
+          "n_components_ref": 1,
+          "n_components_perturbed": 14075,
+          "n_isolated_perturbed": 14074,
+          "largest_ref": 176.06759644165987,
+          "largest_perturbed": 174.01748435598287
+        },
+        "routing_survival": 0.05138490794734652
       },
       "edge_label_homophily": 0.7827840990294762,
       "assignments_usage": {
@@ -509,30 +623,30 @@
       },
       "comparisons": {
         "oracle_vs_uniform": {
-          "mean_diff": 0.0002830188679245338,
-          "ci_low": -6.608853949829701e-05,
-          "ci_high": 0.0006321262753473646,
+          "mean_diff": 0.0002830188679245227,
+          "ci_low": -4.7863257936152294e-05,
+          "ci_high": 0.0006139009937851977,
           "p_wilcoxon": 0.10546875,
-          "p_paired_t": 0.09987274204250479,
-          "effect_size_dz": 0.6113048550727798,
+          "p_paired_t": 0.084998108011543,
+          "effect_size_dz": 0.6449760697841393,
           "significant": false
         },
         "label_free_vs_random": {
-          "mean_diff": 0.0011185983827492808,
-          "ci_low": 0.000614683420267858,
-          "ci_high": 0.0016225133452307035,
+          "mean_diff": 0.0011275831087151466,
+          "ci_low": 0.0006119628122856735,
+          "ci_high": 0.0016432034051446199,
           "p_wilcoxon": 0.00390625,
-          "p_paired_t": 0.0007175515136821049,
-          "effect_size_dz": 1.6738573848734672,
+          "p_paired_t": 0.0007945729438550075,
+          "effect_size_dz": 1.648997801778191,
           "significant": true
         },
         "oracle_vs_random": {
-          "mean_diff": 0.0014240790655884795,
-          "ci_low": 0.0008649811379030512,
-          "ci_high": 0.0019831769932739077,
+          "mean_diff": 0.0014150943396226134,
+          "ci_low": 0.0008619389434029023,
+          "ci_high": 0.0019682497358423246,
           "p_wilcoxon": 0.001953125,
-          "p_paired_t": 0.00027217334922148095,
-          "effect_size_dz": 1.9206478264180433,
+          "p_paired_t": 0.00026370542205040817,
+          "effect_size_dz": 1.9290334556789992,
           "significant": true
         }
       },
@@ -544,7 +658,7 @@
         "D1_p": 0.10546875,
         "D2_p": 0.00390625,
         "D3_p": 0.001953125,
-        "D4_p": 0.03125,
+        "D4_p": 0.001953125,
         "verdict": "Not supported; failed rule(s): D1."
       }
     },
@@ -554,18 +668,37 @@
       "n_edges_kept": 16448,
       "n_edges_orig": 411194,
       "fraction_kept": 0.040000583666104074,
-      "sd_laplacian": 0.9999999998009551,
+      "sd_laplacian": 0.9999999998009548,
       "sd_profile": {
-        "SD": 0.9999999998009551,
+        "SD": 0.9999999998009548,
         "argmax_index": 6694,
         "median_relative_error": 0.9863013697279039,
         "p90_relative_error": 0.9999999997401772,
         "p99_relative_error": 0.9999999997959184,
-        "low_mode_mean_error": 0.9999998892893373,
+        "low_mode_mean_error": 0.9999998892893543,
         "min_eigengap": 0.0,
-        "fragility_score": 99999999.9800955,
+        "fragility_score": 99999999.98009548,
         "lambda_max_ref": 176.06759644165987,
-        "lambda_max_perturbed": 134.019542926405
+        "lambda_max_perturbed": 134.01954292640497,
+        "low_frequency": {
+          "low_freq_k": 32,
+          "low_freq_mean_error": 0.0005627527476517462,
+          "low_freq_median_error": 0.0005920434064972127,
+          "low_freq_p90_error": 0.0008592745442311279,
+          "low_freq_max_error": 0.0009163764679472787,
+          "low_freq_gap_ref": 0.00012673225165448637,
+          "normalisation": 176.06759644165987,
+          "n_matched_modes_ref": 14839,
+          "n_matched_modes_perturbed": 8145
+        },
+        "connectivity": {
+          "n_components_ref": 1,
+          "n_components_perturbed": 6695,
+          "n_isolated_perturbed": 6694,
+          "largest_ref": 176.06759644165987,
+          "largest_perturbed": 134.01954292640497
+        },
+        "routing_survival": 0.5486129256143955
       },
       "edge_label_homophily": 0.8504356646455157,
       "assignments_usage": {
@@ -592,12 +725,12 @@
       },
       "comparisons": {
         "oracle_vs_uniform": {
-          "mean_diff": 0.022511230907457314,
-          "ci_low": 0.021606013628839228,
-          "ci_high": 0.0234164481860754,
+          "mean_diff": 0.0225247079964061,
+          "ci_low": 0.02161106832597896,
+          "ci_high": 0.023438347666833243,
           "p_wilcoxon": 0.001953125,
-          "p_paired_t": 8.918724376315986e-13,
-          "effect_size_dz": 18.752014367095036,
+          "p_paired_t": 9.639940869560364e-13,
+          "effect_size_dz": 18.59027184880045,
           "significant": true
         },
         "label_free_vs_random": {
@@ -610,12 +743,12 @@
           "significant": true
         },
         "oracle_vs_random": {
-          "mean_diff": 0.024052111410601974,
-          "ci_low": 0.02303437890213571,
-          "ci_high": 0.025069843919068236,
+          "mean_diff": 0.024056603773584907,
+          "ci_low": 0.023039429533975708,
+          "ci_high": 0.025073778013194107,
           "p_wilcoxon": 0.001953125,
-          "p_paired_t": 1.408977257529907e-12,
-          "effect_size_dz": 17.820549000396362,
+          "p_paired_t": 1.3997083690436162e-12,
+          "effect_size_dz": 17.8336599641199,
           "significant": true
         }
       },
@@ -627,7 +760,7 @@
         "D1_p": 0.001953125,
         "D2_p": 0.001953125,
         "D3_p": 0.001953125,
-        "D4_p": 0.03125,
+        "D4_p": 0.001953125,
         "verdict": "Supported: signal exists, router finds it, not capacity, instrument valid."
       }
     },
@@ -637,18 +770,37 @@
       "n_edges_kept": 16448,
       "n_edges_orig": 411194,
       "fraction_kept": 0.040000583666104074,
-      "sd_laplacian": 1.3275183315537362,
+      "sd_laplacian": 1.3275183315537376,
       "sd_profile": {
-        "SD": 1.3275183315537362,
+        "SD": 1.3275183315537376,
         "argmax_index": 14839,
-        "median_relative_error": 0.5244938496908373,
+        "median_relative_error": 0.5244938496908449,
         "p90_relative_error": 0.9999999994529334,
-        "p99_relative_error": 0.9999999996265794,
-        "low_mode_mean_error": 0.9999998892912334,
+        "p99_relative_error": 0.9999999996265796,
+        "low_mode_mean_error": 0.9999998892910191,
         "min_eigengap": 0.0,
-        "fragility_score": 132751833.15537362,
+        "fragility_score": 132751833.15537375,
         "lambda_max_ref": 176.06759644165987,
-        "lambda_max_perturbed": 409.8005583238439
+        "lambda_max_perturbed": 409.80055832384414,
+        "low_frequency": {
+          "low_freq_k": 32,
+          "low_freq_mean_error": 0.00022226338359741568,
+          "low_freq_median_error": 0.00022713744142618437,
+          "low_freq_p90_error": 0.00027071211440146583,
+          "low_freq_max_error": 0.00028723637849872895,
+          "low_freq_gap_ref": 0.00012673225165448637,
+          "normalisation": 176.06759644165987,
+          "n_matched_modes_ref": 14839,
+          "n_matched_modes_perturbed": 11191
+        },
+        "connectivity": {
+          "n_components_ref": 1,
+          "n_components_perturbed": 3649,
+          "n_isolated_perturbed": 3648,
+          "largest_ref": 176.06759644165987,
+          "largest_perturbed": 409.80055832384414
+        },
+        "routing_survival": 0.7540102714427748
       },
       "edge_label_homophily": 0.7686999330468236,
       "assignments_usage": {
@@ -658,8 +810,8 @@
           4035
         ],
         "label_free": [
-          2747,
-          9104,
+          2755,
+          9096,
           2989
         ],
         "random": [
@@ -675,30 +827,30 @@
       },
       "comparisons": {
         "oracle_vs_uniform": {
-          "mean_diff": 0.017502246181491498,
-          "ci_low": 0.016522661854103435,
-          "ci_high": 0.01848183050887956,
+          "mean_diff": 0.017515723270440275,
+          "ci_low": 0.016530037301104746,
+          "ci_high": 0.018501409239775803,
           "p_wilcoxon": 0.001953125,
-          "p_paired_t": 1.7295640085374757e-11,
-          "effect_size_dz": 13.472664019668434,
+          "p_paired_t": 1.8159014939178122e-11,
+          "effect_size_dz": 13.399574878635892,
           "significant": true
         },
         "label_free_vs_random": {
-          "mean_diff": 0.002115902964959615,
-          "ci_low": 0.0012067644596082318,
-          "ci_high": 0.0030250414703109985,
+          "mean_diff": 0.0020215633423181223,
+          "ci_low": 0.001099571992983211,
+          "ci_high": 0.0029435546916530336,
           "p_wilcoxon": 0.00390625,
-          "p_paired_t": 0.0005173719563279301,
-          "effect_size_dz": 1.7549599684805004,
+          "p_paired_t": 0.0007805040343316124,
+          "effect_size_dz": 1.6533394441235145,
           "significant": true
         },
         "oracle_vs_random": {
-          "mean_diff": 0.01881401617250681,
-          "ci_low": 0.01768219323021037,
-          "ci_high": 0.01994583911480325,
+          "mean_diff": 0.01881850853548973,
+          "ci_low": 0.017683178033759107,
+          "ci_high": 0.019953839037220353,
           "p_wilcoxon": 0.001953125,
-          "p_paired_t": 3.300393913118559e-11,
-          "effect_size_dz": 12.534428562455624,
+          "p_paired_t": 3.385809706124494e-11,
+          "effect_size_dz": 12.498687625291364,
           "significant": true
         }
       },
@@ -710,7 +862,7 @@
         "D1_p": 0.001953125,
         "D2_p": 0.00390625,
         "D3_p": 0.001953125,
-        "D4_p": 0.03125,
+        "D4_p": 0.001953125,
         "verdict": "Supported: signal exists, router finds it, not capacity, instrument valid."
       }
     },
@@ -720,18 +872,37 @@
       "n_edges_kept": 16448,
       "n_edges_orig": 411194,
       "fraction_kept": 0.040000583666104074,
-      "sd_laplacian": 0.999999999918032,
+      "sd_laplacian": 0.9999999999180321,
       "sd_profile": {
-        "SD": 0.999999999918032,
+        "SD": 0.9999999999180321,
         "argmax_index": 14460,
         "median_relative_error": 0.9999999998113207,
         "p90_relative_error": 0.999999999891862,
         "p99_relative_error": 0.9999999999096939,
-        "low_mode_mean_error": 0.9999998892900799,
+        "low_mode_mean_error": 0.9999998892900968,
         "min_eigengap": 0.0,
-        "fragility_score": 99999999.9918032,
+        "fragility_score": 99999999.99180321,
         "lambda_max_ref": 176.06759644165987,
-        "lambda_max_perturbed": 167.0004901139113
+        "lambda_max_perturbed": 167.0004901139111,
+        "low_frequency": {
+          "low_freq_k": 32,
+          "low_freq_mean_error": 0.008779659923682894,
+          "low_freq_median_error": 0.010449606542267917,
+          "low_freq_p90_error": 0.010766628983351647,
+          "low_freq_max_error": 0.01093144439132143,
+          "low_freq_gap_ref": 0.00012673225165448637,
+          "normalisation": 176.06759644165987,
+          "n_matched_modes_ref": 14839,
+          "n_matched_modes_perturbed": 378
+        },
+        "connectivity": {
+          "n_components_ref": 1,
+          "n_components_perturbed": 14462,
+          "n_isolated_perturbed": 14461,
+          "largest_ref": 176.06759644165987,
+          "largest_perturbed": 167.0004901139111
+        },
+        "routing_survival": 0.0253148590895502
       },
       "edge_label_homophily": 0.7132834417899051,
       "assignments_usage": {
@@ -758,12 +929,12 @@
       },
       "comparisons": {
         "oracle_vs_uniform": {
-          "mean_diff": 6.289308176102849e-05,
-          "ci_low": -0.00022382438311670382,
-          "ci_high": 0.0003496105466387608,
+          "mean_diff": 7.187780772688335e-05,
+          "ci_low": -0.0002029883493171628,
+          "ci_high": 0.0003467439647709295,
           "p_wilcoxon": 0.625,
-          "p_paired_t": 0.6316340251133052,
-          "effect_size_dz": 0.1654056145020097,
+          "p_paired_t": 0.5687064060466769,
+          "effect_size_dz": 0.1971855433789218,
           "significant": false
         },
         "label_free_vs_random": {
@@ -793,7 +964,7 @@
         "D1_p": 0.625,
         "D2_p": 0.0078125,
         "D3_p": 0.005859375,
-        "D4_p": 0.03125,
+        "D4_p": 0.001953125,
         "verdict": "Not supported; failed rule(s): D1."
       }
     }

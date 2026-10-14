@@ -22,25 +22,10 @@
     "out_suffix": "_eig_nb_sim_pq",
     "max_nodes": null,
     "skip_sd": true,
-    "resume": true,
-    "no_progress": true,
+    "resume": false,
+    "no_progress": false,
     "out": "logs",
-    "device": "cpu",
-    "_er_resistance": "[[0.         0.41547183 0.55219885 ... 0.9993704  1.00700842 2.97559255]\n [0.41547183 0.         0.51106887 ... 0.88443098 0.89206902 2.86064954]\n [0.55219885 0.51106887 0.         ... 0.71232447 0.7199624  2.68856014]\n ...\n [0.9993704  0.88443098 0.71232447 ... 0.         0.08636285 2.07801339]\n [1.00700842 0.89206902 0.7199624  ... 0.08636285 0.         2.08568554]\n [2.97559255 2.86064954 2.68856014 ... 2.07801339 2.08568554 0.        ]]",
-    "_pc_control": {
-      "oracle_vs_uniform": {
-        "mean_diff": 0.25341325341325344,
-        "p_wilcoxon": 0.03125
-      },
-      "label_free_vs_random": {
-        "mean_diff": 0.026473526473526483,
-        "p_wilcoxon": 0.03125
-      },
-      "oracle_vs_random": {
-        "mean_diff": 0.2798867798867799,
-        "p_wilcoxon": 0.03125
-      }
-    }
+    "device": "cpu"
   },
   "graph": {
     "n_nodes": 14840,
@@ -52,16 +37,16 @@
   "control": {
     "pc_n_nodes": 2000,
     "oracle_vs_uniform": {
-      "mean_diff": 0.25341325341325344,
-      "p_wilcoxon": 0.03125
+      "mean_diff": 0.24931734931734928,
+      "p_wilcoxon": 0.001953125
     },
     "label_free_vs_random": {
-      "mean_diff": 0.026473526473526483,
-      "p_wilcoxon": 0.03125
+      "mean_diff": 0.0273726273726274,
+      "p_wilcoxon": 0.001953125
     },
     "oracle_vs_random": {
-      "mean_diff": 0.2798867798867799,
-      "p_wilcoxon": 0.03125
+      "mean_diff": 0.27668997668997675,
+      "p_wilcoxon": 0.001953125
     }
   },
   "points": [
@@ -71,7 +56,8 @@
       "n_edges_kept": 246716,
       "n_edges_orig": 411194,
       "fraction_kept": 0.5999990272231599,
-      "sd_laplacian": 0.0,
+      "sd_laplacian": null,
+      "sd_profile": {},
       "edge_label_homophily": 0.796485953989183,
       "assignments_usage": {
         "oracle": [
@@ -80,9 +66,9 @@
           4934
         ],
         "label_free": [
-          14799,
-          0,
-          41
+          4947,
+          4946,
+          4947
         ],
         "random": [
           6440,
@@ -97,22 +83,22 @@
       },
       "comparisons": {
         "oracle_vs_uniform": {
-          "mean_diff": 0.04466307277628031,
-          "ci_low": 0.0435786779373297,
-          "ci_high": 0.045747467615230915,
+          "mean_diff": 0.04467205750224616,
+          "ci_low": 0.04358857309228417,
+          "ci_high": 0.04575554191220815,
           "p_wilcoxon": 0.001953125,
-          "p_paired_t": 9.58240316065076e-15,
-          "effect_size_dz": 31.057226994831012,
+          "p_paired_t": 9.493122343000226e-15,
+          "effect_size_dz": 31.08957665626259,
           "significant": true
         },
         "label_free_vs_random": {
-          "mean_diff": 0.0010062893081760338,
-          "ci_low": 0.0006068541957288272,
-          "ci_high": 0.0014057244206232404,
-          "p_wilcoxon": 0.001953125,
-          "p_paired_t": 0.0002946777912711385,
-          "effect_size_dz": 1.8996698883474525,
-          "significant": true
+          "mean_diff": 0.0004402515723270217,
+          "ci_low": -5.617275623407379e-05,
+          "ci_high": 0.0009366759008881172,
+          "p_wilcoxon": 0.109375,
+          "p_paired_t": 0.07579326898186747,
+          "effect_size_dz": 0.6687278003236048,
+          "significant": false
         },
         "oracle_vs_random": {
           "mean_diff": 0.045705300988319805,
@@ -126,85 +112,14 @@
       },
       "findings": {
         "D1": true,
-        "D2": true,
+        "D2": false,
         "D3": true,
         "D4": true,
         "D1_p": 0.001953125,
-        "D2_p": 0.001953125,
+        "D2_p": 0.109375,
         "D3_p": 0.001953125,
-        "D4_p": 0.03125,
-        "verdict": "Supported: signal exists, router finds it, not capacity, instrument valid."
-      }
-    },
-    {
-      "method": "random",
-      "retention": 0.6,
-      "n_edges_kept": 246716,
-      "n_edges_orig": 411194,
-      "fraction_kept": 0.5999990272231599,
-      "sd_laplacian": 0.0,
-      "edge_label_homophily": 0.7632795923320115,
-      "assignments_usage": {
-        "oracle": [
-          5075,
-          4776,
-          4989
-        ],
-        "label_free": [
-          168,
-          14640,
-          32
-        ],
-        "random": [
-          5077,
-          4698,
-          5065
-        ],
-        "uniform": [
-          14840,
-          0,
-          0
-        ]
-      },
-      "comparisons": {
-        "oracle_vs_uniform": {
-          "mean_diff": 0.04178346810422282,
-          "ci_low": 0.04038485025576435,
-          "ci_high": 0.0431820859526813,
-          "p_wilcoxon": 0.001953125,
-          "p_paired_t": 1.717590035480199e-13,
-          "effect_size_dz": 22.52718562234661,
-          "significant": true
-        },
-        "label_free_vs_random": {
-          "mean_diff": 0.0008131176999101486,
-          "ci_low": 0.0003515125796027611,
-          "ci_high": 0.001274722820217536,
-          "p_wilcoxon": 0.009765625,
-          "p_paired_t": 0.0031826727510674913,
-          "effect_size_dz": 1.328263738979843,
-          "significant": true
-        },
-        "oracle_vs_random": {
-          "mean_diff": 0.042592093441150024,
-          "ci_low": 0.04108686010256137,
-          "ci_high": 0.044097326779738676,
-          "p_wilcoxon": 0.001953125,
-          "p_paired_t": 2.797313185369803e-13,
-          "effect_size_dz": 21.33667181665208,
-          "significant": true
-        }
-      },
-      "findings": {
-        "D1": true,
-        "D2": true,
-        "D3": true,
-        "D4": true,
-        "D1_p": 0.001953125,
-        "D2_p": 0.009765625,
-        "D3_p": 0.001953125,
-        "D4_p": 0.03125,
-        "verdict": "Supported: signal exists, router finds it, not capacity, instrument valid."
+        "D4_p": 0.001953125,
+        "verdict": "Not supported; failed rule(s): D2."
       }
     },
     {
@@ -213,7 +128,8 @@
       "n_edges_kept": 123358,
       "n_edges_orig": 411194,
       "fraction_kept": 0.29999951361157995,
-      "sd_laplacian": 0.0,
+      "sd_laplacian": null,
+      "sd_profile": {},
       "edge_label_homophily": 0.8264270985278426,
       "assignments_usage": {
         "oracle": [
@@ -239,22 +155,22 @@
       },
       "comparisons": {
         "oracle_vs_uniform": {
-          "mean_diff": 0.06635669362084454,
-          "ci_low": 0.0653462880918882,
-          "ci_high": 0.06736709914980088,
+          "mean_diff": 0.06636567834681038,
+          "ci_low": 0.06535304932628962,
+          "ci_high": 0.06737830736733115,
           "p_wilcoxon": 0.001953125,
-          "p_paired_t": 1.441917185730061e-16,
-          "effect_size_dz": 49.52112971008723,
+          "p_paired_t": 1.468926366758354e-16,
+          "effect_size_dz": 49.419083592495674,
           "significant": true
         },
         "label_free_vs_random": {
-          "mean_diff": 0.0026819407008086714,
-          "ci_low": 0.002050187586330467,
-          "ci_high": 0.0033136938152868757,
-          "p_wilcoxon": 0.001953125,
-          "p_paired_t": 5.006200613180696e-06,
-          "effect_size_dz": 3.2011299074719943,
-          "significant": true
+          "mean_diff": -0.0005660377358490786,
+          "ci_low": -0.0011274194401175055,
+          "ci_high": -4.65603158065174e-06,
+          "p_wilcoxon": 0.048828125,
+          "p_paired_t": 0.04848953660519114,
+          "effect_size_dz": -0.7603064064140156,
+          "significant": false
         },
         "oracle_vs_random": {
           "mean_diff": 0.06700808625336925,
@@ -268,14 +184,14 @@
       },
       "findings": {
         "D1": true,
-        "D2": true,
+        "D2": false,
         "D3": true,
         "D4": true,
         "D1_p": 0.001953125,
-        "D2_p": 0.001953125,
+        "D2_p": 0.048828125,
         "D3_p": 0.001953125,
-        "D4_p": 0.03125,
-        "verdict": "Supported: signal exists, router finds it, not capacity, instrument valid."
+        "D4_p": 0.001953125,
+        "verdict": "Not supported; failed rule(s): D2."
       }
     },
     {
@@ -284,7 +200,8 @@
       "n_edges_kept": 61679,
       "n_edges_orig": 411194,
       "fraction_kept": 0.14999975680578997,
-      "sd_laplacian": 0.0,
+      "sd_laplacian": null,
+      "sd_profile": {},
       "edge_label_homophily": 0.8394087300187126,
       "assignments_usage": {
         "oracle": [
@@ -294,8 +211,8 @@
         ],
         "label_free": [
           4947,
-          4519,
-          5374
+          4946,
+          4947
         ],
         "random": [
           11820,
@@ -310,43 +227,43 @@
       },
       "comparisons": {
         "oracle_vs_uniform": {
-          "mean_diff": 0.09803234501347707,
-          "ci_low": 0.09701714126126905,
-          "ci_high": 0.0990475487656851,
+          "mean_diff": 0.09804582210242588,
+          "ci_low": 0.09702853505653491,
+          "ci_high": 0.09906310914831684,
           "p_wilcoxon": 0.001953125,
-          "p_paired_t": 4.4924701980971125e-18,
-          "effect_size_dz": 72.81447065225173,
+          "p_paired_t": 4.570453684134474e-18,
+          "effect_size_dz": 72.6753442412669,
           "significant": true
         },
         "label_free_vs_random": {
-          "mean_diff": 0.0007008086253369239,
-          "ci_low": 0.00023186629148179362,
-          "ci_high": 0.0011697509591920541,
-          "p_wilcoxon": 0.009765625,
-          "p_paired_t": 0.008118343191585534,
-          "effect_size_dz": 1.1268899799561949,
-          "significant": true
+          "mean_diff": -0.0004716981132075637,
+          "ci_low": -0.0008553214745307648,
+          "ci_high": -8.807475188436271e-05,
+          "p_wilcoxon": 0.037109375,
+          "p_paired_t": 0.021347734908769154,
+          "effect_size_dz": -0.9271726499456364,
+          "significant": false
         },
         "oracle_vs_random": {
-          "mean_diff": 0.09919586702605568,
-          "ci_low": 0.09828471126433273,
-          "ci_high": 0.10010702278777862,
+          "mean_diff": 0.09920035938903862,
+          "ci_low": 0.09829067199934415,
+          "ci_high": 0.1001100467787331,
           "p_wilcoxon": 0.001953125,
-          "p_paired_t": 1.526840541357068e-18,
-          "effect_size_dz": 82.09230903769674,
+          "p_paired_t": 1.5042273594443884e-18,
+          "effect_size_dz": 82.22854213137296,
           "significant": true
         }
       },
       "findings": {
         "D1": true,
-        "D2": true,
+        "D2": false,
         "D3": true,
         "D4": true,
         "D1_p": 0.001953125,
-        "D2_p": 0.009765625,
+        "D2_p": 0.037109375,
         "D3_p": 0.001953125,
-        "D4_p": 0.03125,
-        "verdict": "Supported: signal exists, router finds it, not capacity, instrument valid."
+        "D4_p": 0.001953125,
+        "verdict": "Not supported; failed rule(s): D2."
       }
     },
     {
@@ -355,7 +272,8 @@
       "n_edges_kept": 32896,
       "n_edges_orig": 411194,
       "fraction_kept": 0.08000116733220815,
-      "sd_laplacian": 0.0,
+      "sd_laplacian": null,
+      "sd_profile": {},
       "edge_label_homophily": 0.8439784430640465,
       "assignments_usage": {
         "oracle": [
@@ -364,9 +282,9 @@
           1533
         ],
         "label_free": [
-          4947,
-          4376,
-          5517
+          9129,
+          0,
+          5711
         ],
         "random": [
           10628,
@@ -381,30 +299,30 @@
       },
       "comparisons": {
         "oracle_vs_uniform": {
-          "mean_diff": 0.053926325247079944,
-          "ci_low": 0.05267991781442568,
-          "ci_high": 0.05517273267973421,
+          "mean_diff": 0.05394878706199459,
+          "ci_low": 0.052677742662024206,
+          "ci_high": 0.05521983146196497,
           "p_wilcoxon": 0.001953125,
-          "p_paired_t": 6.155030714213028e-15,
-          "effect_size_dz": 32.62438368281667,
+          "p_paired_t": 7.312124697981256e-15,
+          "effect_size_dz": 32.005342767051864,
           "significant": true
         },
         "label_free_vs_random": {
-          "mean_diff": 0.0005974842767295874,
-          "ci_low": -0.0002767276646080302,
-          "ci_high": 0.0014716962180672051,
-          "p_wilcoxon": 0.193359375,
-          "p_paired_t": 0.15648673165941276,
-          "effect_size_dz": 0.515360662704771,
+          "mean_diff": -0.00011230907457325801,
+          "ci_low": -0.0006164061777419659,
+          "ci_high": 0.00039178802859544986,
+          "p_wilcoxon": 0.6953125,
+          "p_paired_t": 0.626372954176236,
+          "effect_size_dz": -0.16799724755568468,
           "significant": false
         },
         "oracle_vs_random": {
-          "mean_diff": 0.0549101527403414,
-          "ci_low": 0.05369169180158875,
-          "ci_high": 0.05612861367909405,
+          "mean_diff": 0.05492362982929019,
+          "ci_low": 0.053696988893481665,
+          "ci_high": 0.05615027076509871,
           "p_wilcoxon": 0.001953125,
-          "p_paired_t": 4.266370611818086e-15,
-          "effect_size_dz": 33.981501139225884,
+          "p_paired_t": 4.520973921750725e-15,
+          "effect_size_dz": 33.76317633010276,
           "significant": true
         }
       },
@@ -414,9 +332,9 @@
         "D3": true,
         "D4": true,
         "D1_p": 0.001953125,
-        "D2_p": 0.193359375,
+        "D2_p": 0.6953125,
         "D3_p": 0.001953125,
-        "D4_p": 0.03125,
+        "D4_p": 0.001953125,
         "verdict": "Not supported; failed rule(s): D2."
       }
     },
@@ -426,7 +344,8 @@
       "n_edges_kept": 16448,
       "n_edges_orig": 411194,
       "fraction_kept": 0.040000583666104074,
-      "sd_laplacian": 0.0,
+      "sd_laplacian": null,
+      "sd_profile": {},
       "edge_label_homophily": 0.8504356646455157,
       "assignments_usage": {
         "oracle": [
@@ -436,8 +355,8 @@
         ],
         "label_free": [
           4947,
-          1159,
-          8734
+          2597,
+          7296
         ],
         "random": [
           9283,
@@ -452,30 +371,30 @@
       },
       "comparisons": {
         "oracle_vs_uniform": {
-          "mean_diff": 0.022511230907457314,
-          "ci_low": 0.021606013628839228,
-          "ci_high": 0.0234164481860754,
+          "mean_diff": 0.0225247079964061,
+          "ci_low": 0.02161106832597896,
+          "ci_high": 0.023438347666833243,
           "p_wilcoxon": 0.001953125,
-          "p_paired_t": 8.918724376315986e-13,
-          "effect_size_dz": 18.752014367095036,
+          "p_paired_t": 9.639940869560364e-13,
+          "effect_size_dz": 18.59027184880045,
           "significant": true
         },
         "label_free_vs_random": {
-          "mean_diff": 0.0030862533692722627,
-          "ci_low": 0.00254297766417209,
-          "ci_high": 0.0036295290743724356,
+          "mean_diff": 0.002695417789757448,
+          "ci_low": 0.0021255559482275636,
+          "ci_high": 0.0032652796312873326,
           "p_wilcoxon": 0.001953125,
-          "p_paired_t": 4.2869873895626234e-07,
-          "effect_size_dz": 4.283638491555304,
+          "p_paired_t": 2.032067540346311e-06,
+          "effect_size_dz": 3.5666297896665524,
           "significant": true
         },
         "oracle_vs_random": {
-          "mean_diff": 0.024052111410601974,
-          "ci_low": 0.02303437890213571,
-          "ci_high": 0.025069843919068236,
+          "mean_diff": 0.024056603773584907,
+          "ci_low": 0.023039429533975708,
+          "ci_high": 0.025073778013194107,
           "p_wilcoxon": 0.001953125,
-          "p_paired_t": 1.408977257529907e-12,
-          "effect_size_dz": 17.820549000396362,
+          "p_paired_t": 1.3997083690436162e-12,
+          "effect_size_dz": 17.8336599641199,
           "significant": true
         }
       },
@@ -487,7 +406,7 @@
         "D1_p": 0.001953125,
         "D2_p": 0.001953125,
         "D3_p": 0.001953125,
-        "D4_p": 0.03125,
+        "D4_p": 0.001953125,
         "verdict": "Supported: signal exists, router finds it, not capacity, instrument valid."
       }
     }

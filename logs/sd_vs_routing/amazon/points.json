@@ -1,605 +1,605 @@
 {
   "device": "cpu",
   "points": [
-  {
-    "method": "random",
-    "retention": 1.0,
-    "n_edges_kept": 296941,
-    "n_edges_orig": 296941,
-    "fraction_kept": 1.0,
-    "legacy_SD": 0.0,
-    "legacy_min_eigengap": 0.0,
-    "legacy_fragility": 0.0,
-    "low_frequency": {
-      "low_freq_k": 32,
-      "low_freq_mean_error": 0.0,
-      "low_freq_median_error": 0.0,
-      "low_freq_p90_error": 0.0,
-      "low_freq_max_error": 0.0,
-      "low_freq_gap_ref": 0.0007160004332469327,
-      "normalisation": 1353.0563741557844,
-      "n_matched_modes_ref": 1999,
-      "n_matched_modes_perturbed": 1999
+    {
+      "method": "random",
+      "retention": 1.0,
+      "n_edges_kept": 180298,
+      "n_edges_orig": 180298,
+      "fraction_kept": 1.0,
+      "legacy_SD": 0.0,
+      "legacy_min_eigengap": 7.105427357601002e-14,
+      "legacy_fragility": 0.0,
+      "low_frequency": {
+        "low_freq_k": 32,
+        "low_freq_mean_error": 0.0,
+        "low_freq_median_error": 0.0,
+        "low_freq_p90_error": 0.0,
+        "low_freq_max_error": 0.0,
+        "low_freq_gap_ref": 0.0013797912764688114,
+        "normalisation": 1231.2499369148618,
+        "n_matched_modes_ref": 1996,
+        "n_matched_modes_perturbed": 1996
+      },
+      "connectivity": {
+        "n_components_ref": 4,
+        "n_components_perturbed": 4,
+        "n_isolated_perturbed": 0,
+        "largest_ref": 1231.2499369148618,
+        "largest_perturbed": 1231.2499369148618
+      },
+      "routing_survival": 1.0,
+      "assignment_stability": 1.0,
+      "assignment_stability_per_seed": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "oracle_agreement": 0.409,
+      "router_collapse_seeds": 0,
+      "davis_kahan_bound": 0.0,
+      "protocol_b_accuracy": {},
+      "low_frequency_error": 0.0
     },
-    "connectivity": {
-      "n_components_ref": 1,
-      "n_components_perturbed": 1,
-      "n_isolated_perturbed": 0,
-      "largest_ref": 1353.0563741557844,
-      "largest_perturbed": 1353.0563741557844
+    {
+      "method": "random",
+      "retention": 0.5,
+      "n_edges_kept": 90149,
+      "n_edges_orig": 180298,
+      "fraction_kept": 0.5,
+      "legacy_SD": 0.9999999949431106,
+      "legacy_min_eigengap": 7.105427357601002e-14,
+      "legacy_fragility": 99999288.95662756,
+      "low_frequency": {
+        "low_freq_k": 32,
+        "low_freq_mean_error": 0.0007248953163134029,
+        "low_freq_median_error": 0.0008066380576566435,
+        "low_freq_p90_error": 0.0012781171637596689,
+        "low_freq_max_error": 0.0014330595348732939,
+        "low_freq_gap_ref": 0.0013797912764688114,
+        "normalisation": 1231.2499369148618,
+        "n_matched_modes_ref": 1996,
+        "n_matched_modes_perturbed": 1984
+      },
+      "connectivity": {
+        "n_components_ref": 4,
+        "n_components_perturbed": 16,
+        "n_isolated_perturbed": 12,
+        "largest_ref": 1231.2499369148618,
+        "largest_perturbed": 1236.4659926517393
+      },
+      "routing_survival": 0.9932794540555845,
+      "assignment_stability": 0.3534999999999999,
+      "assignment_stability_per_seed": [
+        0.3515,
+        0.351,
+        0.358
+      ],
+      "oracle_agreement": 0.3675,
+      "router_collapse_seeds": 0,
+      "davis_kahan_bound": 2240118.6694210875,
+      "protocol_b_accuracy": {},
+      "low_frequency_error": 0.0007248953163134029
     },
-    "routing_survival": 1.0,
-    "assignment_stability": 1.0,
-    "assignment_stability_per_seed": [
-      1.0,
-      1.0,
-      1.0
-    ],
-    "oracle_agreement": 0.6216666666666666,
-    "router_collapse_seeds": 0,
-    "davis_kahan_bound": 0.0,
-    "protocol_b_accuracy": {},
-    "low_frequency_error": 0.0
-  },
-  {
-    "method": "random",
-    "retention": 0.5,
-    "n_edges_kept": 148470,
-    "n_edges_orig": 296941,
-    "fraction_kept": 0.49999831616381707,
-    "legacy_SD": 0.9999999948130077,
-    "legacy_min_eigengap": 0.0,
-    "legacy_fragility": 99999999.48130077,
-    "low_frequency": {
-      "low_freq_k": 32,
-      "low_freq_mean_error": 0.00034496647173370303,
-      "low_freq_median_error": 0.00041136329370751424,
-      "low_freq_p90_error": 0.0006847124667423591,
-      "low_freq_max_error": 0.0007339337377938375,
-      "low_freq_gap_ref": 0.0007160004332469327,
-      "normalisation": 1353.0563741557844,
-      "n_matched_modes_ref": 1999,
-      "n_matched_modes_perturbed": 1993
+    {
+      "method": "random",
+      "retention": 0.25,
+      "n_edges_kept": 45074,
+      "n_edges_orig": 180298,
+      "fraction_kept": 0.24999722681338674,
+      "legacy_SD": 0.9999999965583677,
+      "legacy_min_eigengap": 7.105427357601002e-14,
+      "legacy_fragility": 99999289.11815213,
+      "low_frequency": {
+        "low_freq_k": 32,
+        "low_freq_mean_error": 0.0010752735537280225,
+        "low_freq_median_error": 0.0011981174827697463,
+        "low_freq_p90_error": 0.0018126834036952053,
+        "low_freq_max_error": 0.0020765823153344695,
+        "low_freq_gap_ref": 0.0013797912764688114,
+        "normalisation": 1231.2499369148618,
+        "n_matched_modes_ref": 1996,
+        "n_matched_modes_perturbed": 1975
+      },
+      "connectivity": {
+        "n_components_ref": 4,
+        "n_components_perturbed": 25,
+        "n_isolated_perturbed": 21,
+        "largest_ref": 1231.2499369148618,
+        "largest_perturbed": 1273.2849830152745
+      },
+      "routing_survival": 0.9884360168185862,
+      "assignment_stability": 0.3545,
+      "assignment_stability_per_seed": [
+        0.3545,
+        0.3545,
+        0.3545
+      ],
+      "oracle_agreement": 0.349,
+      "router_collapse_seeds": 0,
+      "davis_kahan_bound": 2466913.814981337,
+      "protocol_b_accuracy": {},
+      "low_frequency_error": 0.0010752735537280225
     },
-    "connectivity": {
-      "n_components_ref": 1,
-      "n_components_perturbed": 7,
-      "n_isolated_perturbed": 6,
-      "largest_ref": 1353.0563741557844,
-      "largest_perturbed": 1336.5298092775533
+    {
+      "method": "random",
+      "retention": 0.1,
+      "n_edges_kept": 18030,
+      "n_edges_orig": 180298,
+      "fraction_kept": 0.10000110927464531,
+      "legacy_SD": 0.9999999989831523,
+      "legacy_min_eigengap": 7.105427357601002e-14,
+      "legacy_fragility": 99999289.36062886,
+      "low_frequency": {
+        "low_freq_k": 32,
+        "low_freq_mean_error": 0.0036732083204140922,
+        "low_freq_median_error": 0.003745907420165274,
+        "low_freq_p90_error": 0.004137193677457984,
+        "low_freq_max_error": 0.004263982785550079,
+        "low_freq_gap_ref": 0.0013797912764688114,
+        "normalisation": 1231.2499369148618,
+        "n_matched_modes_ref": 1996,
+        "n_matched_modes_perturbed": 1896
+      },
+      "connectivity": {
+        "n_components_ref": 4,
+        "n_components_perturbed": 104,
+        "n_isolated_perturbed": 100,
+        "largest_ref": 1231.2499369148618,
+        "largest_perturbed": 1236.1644751244432
+      },
+      "routing_survival": 0.9465104520956066,
+      "assignment_stability": 0.34600000000000003,
+      "assignment_stability_per_seed": [
+        0.351,
+        0.3435,
+        0.3435
+      ],
+      "oracle_agreement": 0.32583333333333336,
+      "router_collapse_seeds": 0,
+      "davis_kahan_bound": 9251409.520513827,
+      "protocol_b_accuracy": {},
+      "low_frequency_error": 0.0036732083204140922
     },
-    "routing_survival": 0.9966560684276815,
-    "assignment_stability": 0.9820000000000001,
-    "assignment_stability_per_seed": [
-      0.984,
-      0.9815,
-      0.9805
-    ],
-    "oracle_agreement": 0.6233333333333334,
-    "router_collapse_seeds": 0,
-    "davis_kahan_bound": 2702068.6030731816,
-    "protocol_b_accuracy": {},
-    "low_frequency_error": 0.00034496647173370303
-  },
-  {
-    "method": "random",
-    "retention": 0.25,
-    "n_edges_kept": 74235,
-    "n_edges_orig": 296941,
-    "fraction_kept": 0.24999915808190853,
-    "legacy_SD": 0.9999999966607223,
-    "legacy_min_eigengap": 0.0,
-    "legacy_fragility": 99999999.66607222,
-    "low_frequency": {
-      "low_freq_k": 32,
-      "low_freq_mean_error": 0.0005985156887997147,
-      "low_freq_median_error": 0.0006620022920036687,
-      "low_freq_p90_error": 0.0009824580125187233,
-      "low_freq_max_error": 0.00144627130599817,
-      "low_freq_gap_ref": 0.0007160004332469327,
-      "normalisation": 1353.0563741557844,
-      "n_matched_modes_ref": 1999,
-      "n_matched_modes_perturbed": 1984
+    {
+      "method": "random",
+      "retention": 0.05,
+      "n_edges_kept": 9015,
+      "n_edges_orig": 180298,
+      "fraction_kept": 0.050000554637322656,
+      "legacy_SD": 0.9999999994691492,
+      "legacy_min_eigengap": 7.105427357601002e-14,
+      "legacy_fragility": 99999289.4092282,
+      "low_frequency": {
+        "low_freq_k": 32,
+        "low_freq_mean_error": 0.0051542602439234786,
+        "low_freq_median_error": 0.004755647332405583,
+        "low_freq_p90_error": 0.00693679697527729,
+        "low_freq_max_error": 0.007572806445854537,
+        "low_freq_gap_ref": 0.0013797912764688114,
+        "normalisation": 1231.2499369148618,
+        "n_matched_modes_ref": 1996,
+        "n_matched_modes_perturbed": 1778
+      },
+      "connectivity": {
+        "n_components_ref": 4,
+        "n_components_perturbed": 222,
+        "n_isolated_perturbed": 218,
+        "largest_ref": 1231.2499369148618,
+        "largest_perturbed": 1310.3743682021163
+      },
+      "routing_survival": 0.8864075541226641,
+      "assignment_stability": 0.3305,
+      "assignment_stability_per_seed": [
+        0.3305,
+        0.3305,
+        0.3305
+      ],
+      "oracle_agreement": 0.273,
+      "router_collapse_seeds": 0,
+      "davis_kahan_bound": 17631351.554618135,
+      "protocol_b_accuracy": {},
+      "low_frequency_error": 0.0051542602439234786
     },
-    "connectivity": {
-      "n_components_ref": 1,
-      "n_components_perturbed": 16,
-      "n_isolated_perturbed": 15,
-      "largest_ref": 1353.0563741557844,
-      "largest_perturbed": 1405.33566324014
+    {
+      "method": "degree",
+      "retention": 1.0,
+      "n_edges_kept": 180298,
+      "n_edges_orig": 180298,
+      "fraction_kept": 1.0,
+      "legacy_SD": 0.0,
+      "legacy_min_eigengap": 7.105427357601002e-14,
+      "legacy_fragility": 0.0,
+      "low_frequency": {
+        "low_freq_k": 32,
+        "low_freq_mean_error": 0.0,
+        "low_freq_median_error": 0.0,
+        "low_freq_p90_error": 0.0,
+        "low_freq_max_error": 0.0,
+        "low_freq_gap_ref": 0.0013797912764688114,
+        "normalisation": 1231.2499369148618,
+        "n_matched_modes_ref": 1996,
+        "n_matched_modes_perturbed": 1996
+      },
+      "connectivity": {
+        "n_components_ref": 4,
+        "n_components_perturbed": 4,
+        "n_isolated_perturbed": 0,
+        "largest_ref": 1231.2499369148618,
+        "largest_perturbed": 1231.2499369148618
+      },
+      "routing_survival": 1.0,
+      "assignment_stability": 1.0,
+      "assignment_stability_per_seed": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "oracle_agreement": 0.409,
+      "router_collapse_seeds": 0,
+      "davis_kahan_bound": 0.0,
+      "protocol_b_accuracy": {},
+      "low_frequency_error": 0.0
     },
-    "routing_survival": 0.9919059731788663,
-    "assignment_stability": 0.6295,
-    "assignment_stability_per_seed": [
-      0.6295,
-      0.6295,
-      0.6295
-    ],
-    "oracle_agreement": 0.592,
-    "router_collapse_seeds": 0,
-    "davis_kahan_bound": 6234102.893680267,
-    "protocol_b_accuracy": {},
-    "low_frequency_error": 0.0005985156887997147
-  },
-  {
-    "method": "random",
-    "retention": 0.1,
-    "n_edges_kept": 29694,
-    "n_edges_orig": 296941,
-    "fraction_kept": 0.09999966323276341,
-    "legacy_SD": 0.9999999990721359,
-    "legacy_min_eigengap": 0.0,
-    "legacy_fragility": 99999999.90721358,
-    "low_frequency": {
-      "low_freq_k": 32,
-      "low_freq_mean_error": 0.0034432728054751786,
-      "low_freq_median_error": 0.003571954533100368,
-      "low_freq_p90_error": 0.003997639608098043,
-      "low_freq_max_error": 0.004324313719222255,
-      "low_freq_gap_ref": 0.0007160004332469327,
-      "normalisation": 1353.0563741557844,
-      "n_matched_modes_ref": 1999,
-      "n_matched_modes_perturbed": 1941
+    {
+      "method": "degree",
+      "retention": 0.5,
+      "n_edges_kept": 90149,
+      "n_edges_orig": 180298,
+      "fraction_kept": 0.5,
+      "legacy_SD": 0.9999999998995084,
+      "legacy_min_eigengap": 7.105427357601002e-14,
+      "legacy_fragility": 99999289.45226382,
+      "low_frequency": {
+        "low_freq_k": 32,
+        "low_freq_mean_error": 0.0011544295648674612,
+        "low_freq_median_error": 0.0010388996315646058,
+        "low_freq_p90_error": 0.002359350433774379,
+        "low_freq_max_error": 0.0023997079829529556,
+        "low_freq_gap_ref": 0.0013797912764688114,
+        "normalisation": 1231.2499369148618,
+        "n_matched_modes_ref": 1996,
+        "n_matched_modes_perturbed": 1026
+      },
+      "connectivity": {
+        "n_components_ref": 4,
+        "n_components_perturbed": 974,
+        "n_isolated_perturbed": 970,
+        "largest_ref": 1231.2499369148618,
+        "largest_perturbed": 909.0016354656193
+      },
+      "routing_survival": 0.5144054687740933,
+      "assignment_stability": 0.6294999999999998,
+      "assignment_stability_per_seed": [
+        0.6285,
+        0.6315,
+        0.6285
+      ],
+      "oracle_agreement": 0.228,
+      "router_collapse_seeds": 0,
+      "davis_kahan_bound": 198010041.9744338,
+      "protocol_b_accuracy": {},
+      "low_frequency_error": 0.0011544295648674612
     },
-    "connectivity": {
-      "n_components_ref": 1,
-      "n_components_perturbed": 59,
-      "n_isolated_perturbed": 58,
-      "largest_ref": 1353.0563741557844,
-      "largest_perturbed": 1354.2662529967906
+    {
+      "method": "degree",
+      "retention": 0.25,
+      "n_edges_kept": 45074,
+      "n_edges_orig": 180298,
+      "fraction_kept": 0.24999722681338674,
+      "legacy_SD": 0.999999999944212,
+      "legacy_min_eigengap": 7.105427357601002e-14,
+      "legacy_fragility": 99999289.45673415,
+      "low_frequency": {
+        "low_freq_k": 32,
+        "low_freq_mean_error": 0.0007745495094894196,
+        "low_freq_median_error": 0.0007919602701695582,
+        "low_freq_p90_error": 0.0015471676510506929,
+        "low_freq_max_error": 0.0015875252002292956,
+        "low_freq_gap_ref": 0.0013797912764688114,
+        "normalisation": 1231.2499369148618,
+        "n_matched_modes_ref": 1996,
+        "n_matched_modes_perturbed": 673
+      },
+      "connectivity": {
+        "n_components_ref": 4,
+        "n_components_perturbed": 1327,
+        "n_isolated_perturbed": 1323,
+        "largest_ref": 1231.2499369148618,
+        "largest_perturbed": 627.0008071658968
+      },
+      "routing_survival": 0.33823781499103783,
+      "assignment_stability": 0.6765,
+      "assignment_stability_per_seed": [
+        0.675,
+        0.6795,
+        0.675
+      ],
+      "oracle_agreement": 0.20000000000000004,
+      "router_collapse_seeds": 0,
+      "davis_kahan_bound": 199998578.84709814,
+      "protocol_b_accuracy": {},
+      "low_frequency_error": 0.0007745495094894196
     },
-    "routing_survival": 0.9676565821058836,
-    "assignment_stability": 0.624,
-    "assignment_stability_per_seed": [
-      0.624,
-      0.624,
-      0.624
-    ],
-    "oracle_agreement": 0.5765,
-    "router_collapse_seeds": 0,
-    "davis_kahan_bound": 12376325.4310873,
-    "protocol_b_accuracy": {},
-    "low_frequency_error": 0.0034432728054751786
-  },
-  {
-    "method": "random",
-    "retention": 0.05,
-    "n_edges_kept": 14847,
-    "n_edges_orig": 296941,
-    "fraction_kept": 0.049999831616381704,
-    "legacy_SD": 0.999999999459944,
-    "legacy_min_eigengap": 0.0,
-    "legacy_fragility": 99999999.94599439,
-    "low_frequency": {
-      "low_freq_k": 32,
-      "low_freq_mean_error": 0.006389339478695334,
-      "low_freq_median_error": 0.006281580665815155,
-      "low_freq_p90_error": 0.008145032460064048,
-      "low_freq_max_error": 0.008455490195915903,
-      "low_freq_gap_ref": 0.0007160004332469327,
-      "normalisation": 1353.0563741557844,
-      "n_matched_modes_ref": 1999,
-      "n_matched_modes_perturbed": 1892
+    {
+      "method": "degree",
+      "retention": 0.1,
+      "n_edges_kept": 18030,
+      "n_edges_orig": 180298,
+      "fraction_kept": 0.10000110927464531,
+      "legacy_SD": 0.9999999999639404,
+      "legacy_min_eigengap": 7.105427357601002e-14,
+      "legacy_fragility": 99999289.45870697,
+      "low_frequency": {
+        "low_freq_k": 32,
+        "low_freq_mean_error": 0.000624202978420092,
+        "low_freq_median_error": 0.0006672395345283372,
+        "low_freq_p90_error": 0.0015471676510506924,
+        "low_freq_max_error": 0.0015875252002292952,
+        "low_freq_gap_ref": 0.0013797912764688114,
+        "normalisation": 1231.2499369148618,
+        "n_matched_modes_ref": 1996,
+        "n_matched_modes_perturbed": 443
+      },
+      "connectivity": {
+        "n_components_ref": 4,
+        "n_components_perturbed": 1557,
+        "n_isolated_perturbed": 1553,
+        "largest_ref": 1231.2499369148618,
+        "largest_perturbed": 415.00429908490116
+      },
+      "routing_survival": 0.22336049063432312,
+      "assignment_stability": 0.6415000000000001,
+      "assignment_stability_per_seed": [
+        0.64,
+        0.6445,
+        0.64
+      ],
+      "oracle_agreement": 0.1325,
+      "router_collapse_seeds": 0,
+      "davis_kahan_bound": 199998578.88008708,
+      "protocol_b_accuracy": {},
+      "low_frequency_error": 0.000624202978420092
     },
-    "connectivity": {
-      "n_components_ref": 1,
-      "n_components_perturbed": 108,
-      "n_isolated_perturbed": 107,
-      "largest_ref": 1353.0563741557844,
-      "largest_perturbed": 1507.3327037159863
+    {
+      "method": "degree",
+      "retention": 0.05,
+      "n_edges_kept": 9015,
+      "n_edges_orig": 180298,
+      "fraction_kept": 0.050000554637322656,
+      "legacy_SD": 0.9999999999716496,
+      "legacy_min_eigengap": 7.105427357601002e-14,
+      "legacy_fragility": 99999289.45947789,
+      "low_frequency": {
+        "low_freq_k": 32,
+        "low_freq_mean_error": 0.0005604050203411391,
+        "low_freq_median_error": 0.0005100353300435936,
+        "low_freq_p90_error": 0.0015471676510506898,
+        "low_freq_max_error": 0.0015800245594842725,
+        "low_freq_gap_ref": 0.0013797912764688114,
+        "normalisation": 1231.2499369148618,
+        "n_matched_modes_ref": 1996,
+        "n_matched_modes_perturbed": 323
+      },
+      "connectivity": {
+        "n_components_ref": 4,
+        "n_components_perturbed": 1677,
+        "n_isolated_perturbed": 1673,
+        "largest_ref": 1231.2499369148618,
+        "largest_perturbed": 313.00121256124817
+      },
+      "routing_survival": 0.1634083737791742,
+      "assignment_stability": 0.6205,
+      "assignment_stability_per_seed": [
+        0.619,
+        0.6235,
+        0.619
+      ],
+      "oracle_agreement": 0.111,
+      "router_collapse_seeds": 0,
+      "davis_kahan_bound": 199998578.8908702,
+      "protocol_b_accuracy": {},
+      "low_frequency_error": 0.0005604050203411391
     },
-    "routing_survival": 0.9404524901834148,
-    "assignment_stability": 0.6268333333333332,
-    "assignment_stability_per_seed": [
-      0.6265,
-      0.627,
-      0.627
-    ],
-    "oracle_agreement": 0.5738333333333333,
-    "router_collapse_seeds": 0,
-    "davis_kahan_bound": 23302895.82108847,
-    "protocol_b_accuracy": {},
-    "low_frequency_error": 0.006389339478695334
-  },
-  {
-    "method": "degree",
-    "retention": 1.0,
-    "n_edges_kept": 296941,
-    "n_edges_orig": 296941,
-    "fraction_kept": 1.0,
-    "legacy_SD": 0.0,
-    "legacy_min_eigengap": 0.0,
-    "legacy_fragility": 0.0,
-    "low_frequency": {
-      "low_freq_k": 32,
-      "low_freq_mean_error": 0.0,
-      "low_freq_median_error": 0.0,
-      "low_freq_p90_error": 0.0,
-      "low_freq_max_error": 0.0,
-      "low_freq_gap_ref": 0.0007160004332469327,
-      "normalisation": 1353.0563741557844,
-      "n_matched_modes_ref": 1999,
-      "n_matched_modes_perturbed": 1999
+    {
+      "method": "er",
+      "retention": 1.0,
+      "n_edges_kept": 180298,
+      "n_edges_orig": 180298,
+      "fraction_kept": 1.0,
+      "legacy_SD": 0.0,
+      "legacy_min_eigengap": 7.105427357601002e-14,
+      "legacy_fragility": 0.0,
+      "low_frequency": {
+        "low_freq_k": 32,
+        "low_freq_mean_error": 0.0,
+        "low_freq_median_error": 0.0,
+        "low_freq_p90_error": 0.0,
+        "low_freq_max_error": 0.0,
+        "low_freq_gap_ref": 0.0013797912764688114,
+        "normalisation": 1231.2499369148618,
+        "n_matched_modes_ref": 1996,
+        "n_matched_modes_perturbed": 1996
+      },
+      "connectivity": {
+        "n_components_ref": 4,
+        "n_components_perturbed": 4,
+        "n_isolated_perturbed": 0,
+        "largest_ref": 1231.2499369148618,
+        "largest_perturbed": 1231.2499369148618
+      },
+      "routing_survival": 1.0,
+      "assignment_stability": 1.0,
+      "assignment_stability_per_seed": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "oracle_agreement": 0.409,
+      "router_collapse_seeds": 0,
+      "davis_kahan_bound": 0.0,
+      "protocol_b_accuracy": {},
+      "low_frequency_error": 0.0
     },
-    "connectivity": {
-      "n_components_ref": 1,
-      "n_components_perturbed": 1,
-      "n_isolated_perturbed": 0,
-      "largest_ref": 1353.0563741557844,
-      "largest_perturbed": 1353.0563741557844
+    {
+      "method": "er",
+      "retention": 0.5,
+      "n_edges_kept": 90149,
+      "n_edges_orig": 180298,
+      "fraction_kept": 0.5,
+      "legacy_SD": 0.9999999963638122,
+      "legacy_min_eigengap": 7.105427357601002e-14,
+      "legacy_fragility": 99999289.09869671,
+      "low_frequency": {
+        "low_freq_k": 32,
+        "low_freq_mean_error": 0.001159401316140775,
+        "low_freq_median_error": 0.0010443215479697993,
+        "low_freq_p90_error": 0.002360065118556933,
+        "low_freq_max_error": 0.0023997079829529834,
+        "low_freq_gap_ref": 0.0013797912764688114,
+        "normalisation": 1231.2499369148618,
+        "n_matched_modes_ref": 1996,
+        "n_matched_modes_perturbed": 1976
+      },
+      "connectivity": {
+        "n_components_ref": 4,
+        "n_components_perturbed": 24,
+        "n_isolated_perturbed": 20,
+        "largest_ref": 1231.2499369148618,
+        "largest_perturbed": 1231.233044309132
+      },
+      "routing_survival": 0.9888521926970206,
+      "assignment_stability": 0.8086666666666668,
+      "assignment_stability_per_seed": [
+        0.81,
+        0.806,
+        0.81
+      ],
+      "oracle_agreement": 0.4811666666666666,
+      "router_collapse_seeds": 0,
+      "davis_kahan_bound": 125148271.1417221,
+      "protocol_b_accuracy": {},
+      "low_frequency_error": 0.001159401316140775
     },
-    "routing_survival": 1.0,
-    "assignment_stability": 1.0,
-    "assignment_stability_per_seed": [
-      1.0,
-      1.0,
-      1.0
-    ],
-    "oracle_agreement": 0.6216666666666666,
-    "router_collapse_seeds": 0,
-    "davis_kahan_bound": 0.0,
-    "protocol_b_accuracy": {},
-    "low_frequency_error": 0.0
-  },
-  {
-    "method": "degree",
-    "retention": 0.5,
-    "n_edges_kept": 148470,
-    "n_edges_orig": 296941,
-    "fraction_kept": 0.49999831616381707,
-    "legacy_SD": 0.999999999930248,
-    "legacy_min_eigengap": 0.0,
-    "legacy_fragility": 99999999.9930248,
-    "low_frequency": {
-      "low_freq_k": 32,
-      "low_freq_mean_error": 0.0018514994623921592,
-      "low_freq_median_error": 0.002077952371162906,
-      "low_freq_p90_error": 0.0031478133262164594,
-      "low_freq_max_error": 0.0036401065212586423,
-      "low_freq_gap_ref": 0.0007160004332469327,
-      "normalisation": 1353.0563741557844,
-      "n_matched_modes_ref": 1999,
-      "n_matched_modes_perturbed": 1367
+    {
+      "method": "er",
+      "retention": 0.25,
+      "n_edges_kept": 45074,
+      "n_edges_orig": 180298,
+      "fraction_kept": 0.24999722681338674,
+      "legacy_SD": 0.9999999982028049,
+      "legacy_min_eigengap": 7.105427357601002e-14,
+      "legacy_fragility": 99999289.28259468,
+      "low_frequency": {
+        "low_freq_k": 32,
+        "low_freq_mean_error": 0.0011697320557487838,
+        "low_freq_median_error": 0.0010462420229310578,
+        "low_freq_p90_error": 0.002360917242969172,
+        "low_freq_max_error": 0.002400839967560429,
+        "low_freq_gap_ref": 0.0013797912764688114,
+        "normalisation": 1231.2499369148618,
+        "n_matched_modes_ref": 1996,
+        "n_matched_modes_perturbed": 1944
+      },
+      "connectivity": {
+        "n_components_ref": 4,
+        "n_components_perturbed": 56,
+        "n_isolated_perturbed": 52,
+        "largest_ref": 1231.2499369148618,
+        "largest_perturbed": 1231.2277735104467
+      },
+      "routing_survival": 0.9728606809777006,
+      "assignment_stability": 0.7295000000000001,
+      "assignment_stability_per_seed": [
+        0.7305,
+        0.7235,
+        0.7345
+      ],
+      "oracle_agreement": 0.5488333333333334,
+      "router_collapse_seeds": 0,
+      "davis_kahan_bound": 165647164.40164277,
+      "protocol_b_accuracy": {},
+      "low_frequency_error": 0.0011697320557487838
     },
-    "connectivity": {
-      "n_components_ref": 1,
-      "n_components_perturbed": 633,
-      "n_isolated_perturbed": 632,
-      "largest_ref": 1353.0563741557844,
-      "largest_perturbed": 1110.024044323143
+    {
+      "method": "er",
+      "retention": 0.1,
+      "n_edges_kept": 18030,
+      "n_edges_orig": 180298,
+      "fraction_kept": 0.10000110927464531,
+      "legacy_SD": 0.9999999992729627,
+      "legacy_min_eigengap": 7.105427357601002e-14,
+      "legacy_fragility": 99999289.3896097,
+      "low_frequency": {
+        "low_freq_k": 32,
+        "low_freq_mean_error": 0.0011617990786573769,
+        "low_freq_median_error": 0.001047028788841482,
+        "low_freq_p90_error": 0.0023595003021257247,
+        "low_freq_max_error": 0.0023997079829530016,
+        "low_freq_gap_ref": 0.0013797912764688114,
+        "normalisation": 1231.2499369148618,
+        "n_matched_modes_ref": 1996,
+        "n_matched_modes_perturbed": 1850
+      },
+      "connectivity": {
+        "n_components_ref": 4,
+        "n_components_perturbed": 150,
+        "n_isolated_perturbed": 146,
+        "largest_ref": 1231.2499369148618,
+        "largest_perturbed": 1231.2251774263304
+      },
+      "routing_survival": 0.9259230122540847,
+      "assignment_stability": 0.7825000000000001,
+      "assignment_stability_per_seed": [
+        0.784,
+        0.7795,
+        0.784
+      ],
+      "oracle_agreement": 0.532,
+      "router_collapse_seeds": 0,
+      "davis_kahan_bound": 188995618.95792034,
+      "protocol_b_accuracy": {},
+      "low_frequency_error": 0.0011617990786573769
     },
-    "routing_survival": 0.6827335743677238,
-    "assignment_stability": 0.625,
-    "assignment_stability_per_seed": [
-      0.625,
-      0.6245,
-      0.6255
-    ],
-    "oracle_agreement": 0.35316666666666663,
-    "router_collapse_seeds": 0,
-    "davis_kahan_bound": 161326024.7371172,
-    "protocol_b_accuracy": {},
-    "low_frequency_error": 0.0018514994623921592
-  },
-  {
-    "method": "degree",
-    "retention": 0.25,
-    "n_edges_kept": 74235,
-    "n_edges_orig": 296941,
-    "fraction_kept": 0.24999915808190853,
-    "legacy_SD": 0.9999999999463242,
-    "legacy_min_eigengap": 0.0,
-    "legacy_fragility": 99999999.99463241,
-    "low_frequency": {
-      "low_freq_k": 32,
-      "low_freq_mean_error": 0.0018515475216820997,
-      "low_freq_median_error": 0.002077952371162907,
-      "low_freq_p90_error": 0.0031478133262164767,
-      "low_freq_max_error": 0.0036401065212586636,
-      "low_freq_gap_ref": 0.0007160004332469327,
-      "normalisation": 1353.0563741557844,
-      "n_matched_modes_ref": 1999,
-      "n_matched_modes_perturbed": 1225
-    },
-    "connectivity": {
-      "n_components_ref": 1,
-      "n_components_perturbed": 775,
-      "n_isolated_perturbed": 774,
-      "largest_ref": 1353.0563741557844,
-      "largest_perturbed": 1028.0135919426784
-    },
-    "routing_survival": 0.6118650013692088,
-    "assignment_stability": 0.5743333333333333,
-    "assignment_stability_per_seed": [
-      0.574,
-      0.575,
-      0.574
-    ],
-    "oracle_agreement": 0.2865,
-    "router_collapse_seeds": 0,
-    "davis_kahan_bound": 193459926.00680506,
-    "protocol_b_accuracy": {},
-    "low_frequency_error": 0.0018515475216820997
-  },
-  {
-    "method": "degree",
-    "retention": 0.1,
-    "n_edges_kept": 29694,
-    "n_edges_orig": 296941,
-    "fraction_kept": 0.09999966323276341,
-    "legacy_SD": 0.9999999999634843,
-    "legacy_min_eigengap": 0.0,
-    "legacy_fragility": 99999999.99634843,
-    "low_frequency": {
-      "low_freq_k": 32,
-      "low_freq_mean_error": 0.00185142774079563,
-      "low_freq_median_error": 0.002077952371162906,
-      "low_freq_p90_error": 0.003147813326216475,
-      "low_freq_max_error": 0.003640106521258665,
-      "low_freq_gap_ref": 0.0007160004332469327,
-      "normalisation": 1353.0563741557844,
-      "n_matched_modes_ref": 1999,
-      "n_matched_modes_perturbed": 1026
-    },
-    "connectivity": {
-      "n_components_ref": 1,
-      "n_components_perturbed": 974,
-      "n_isolated_perturbed": 973,
-      "largest_ref": 1353.0563741557844,
-      "largest_perturbed": 913.0045684396031
-    },
-    "routing_survival": 0.5125492918551016,
-    "assignment_stability": 0.42383333333333334,
-    "assignment_stability_per_seed": [
-      0.4235,
-      0.4245,
-      0.4235
-    ],
-    "oracle_agreement": 0.1605,
-    "router_collapse_seeds": 0,
-    "davis_kahan_bound": 199284781.098268,
-    "protocol_b_accuracy": {},
-    "low_frequency_error": 0.00185142774079563
-  },
-  {
-    "method": "degree",
-    "retention": 0.05,
-    "n_edges_kept": 14847,
-    "n_edges_orig": 296941,
-    "fraction_kept": 0.049999831616381704,
-    "legacy_SD": 0.9999999999704826,
-    "legacy_min_eigengap": 0.0,
-    "legacy_fragility": 99999999.99704826,
-    "low_frequency": {
-      "low_freq_k": 32,
-      "low_freq_mean_error": 0.0018513334445729264,
-      "low_freq_median_error": 0.0020779523711629035,
-      "low_freq_p90_error": 0.0031478133262164724,
-      "low_freq_max_error": 0.0036401065212586636,
-      "low_freq_gap_ref": 0.0007160004332469327,
-      "normalisation": 1353.0563741557844,
-      "n_matched_modes_ref": 1999,
-      "n_matched_modes_perturbed": 910
-    },
-    "connectivity": {
-      "n_components_ref": 1,
-      "n_components_perturbed": 1090,
-      "n_isolated_perturbed": 1089,
-      "largest_ref": 1353.0563741557844,
-      "largest_perturbed": 814.0014303475047
-    },
-    "routing_survival": 0.4546567176159971,
-    "assignment_stability": 0.5493333333333333,
-    "assignment_stability_per_seed": [
-      0.552,
-      0.5485,
-      0.5475
-    ],
-    "oracle_agreement": 0.284,
-    "router_collapse_seeds": 0,
-    "davis_kahan_bound": 199999999.866232,
-    "protocol_b_accuracy": {},
-    "low_frequency_error": 0.0018513334445729264
-  },
-  {
-    "method": "er",
-    "retention": 1.0,
-    "n_edges_kept": 296941,
-    "n_edges_orig": 296941,
-    "fraction_kept": 1.0,
-    "legacy_SD": 0.0,
-    "legacy_min_eigengap": 0.0,
-    "legacy_fragility": 0.0,
-    "low_frequency": {
-      "low_freq_k": 32,
-      "low_freq_mean_error": 0.0,
-      "low_freq_median_error": 0.0,
-      "low_freq_p90_error": 0.0,
-      "low_freq_max_error": 0.0,
-      "low_freq_gap_ref": 0.0007160004332469327,
-      "normalisation": 1353.0563741557844,
-      "n_matched_modes_ref": 1999,
-      "n_matched_modes_perturbed": 1999
-    },
-    "connectivity": {
-      "n_components_ref": 1,
-      "n_components_perturbed": 1,
-      "n_isolated_perturbed": 0,
-      "largest_ref": 1353.0563741557844,
-      "largest_perturbed": 1353.0563741557844
-    },
-    "routing_survival": 1.0,
-    "assignment_stability": 1.0,
-    "assignment_stability_per_seed": [
-      1.0,
-      1.0,
-      1.0
-    ],
-    "oracle_agreement": 0.6216666666666666,
-    "router_collapse_seeds": 0,
-    "davis_kahan_bound": 0.0,
-    "protocol_b_accuracy": {},
-    "low_frequency_error": 0.0
-  },
-  {
-    "method": "er",
-    "retention": 0.5,
-    "n_edges_kept": 148470,
-    "n_edges_orig": 296941,
-    "fraction_kept": 0.49999831616381707,
-    "legacy_SD": 0.9999999987400802,
-    "legacy_min_eigengap": 0.0,
-    "legacy_fragility": 99999999.87400801,
-    "low_frequency": {
-      "low_freq_k": 32,
-      "low_freq_mean_error": 0.0018532208552041994,
-      "low_freq_median_error": 0.002079678917507573,
-      "low_freq_p90_error": 0.00314787041538829,
-      "low_freq_max_error": 0.003640106521258668,
-      "low_freq_gap_ref": 0.0007160004332469327,
-      "normalisation": 1353.0563741557844,
-      "n_matched_modes_ref": 1999,
-      "n_matched_modes_perturbed": 1954
-    },
-    "connectivity": {
-      "n_components_ref": 1,
-      "n_components_perturbed": 46,
-      "n_isolated_perturbed": 45,
-      "largest_ref": 1353.0563741557844,
-      "largest_perturbed": 1353.0394751059157
-    },
-    "routing_survival": 0.9756884766140379,
-    "assignment_stability": 0.6221666666666668,
-    "assignment_stability_per_seed": [
-      0.6225,
-      0.6215,
-      0.6225
-    ],
-    "oracle_agreement": 0.4925,
-    "router_collapse_seeds": 0,
-    "davis_kahan_bound": 163437568.18190357,
-    "protocol_b_accuracy": {},
-    "low_frequency_error": 0.0018532208552041994
-  },
-  {
-    "method": "er",
-    "retention": 0.25,
-    "n_edges_kept": 74235,
-    "n_edges_orig": 296941,
-    "fraction_kept": 0.24999915808190853,
-    "legacy_SD": 0.9999999996830652,
-    "legacy_min_eigengap": 0.0,
-    "legacy_fragility": 99999999.96830651,
-    "low_frequency": {
-      "low_freq_k": 32,
-      "low_freq_mean_error": 0.0018577614545660986,
-      "low_freq_median_error": 0.002082807619073076,
-      "low_freq_p90_error": 0.0031508746550784495,
-      "low_freq_max_error": 0.003641912502723046,
-      "low_freq_gap_ref": 0.0007160004332469327,
-      "normalisation": 1353.0563741557844,
-      "n_matched_modes_ref": 1999,
-      "n_matched_modes_perturbed": 1816
-    },
-    "connectivity": {
-      "n_components_ref": 1,
-      "n_components_perturbed": 184,
-      "n_isolated_perturbed": 183,
-      "largest_ref": 1353.0563741557844,
-      "largest_perturbed": 1219.0040897349795
-    },
-    "routing_survival": 0.9068122237185267,
-    "assignment_stability": 0.6571666666666667,
-    "assignment_stability_per_seed": [
-      0.6575,
-      0.6565,
-      0.6575
-    ],
-    "oracle_agreement": 0.5165,
-    "router_collapse_seeds": 0,
-    "davis_kahan_bound": 193748995.61117962,
-    "protocol_b_accuracy": {},
-    "low_frequency_error": 0.0018577614545660986
-  },
-  {
-    "method": "er",
-    "retention": 0.1,
-    "n_edges_kept": 29694,
-    "n_edges_orig": 296941,
-    "fraction_kept": 0.09999966323276341,
-    "legacy_SD": 0.9999999998113447,
-    "legacy_min_eigengap": 0.0,
-    "legacy_fragility": 99999999.98113446,
-    "low_frequency": {
-      "low_freq_k": 32,
-      "low_freq_mean_error": 0.001859865970488325,
-      "low_freq_median_error": 0.002084942376249538,
-      "low_freq_p90_error": 0.003149946085541895,
-      "low_freq_max_error": 0.003640106521258697,
-      "low_freq_gap_ref": 0.0007160004332469327,
-      "normalisation": 1353.0563741557844,
-      "n_matched_modes_ref": 1999,
-      "n_matched_modes_perturbed": 1715
-    },
-    "connectivity": {
-      "n_components_ref": 1,
-      "n_components_perturbed": 285,
-      "n_isolated_perturbed": 284,
-      "largest_ref": 1353.0563741557844,
-      "largest_perturbed": 905.0082747026466
-    },
-    "routing_survival": 0.856404234997321,
-    "assignment_stability": 0.8291666666666666,
-    "assignment_stability_per_seed": [
-      0.8295,
-      0.8285,
-      0.8295
-    ],
-    "oracle_agreement": 0.5985,
-    "router_collapse_seeds": 0,
-    "davis_kahan_bound": 195277448.62009123,
-    "protocol_b_accuracy": {},
-    "low_frequency_error": 0.001859865970488325
-  },
-  {
-    "method": "er",
-    "retention": 0.05,
-    "n_edges_kept": 14847,
-    "n_edges_orig": 296941,
-    "fraction_kept": 0.049999831616381704,
-    "legacy_SD": 0.9999999998303163,
-    "legacy_min_eigengap": 0.0,
-    "legacy_fragility": 99999999.98303163,
-    "low_frequency": {
-      "low_freq_k": 32,
-      "low_freq_mean_error": 0.0018597803896173383,
-      "low_freq_median_error": 0.0020848765665517207,
-      "low_freq_p90_error": 0.003147813326216498,
-      "low_freq_max_error": 0.003640106521258687,
-      "low_freq_gap_ref": 0.0007160004332469327,
-      "normalisation": 1353.0563741557844,
-      "n_matched_modes_ref": 1999,
-      "n_matched_modes_perturbed": 1684
-    },
-    "connectivity": {
-      "n_components_ref": 1,
-      "n_components_perturbed": 316,
-      "n_isolated_perturbed": 315,
-      "largest_ref": 1353.0563741557844,
-      "largest_perturbed": 905.0047637016825
-    },
-    "routing_survival": 0.8409331350217475,
-    "assignment_stability": 0.8445,
-    "assignment_stability_per_seed": [
-      0.845,
-      0.844,
-      0.8445
-    ],
-    "oracle_agreement": 0.6111666666666666,
-    "router_collapse_seeds": 0,
-    "davis_kahan_bound": 195609940.65597495,
-    "protocol_b_accuracy": {},
-    "low_frequency_error": 0.0018597803896173383
-  }
-]
+    {
+      "method": "er",
+      "retention": 0.05,
+      "n_edges_kept": 9015,
+      "n_edges_orig": 180298,
+      "fraction_kept": 0.050000554637322656,
+      "legacy_SD": 0.9999999997695264,
+      "legacy_min_eigengap": 7.105427357601002e-14,
+      "legacy_fragility": 99999289.43926571,
+      "low_frequency": {
+        "low_freq_k": 32,
+        "low_freq_mean_error": 0.0012083262513531228,
+        "low_freq_median_error": 0.0010600229321716624,
+        "low_freq_p90_error": 0.0023669032185367547,
+        "low_freq_max_error": 0.0023997079829530163,
+        "low_freq_gap_ref": 0.0013797912764688114,
+        "normalisation": 1231.2499369148618,
+        "n_matched_modes_ref": 1996,
+        "n_matched_modes_perturbed": 1458
+      },
+      "connectivity": {
+        "n_components_ref": 4,
+        "n_components_perturbed": 542,
+        "n_isolated_perturbed": 538,
+        "largest_ref": 1231.2499369148618,
+        "largest_perturbed": 955.0051329701453
+      },
+      "routing_survival": 0.7301167135102609,
+      "assignment_stability": 0.786,
+      "assignment_stability_per_seed": [
+        0.7875,
+        0.783,
+        0.7875
+      ],
+      "oracle_agreement": 0.4895,
+      "router_collapse_seeds": 0,
+      "davis_kahan_bound": 196873270.28551543,
+      "protocol_b_accuracy": {},
+      "low_frequency_error": 0.0012083262513531228
+    }
+  ]
 }

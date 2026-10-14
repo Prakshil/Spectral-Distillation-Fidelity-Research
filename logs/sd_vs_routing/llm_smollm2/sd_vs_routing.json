@@ -2,7 +2,7 @@
   "config": {
     "dataset": "llm",
     "config": "configs/default.yaml",
-    "model_id": "C:\\Users\\Prakshil\\.cache\\huggingface\\hub\\models--HuggingFaceTB--SmolLM2-1.7B\\snapshots\\effd688a12921b4cc83e3312b6feb579f70f9c71",
+    "model_id": "HuggingFaceTB/SmolLM2-1.7B",
     "text_file": "data/erp_attention/corpus_scaled.txt",
     "max_tokens": "None",
     "max_passages": "None",
@@ -32,7 +32,7 @@
     "out": "logs/sd_vs_routing/llm_smollm2"
   },
   "graph": {
-    "source": "C:\\Users\\Prakshil\\.cache\\huggingface\\hub\\models--HuggingFaceTB--SmolLM2-1.7B\\snapshots\\effd688a12921b4cc83e3312b6feb579f70f9c71",
+    "source": "HuggingFaceTB/SmolLM2-1.7B",
     "n_nodes": 2000,
     "n_features": 3,
     "n_labels": 29,
@@ -657,10 +657,36 @@
     "spearman_lowfreq_vs_assignment_stability": -0.8201438848920863,
     "pvalue_lowfreq_vs_assignment_stability": 0.00018080985328083164,
     "pearson_lowfreq_vs_assignment_stability": -0.4426081503556177,
+    "spearman_lowfreq_vs_assignment_stability_clustered": {
+      "rho": -0.8201438848920863,
+      "n_clusters": 3,
+      "n_boot": 2000,
+      "p_cluster": 0.78,
+      "ci_low": -1.0,
+      "ci_high": -0.7500000000000001
+    },
+    "per_method_spearman_vs_assignment_stability": {
+      "random": -0.8999999999999998,
+      "degree": -0.9999999999999999,
+      "er": -0.9999999999999999
+    },
     "spearman_legacy_vs_assignment_stability": -0.7086330935251799,
     "spearman_lowfreq_vs_oracle_agreement": 0.7446043165467626,
     "pvalue_lowfreq_vs_oracle_agreement": 0.0014507554010497077,
     "pearson_lowfreq_vs_oracle_agreement": 0.4424241144928735,
+    "spearman_lowfreq_vs_oracle_agreement_clustered": {
+      "rho": 0.7446043165467626,
+      "n_clusters": 3,
+      "n_boot": 2000,
+      "p_cluster": 0.774,
+      "ci_low": 0.6884057971014494,
+      "ci_high": 1.0
+    },
+    "per_method_spearman_vs_oracle_agreement": {
+      "random": 0.7,
+      "degree": 0.9999999999999999,
+      "er": 0.9999999999999999
+    },
     "spearman_legacy_vs_oracle_agreement": 0.6330935251798562,
     "per_method_monotonicity": {
       "degree": {

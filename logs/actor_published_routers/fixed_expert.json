@@ -52,6 +52,44 @@
     "n_runs_router_gnn_beats_no_routing": 0,
     "n_runs_ad_gnn_beats_no_routing": 0,
     "n_runs_mlp_gate_beats_no_routing": 0,
+    "paired_tests": {
+      "router_gnn": {
+        "name": "router_gnn_vs_no_routing",
+        "mean_diff": -0.04919757958431992,
+        "ci_low": -0.074161077793432,
+        "ci_high": -0.02423408137520782,
+        "p_wilcoxon": 0.25,
+        "p_paired_t": 0.013623991360464298,
+        "effect_size_dz": -5.995971917241675,
+        "n_pairs": 3,
+        "alpha_corrected": 0.05,
+        "significant": false
+      },
+      "ad_gnn": {
+        "name": "ad_gnn_vs_no_routing",
+        "mean_diff": -0.0570025431903885,
+        "ci_low": -0.07995441094894419,
+        "ci_high": -0.03405067543183281,
+        "p_wilcoxon": 0.25,
+        "p_paired_t": 0.008644012183244591,
+        "effect_size_dz": -7.556096518348251,
+        "n_pairs": 3,
+        "alpha_corrected": 0.05,
+        "significant": false
+      },
+      "mlp_gate": {
+        "name": "mlp_gate_vs_no_routing",
+        "mean_diff": -0.04253266684205911,
+        "ci_low": -0.06513763502602346,
+        "ci_high": -0.01992769865809475,
+        "p_wilcoxon": 0.25,
+        "p_paired_t": 0.014917183551502167,
+        "effect_size_dz": -5.724532318912201,
+        "n_pairs": 3,
+        "alpha_corrected": 0.05,
+        "significant": false
+      }
+    },
     "per_run": [
       {
         "accuracy": {
@@ -151,5 +189,5 @@
       }
     ]
   },
-  "interpretation": "Published routers (RouterGNN message-passing, AD-GNN per-node depth via signal preservation) scored on the same frozen routing-blind k-means pool and splits as every baseline. RouterGNN shares the MLP gate's cross-fit supervision; AD-GNN is label-free. The message-passing router is trained with LayerNorm, weight decay and gradient clipping (the raw unnormalized stack diverges on large graphs); loss first->last, router fit accuracy and distinct channels emitted are recorded per run so a collapsed router is never silently reported as a trained one."
+  "interpretation": "Published routers (RouterGNN message-passing, AD-GNN per-node depth via signal preservation) scored on the same frozen routing-blind k-means pool and splits as every baseline. RouterGNN shares the MLP gate's cross-fit supervision; AD-GNN is label-free. The message-passing router is trained with LayerNorm, weight decay and gradient clipping (the raw unnormalized stack diverges on large graphs); loss first->last, router fit accuracy and distinct channels emitted are recorded per run so a collapsed router is never silently reported as a trained one. Significance is a paired Wilcoxon signed-rank test of per-split means (router minus no-routing); win-counts alone are not evidence."
 }

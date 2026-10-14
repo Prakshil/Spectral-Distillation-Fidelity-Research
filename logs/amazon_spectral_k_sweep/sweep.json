@@ -17,7 +17,7 @@
     "top_k": 32,
     "seed": 0,
     "no_adaptive_oracle": false,
-    "no_progress": true,
+    "no_progress": false,
     "out": "logs",
     "device": "cpu"
   },
@@ -31,112 +31,112 @@
   "rows": [
     {
       "spectral_k": 2,
-      "d2_mean_diff": 0.0006327160493827422,
+      "d2_mean_diff": 0.0005709876543210091,
       "d2_p_wilcoxon": 0.048828125,
-      "d2_effect_size_dz": 0.7614821878783923,
+      "d2_effect_size_dz": 0.7688337623041662,
       "d2_significant": true,
-      "d1_mean_diff": 0.0026929012345678904,
-      "spearman_score_vs_label_homophily": -0.03814983046088058,
+      "d1_mean_diff": 0.002800925925925979,
+      "spearman_score_vs_label_homophily": -0.038149830311985336,
       "usage": [
         2880,
         2879,
         2880
       ],
-      "seconds": 0.3626483000000462
+      "seconds": 0.36135330000252
     },
     {
       "spectral_k": 4,
-      "d2_mean_diff": 0.00017746913580246604,
-      "d2_p_wilcoxon": 0.6953125,
-      "d2_effect_size_dz": 0.22151253795402032,
+      "d2_mean_diff": 0.00010802469135799964,
+      "d2_p_wilcoxon": 0.921875,
+      "d2_effect_size_dz": 0.13608276348792828,
       "d2_significant": false,
-      "d1_mean_diff": 0.0026929012345678904,
-      "spearman_score_vs_label_homophily": -0.06049226502400551,
+      "d1_mean_diff": 0.002800925925925979,
+      "spearman_score_vs_label_homophily": -0.06049226489372218,
       "usage": [
         2880,
         2879,
         2880
       ],
-      "seconds": 0.3498164000000088
+      "seconds": 0.3552148999988276
     },
     {
       "spectral_k": 8,
-      "d2_mean_diff": 0.0004783950617284094,
-      "d2_p_wilcoxon": 0.193359375,
-      "d2_effect_size_dz": 0.45563607646438775,
+      "d2_mean_diff": 0.0003858024691357764,
+      "d2_p_wilcoxon": 0.375,
+      "d2_effect_size_dz": 0.40317336795647135,
       "d2_significant": false,
-      "d1_mean_diff": 0.0026929012345678904,
+      "d1_mean_diff": 0.002800925925925979,
       "spearman_score_vs_label_homophily": -0.031668650535689784,
       "usage": [
         2880,
         2879,
         2880
       ],
-      "seconds": 0.37125120000018796
+      "seconds": 0.3952900000003865
     },
     {
       "spectral_k": 16,
-      "d2_mean_diff": 0.0002160493827160881,
-      "d2_p_wilcoxon": 0.375,
-      "d2_effect_size_dz": 0.24733283866819988,
+      "d2_mean_diff": 8.487654320991079e-05,
+      "d2_p_wilcoxon": 0.76953125,
+      "d2_effect_size_dz": 0.09874708697844244,
       "d2_significant": false,
-      "d1_mean_diff": 0.0026929012345678904,
-      "spearman_score_vs_label_homophily": 0.1404926624961288,
+      "d1_mean_diff": 0.002800925925925979,
+      "spearman_score_vs_label_homophily": 0.14049266264502402,
       "usage": [
         2880,
         2879,
         2880
       ],
-      "seconds": 0.38935689999993883
+      "seconds": 0.3747518999989552
     },
     {
       "spectral_k": 32,
-      "d2_mean_diff": 0.00030864197530867666,
-      "d2_p_wilcoxon": 0.232421875,
-      "d2_effect_size_dz": 0.38561494363989796,
+      "d2_mean_diff": 0.00022376543209873256,
+      "d2_p_wilcoxon": 0.5703125,
+      "d2_effect_size_dz": 0.26596551779769867,
       "d2_significant": false,
-      "d1_mean_diff": 0.0026929012345678904,
-      "spearman_score_vs_label_homophily": 0.17996285902763262,
+      "d1_mean_diff": 0.002800925925925979,
+      "spearman_score_vs_label_homophily": 0.17996285923236358,
       "usage": [
         2880,
         2879,
         2880
       ],
-      "seconds": 0.43452609999985725
+      "seconds": 0.6130703999988327
     },
     {
       "spectral_k": 64,
-      "d2_mean_diff": -0.0002006172839506326,
-      "d2_p_wilcoxon": 0.845703125,
-      "d2_effect_size_dz": -0.1932351272560482,
+      "d2_mean_diff": -0.0002083333333333326,
+      "d2_p_wilcoxon": 0.65234375,
+      "d2_effect_size_dz": -0.21398266546446296,
       "d2_significant": false,
-      "d1_mean_diff": 0.0026929012345678904,
-      "spearman_score_vs_label_homophily": 0.286495627933949,
+      "d1_mean_diff": 0.002800925925925979,
+      "spearman_score_vs_label_homophily": 0.28649562795256095,
       "usage": [
         2880,
         2879,
         2880
       ],
-      "seconds": 0.48343279999994593
+      "seconds": 0.724393999997119
     },
     {
       "spectral_k": 128,
-      "d2_mean_diff": 5.401234567901092e-05,
+      "d2_mean_diff": -1.1102230246251566e-17,
       "d2_p_wilcoxon": 1.0,
-      "d2_effect_size_dz": 0.05640577615513496,
+      "d2_effect_size_dz": -1.2552133474784118e-14,
       "d2_significant": false,
-      "d1_mean_diff": 0.0026929012345678904,
-      "spearman_score_vs_label_homophily": 0.34622767593923987,
+      "d1_mean_diff": 0.002800925925925979,
+      "spearman_score_vs_label_homophily": 0.34622767590201603,
       "usage": [
         2880,
         2879,
         2880
       ],
-      "seconds": 0.6260729999999057
+      "seconds": 1.1071378999986337
     }
   ],
   "best_k_by_d2": 2,
-  "best_d2_mean_diff": 0.0006327160493827422,
-  "default_k8_d2_mean_diff": 0.0004783950617284094,
+  "best_d2_mean_diff": 0.0005709876543210091,
+  "default_k8_d2_mean_diff": 0.0003858024691357764,
   "default_k8_is_best": false
 }

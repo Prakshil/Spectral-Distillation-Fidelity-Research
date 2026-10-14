@@ -256,6 +256,60 @@ def run_point(graph, ref_evals, method, retention, dense_assign_by_seed,
     }
 
 
+def _by_method(points: list[dict], min_points: int = 3) -> list[tuple[str, list[dict]]]:
+    """Group points by sparsifier, keeping only groups with enough points."""
+    groups: dict[str, list[dict]] = {}
+    for p in points:
+        groups.setdefault(p["method"], []).append(p)
+    return [(m, rows) for m, rows in groups.items() if len(rows) >= min_points]
+
+
+def clustered_spearman(
+    points: list[dict],
+    x_key: str,
+    y_key: str,
+    cluster_key: str = "method",
+    n_boot: int = 2000,
+    seed: int = 0,
+) -> dict:
+    """Spearman rho with a *cluster* bootstrap p-value and CI.
+
+    A graph's method x retention grid is not an i.i.d. sample: every point from
+    one sparsifier shares the graph, the splits and the router, so
+    ``scipy.spearmanr``'s p-value is anti-conservative. Resampling whole clusters
+    (sparsifiers) with replacement gives a p-value that respects the dependence.
+    With few clusters this is conservative, which is the honest direction.
+    """
+    x = np.array([p[x_key] for p in points], dtype=float)
+    y = np.array([p[y_key] for p in points], dtype=float)
+    clusters: dict[object, list[int]] = {}
+    for i, p in enumerate(points):
+        clusters.setdefault(p[cluster_key], []).append(i)
+    keys = list(clusters)
+    rho_obs = float(spearmanr(x, y).statistic) if len(points) > 2 else float("nan")
+    rng = np.random.default_rng(seed)
+    boot = []
+    for _ in range(n_boot):
+        pick = rng.integers(0, len(keys), size=len(keys))
+        idx = np.concatenate([clusters[keys[j]] for j in pick])
+        if np.unique(x[idx]).size < 2 or np.unique(y[idx]).size < 2:
+            continue
+        boot.append(float(spearmanr(x[idx], y[idx]).statistic))
+    boot = np.asarray(boot)
+    result = {"rho": rho_obs, "n_clusters": len(keys), "n_boot": int(boot.size)}
+    if boot.size == 0:
+        result.update({"p_cluster": float("nan"), "ci_low": float("nan"),
+                       "ci_high": float("nan")})
+        return result
+    center = float(np.median(boot))
+    result.update({
+        "p_cluster": float(np.mean(np.abs(boot - center) >= abs(rho_obs - center))),
+        "ci_low": float(np.quantile(boot, 0.025)),
+        "ci_high": float(np.quantile(boot, 0.975)),
+    })
+    return result
+
+
 def summarise(points: list[dict]) -> dict:
     """Correlate spectral distortion against each routing outcome."""
     def col(k, rows=None):
@@ -268,13 +322,22 @@ def summarise(points: list[dict]) -> dict:
     out = {"n_points": len(points), "legacy_SD_distinct_values":
            int(np.unique(np.round(legacy, 6)).size)}
 
-    for name, y in (("assignment_stability", stab),
-                    ("oracle_agreement", col("oracle_agreement"))):
+    for name, y_key, y in (("assignment_stability", "assignment_stability", stab),
+                           ("oracle_agreement", "oracle_agreement", col("oracle_agreement"))):
         sp = spearmanr(lf_err, y)
         pe = pearsonr(lf_err, y)
         out[f"spearman_lowfreq_vs_{name}"] = float(sp.statistic)
         out[f"pvalue_lowfreq_vs_{name}"] = float(sp.pvalue)
         out[f"pearson_lowfreq_vs_{name}"] = float(pe.statistic)
+        # Cluster-robust counterpart: the i.i.d. p-value above is
+        # anti-conservative because method x retention points are not independent.
+        rob = clustered_spearman(points, "low_frequency_error", y_key)
+        out[f"spearman_lowfreq_vs_{name}_clustered"] = rob
+        # Per-sparsifier rho: the within-cluster view the pooled number hides.
+        out[f"per_method_spearman_vs_{name}"] = {
+            m: float(spearmanr(col("low_frequency_error", rows), col(y_key, rows)).statistic)
+            for m, rows in _by_method(points, min_points=3)
+        }
         # Legacy control: the same correlation using the saturated scalar.
         if np.unique(np.round(legacy, 6)).size > 1:
             spl = spearmanr(legacy, y)
@@ -406,6 +469,10 @@ def main() -> None:
     log.info("Spearman(lowfreq, stability)  = %+.3f (p=%.3g)",
              summary["spearman_lowfreq_vs_assignment_stability"],
              summary["pvalue_lowfreq_vs_assignment_stability"])
+    rob = summary["spearman_lowfreq_vs_assignment_stability_clustered"]
+    log.info("  cluster-robust (by method): rho=%+.3f p=%.3g over %d clusters "
+             "[the i.i.d. p above is anti-conservative]", rob["rho"],
+             rob["p_cluster"], rob["n_clusters"])
     log.info("Spearman(lowfreq, oracle_ag)  = %+.3f",
              summary["spearman_lowfreq_vs_oracle_agreement"])
     log.info("Spearman(legacy,  stability)  = %s",

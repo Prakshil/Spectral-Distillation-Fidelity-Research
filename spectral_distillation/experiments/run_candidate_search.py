@@ -35,9 +35,12 @@ import scipy.sparse as sp
 from scipy.stats import spearmanr
 
 from spectral_distillation.src.effective_resistance import effective_resistance_exact
-from spectral_distillation.src.evaluation import evaluate_comparison, holm_bonferroni
+from spectral_distillation.src.evaluation import (
+    evaluate_comparison,
+    holm_adjusted_pvalues,
+    holm_step_down,
+)
 from spectral_distillation.src.laplacian import compute_laplacian, eigh_symmetric
-from spectral_distillation.src.mixture import fit_experts, mixture_accuracy, train_test_split
 from spectral_distillation.src.real_fraud import load_real_fraud
 from spectral_distillation.src.router_protocol import (
     label_homophily,
@@ -278,29 +281,39 @@ def main() -> None:
     log.info("evaluating %d conditions x %d splits x %d seeds", len(conditions),
              args.splits, args.seeds)
     t0 = time.perf_counter()
-    split_means: dict[str, dict[int, float]] = {c: {} for c in conditions}
-    for split in range(args.splits):
-        train, test = train_test_split(y, split, 0)
-        for cond, a in conditions.items():
-            accs = []
-            for seed in range(args.seeds):
-                tr, te = train_test_split(y, split, seed)
-                experts = fit_experts(X, y, a, tr)
-                acc, _ = mixture_accuracy(X, y, a, experts, te)
-                accs.append(acc)
-            split_means[cond][split] = float(np.mean(accs))
-        log.info("  split %d/%d done (%.0fs)", split + 1, args.splits,
-                 time.perf_counter() - t0)
+    # Frozen-expert pool (protocol B). Routing must be scored against a pool that
+    # does NOT depend on the routing, otherwise every candidate gets
+    # self-specialization credit and D2 is inflated (see run_fixed_expert_protocol
+    # docstring). The pool is feature k-means: label-free and routing-blind, so
+    # candidate scores are judged on whether they send nodes to a *better* fixed
+    # model, not on whether a partition can support its own specialist.
+    from spectral_distillation.experiments.run_fixed_expert_protocol import (
+        build_expert_factory,
+        evaluate_all,
+        feature_kmeans_routing,
+    )
+
+    pool = feature_kmeans_routing(X)
+    expert_factory = build_expert_factory("logistic", graph, args.device)
+    split_means = evaluate_all(
+        conditions, X, y, args.splits, args.seeds, log,
+        expert_assignment=pool, expert_factory=expert_factory,
+    )
+    log.info("scored %d conditions on the frozen k-means pool in %.1fs",
+             len(conditions), time.perf_counter() - t0)
 
     def cmp(cond: str, ref: str, name: str):
         return evaluate_comparison(split_means[cond], split_means[ref], name)
 
-    # Holm across the entire DECLARED as_defined family: known in advance.
+    # Holm step-down across the entire DECLARED as_defined family: known in advance.
     as_def = [c for c in conditions if c.endswith("::as_defined")]
     comps = [cmp(c, "random", c.replace("::", "_") + "_vs_random") for c in as_def]
-    corrected = holm_bonferroni([c.p_wilcoxon for c in comps], 0.05)
-    for c, thresh in zip(comps, corrected):
-        c.significant = bool(c.mean_diff > 0 and c.p_wilcoxon < thresh)
+    pvals = [c.p_wilcoxon for c in comps]
+    reject = holm_step_down(pvals, 0.05)
+    adjusted = holm_adjusted_pvalues(pvals)
+    for c, rej, padj, in zip(comps, reject, adjusted):
+        c.significant = bool(c.mean_diff > 0 and rej)
+        c.alpha_corrected = float(padj)
 
     label_oriented = {}
     for c in conditions:
@@ -311,7 +324,7 @@ def main() -> None:
     oracle_cmp = cmp("oracle", "random", "oracle_vs_random")
 
     rows = []
-    for key, c, thresh in zip(as_def, comps, corrected):
+    for key, c, padj in zip(as_def, comps, adjusted):
         base = key[: -len("::as_defined")]
         lo = label_oriented.get(f"{base}::label_oriented")
         rows.append({
@@ -320,7 +333,7 @@ def main() -> None:
             "d2_as_defined_mean_diff": c.mean_diff,
             "d2_as_defined_p": c.p_wilcoxon,
             "d2_as_defined_dz": c.effect_size_dz,
-            "d2_as_defined_holm_alpha": thresh,
+            "d2_as_defined_holm_adjusted_p": padj,
             "d2_as_defined_significant": c.significant,
             "d2_label_oriented_mean_diff": lo.mean_diff if lo else None,
             "d2_label_oriented_p": lo.p_wilcoxon if lo else None,
@@ -328,8 +341,8 @@ def main() -> None:
         })
     rows.sort(key=lambda r: -r["d2_as_defined_mean_diff"])
 
-    print(f"\n=== stage 2: D2 vs random, 10 splits x 3 seeds, Holm over "
-          f"{len(comps)} declared candidates ===")
+    print(f"\n=== stage 2: D2 vs random on the frozen k-means pool, 10 splits x 3 "
+          f"seeds, Holm over {len(comps)} declared candidates ===")
     print("oracle ceiling D2 = {:+.5f} (dz {:.2f})".format(
         oracle_cmp.mean_diff, oracle_cmp.effect_size_dz))
     print("{:<26s}{:>11s}{:>10s}{:>8s}{:>7s}{:>11s}".format(

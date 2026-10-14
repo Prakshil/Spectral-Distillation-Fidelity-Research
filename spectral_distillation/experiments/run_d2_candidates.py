@@ -20,8 +20,10 @@ Two stages:
    to *diagnose* which proxy is informative -- never to build the assignment.
 2. **Evaluate** (expensive): build the same 3-bucket assignment the oracle uses,
    but from the label-free score, and measure the routing metric against the
-   shared uniform / random baselines. A candidate with a positive, significant
-   gain over random is a candidate D2 fix.
+   shared uniform / random baselines. Candidates are scored on a *frozen*
+   routing-blind feature-k-means expert pool (protocol B) so a candidate cannot
+   collect self-specialization credit for its own partition. A candidate with a
+   positive, significant gain over random is a candidate D2 fix.
 
 Candidates are oriented so that HIGHER always means "more label-homophilic", so
 they are bucketed with the oracle's adaptive-quantile rule unchanged.
@@ -39,9 +41,12 @@ import scipy.sparse as sp
 from scipy.stats import spearmanr
 
 from spectral_distillation.src.effective_resistance import effective_resistance_exact
-from spectral_distillation.src.evaluation import evaluate_comparison, holm_bonferroni
+from spectral_distillation.src.evaluation import (
+    evaluate_comparison,
+    holm_adjusted_pvalues,
+    holm_step_down,
+)
 from spectral_distillation.src.laplacian import compute_laplacian, eigh_symmetric
-from spectral_distillation.src.mixture import fit_experts, mixture_accuracy, train_test_split
 from spectral_distillation.src.real_fraud import load_real_fraud
 from spectral_distillation.src.router_protocol import (
     label_homophily,
@@ -223,18 +228,24 @@ def main() -> None:
         conditions[c] = bucket_from_score(signed)
 
     t0 = time.perf_counter()
-    split_means: dict[str, dict[int, float]] = {c: {} for c in conditions}
-    for split in range(args.splits):
-        for cond, a in conditions.items():
-            accs = []
-            for seed in range(args.seeds):
-                train, test = train_test_split(y, split, seed)
-                experts = fit_experts(X, y, a, train)
-                acc, _ = mixture_accuracy(X, y, a, experts, test)
-                accs.append(acc)
-            split_means[cond][split] = float(np.mean(accs))
-    log.info("scored %d conditions x %d splits x %d seeds in %.1fs",
-             len(conditions), args.splits, args.seeds, time.perf_counter() - t0)
+    # Frozen-expert pool (protocol B): experts are fitted once from a
+    # routing-blind feature k-means partition and reused for every candidate, so
+    # D2 measures transfer to a fixed specialist rather than self-specialization
+    # credit (see run_fixed_expert_protocol docstring).
+    from spectral_distillation.experiments.run_fixed_expert_protocol import (
+        build_expert_factory,
+        evaluate_all,
+        feature_kmeans_routing,
+    )
+
+    pool = feature_kmeans_routing(X)
+    expert_factory = build_expert_factory("logistic", graph, args.device)
+    split_means = evaluate_all(
+        conditions, X, y, args.splits, args.seeds, log,
+        expert_assignment=pool, expert_factory=expert_factory,
+    )
+    log.info("scored %d conditions on the frozen k-means pool in %.1fs",
+             len(conditions), time.perf_counter() - t0)
 
     comps = []
     for c in chosen:
@@ -252,15 +263,17 @@ def main() -> None:
         i for i, c in enumerate(comps)
         if c.name.endswith("_vs_random") and c.name != "oracle_vs_random"
     ]
-    corrected = holm_bonferroni([comps[i].p_wilcoxon for i in d2_idx], 0.05)
+    d2_pvals = [comps[i].p_wilcoxon for i in d2_idx]
+    d2_reject = holm_step_down(d2_pvals, 0.05)
+    d2_adjusted = holm_adjusted_pvalues(d2_pvals)
     d2_results = []
-    for i, thresh in zip(d2_idx, corrected):
-        comps[i].significant = bool(comps[i].mean_diff > 0 and comps[i].p_wilcoxon < thresh)
+    for i, rej, padj in zip(d2_idx, d2_reject, d2_adjusted):
+        comps[i].significant = bool(comps[i].mean_diff > 0 and rej)
         d2_results.append({
             "candidate": comps[i].name.replace("_vs_random", ""),
             "mean_diff": comps[i].mean_diff,
             "p_wilcoxon": comps[i].p_wilcoxon,
-            "alpha_corrected": thresh,
+            "p_holm_adjusted": padj,
             "effect_size_dz": comps[i].effect_size_dz,
             "d2_supported": comps[i].significant,
         })
@@ -279,7 +292,8 @@ def main() -> None:
     ]
     record["d2_family"] = d2_results
 
-    print(f"\n=== stage 2: does any label-free proxy fix D2 on {args.dataset}? ===")
+    print(f"\n=== stage 2: does any label-free proxy fix D2 on {args.dataset}? "
+          f"(frozen k-means expert pool) ===")
     print("{:<18s}{:>11s}{:>11s}{:>9s}{:>13s}".format(
         "candidate", "vs_random", "p", "dz", "D2 fixed?"))
     for r in d2_results:

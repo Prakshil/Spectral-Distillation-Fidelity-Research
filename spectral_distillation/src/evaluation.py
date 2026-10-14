@@ -97,13 +97,52 @@ def mean_ci95(a: np.ndarray, b: np.ndarray) -> tuple[float, float, float]:
 
 
 def holm_bonferroni(pvalues: list[float], alpha: float = 0.05) -> list[float]:
-    """Adjusted significance thresholds (Holm, 1979) for a set of p-values."""
+    """Per-rank Holm (1979) thresholds ``alpha / (k - rank)``, in input order.
+
+    WARNING: these thresholds are only meaningful when applied *sequentially*
+    -- compare the smallest p-value to its threshold first, and once one
+    hypothesis fails its threshold every larger p-value is retained. Comparing
+    each p-value to its own threshold independently (as callers used to do) does
+    **not** control the family-wise error rate. Use :func:`holm_step_down` (or
+    the adjusted p-values from :func:`holm_adjusted_pvalues`) for decisions.
+    """
     order = np.argsort(pvalues)
     k = len(pvalues)
     thresholds = [0.0] * k
     for rank, idx in enumerate(order):
         thresholds[idx] = alpha / (k - rank)
     return thresholds
+
+
+def holm_adjusted_pvalues(pvalues: list[float]) -> list[float]:
+    """Holm step-down adjusted p-values (monotone, capped at 1.0).
+
+    ``p~(rank) = max_{i <= rank} (k - i + 1) * p_(i)`` on the ascending order.
+    Rejecting ``p~ <= alpha`` is exactly the Holm step-down procedure and *does*
+    control the FWER under arbitrary dependence.
+    """
+    p = np.asarray(pvalues, dtype=float)
+    k = p.size
+    if k == 0:
+        return []
+    order = np.argsort(p, kind="stable")
+    adjusted = np.empty(k, dtype=float)
+    running = 0.0
+    for rank, idx in enumerate(order):
+        running = max(running, float((k - rank) * p[idx]))
+        adjusted[idx] = min(1.0, running)
+    return adjusted.tolist()
+
+
+def holm_step_down(pvalues: list[float], alpha: float = 0.05) -> list[bool]:
+    """Boolean rejection mask for the Holm step-down procedure.
+
+    ``True`` where the (monotone) adjusted p-value is ``<= alpha``. This is the
+    FWER-controlling replacement for the old ``p < threshold`` misuse: because
+    the adjusted values are monotone in the sorted p-values, once the smallest
+    non-rejected p-value stops the sequence, every larger one is retained.
+    """
+    return [bool(a <= alpha) for a in holm_adjusted_pvalues(pvalues)]
 
 
 def combine_comparisons(results) -> dict[str, ComparisonResult]:
@@ -230,9 +269,10 @@ def run_protocol(
         )
 
     corrected = holm_bonferroni([c.p_wilcoxon for c in comparisons], alpha)
-    for c, thresh in zip(comparisons, corrected):
+    reject = holm_step_down([c.p_wilcoxon for c in comparisons], alpha)
+    for c, thresh, rej in zip(comparisons, corrected, reject):
         c.alpha_corrected = float(thresh)
-        c.significant = bool(c.mean_diff > 0 and c.p_wilcoxon < thresh)
+        c.significant = bool(c.mean_diff > 0 and rej)
 
     return ProtocolResults(comparisons=comparisons)
 

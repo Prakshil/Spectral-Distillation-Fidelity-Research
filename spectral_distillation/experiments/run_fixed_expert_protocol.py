@@ -68,7 +68,11 @@ from spectral_distillation.experiments.run_candidate_search import (
     bucket_from_score,
     candidate_scores,
 )
-from spectral_distillation.src.evaluation import evaluate_comparison, holm_bonferroni
+from spectral_distillation.src.evaluation import (
+    evaluate_comparison,
+    holm_adjusted_pvalues,
+    holm_step_down,
+)
 from spectral_distillation.src.learned_router import uniform_ensemble_accuracy
 from spectral_distillation.src.mixture import (
     EXPERT_FACTORIES,
@@ -346,9 +350,11 @@ def main() -> None:
     def d2_table(acc: dict) -> tuple[list[dict], dict]:
         keys = [f"{n}::fwd" for n in scores]
         comps = [evaluate_comparison(acc[k], acc["random"], f"{k}_vs_random") for k in keys]
-        thr = holm_bonferroni([c.p_wilcoxon for c in comps], 0.05)
+        pvals = [c.p_wilcoxon for c in comps]
+        reject = holm_step_down(pvals, 0.05)
+        adjusted = holm_adjusted_pvalues(pvals)
         rows = []
-        for name, c, t in zip(scores, comps, thr):
+        for name, c, rej, padj in zip(scores, comps, reject, adjusted):
             # The meaningful reference under a fixed specialist pool: does this
             # routing beat having no routing at all? Positive means the routing
             # actively helps; negative means it is worse than one global model.
@@ -359,8 +365,9 @@ def main() -> None:
                 "rho": rho[name],
                 "d2": c.mean_diff,
                 "p": c.p_wilcoxon,
+                "p_holm_adjusted": padj,
                 "dz": c.effect_size_dz,
-                "holm_significant": bool(c.mean_diff > 0 and c.p_wilcoxon < t),
+                "holm_significant": bool(c.mean_diff > 0 and rej),
                 "d2_vs_no_routing": g.mean_diff,
                 "p_vs_no_routing": g.p_wilcoxon,
                 "dz_vs_no_routing": g.effect_size_dz,

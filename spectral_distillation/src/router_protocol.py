@@ -12,6 +12,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
+from spectral_distillation.src.evaluation import holm_step_down
 from spectral_distillation.src.laplacian import normalize_adjacency, build_adjacency
 
 EXPERT_TYPES = ("low_pass", "high_pass", "identity")
@@ -137,7 +138,15 @@ def oracle_bucket_assignment(
         elif h_all[i] <= h_low:
             assignment[i] = np.array(soft_gates)[::-1] if soft_gates else np.array([0.0, 0.0, 1.0])
         else:
-            assignment[i] = soft_gates if soft_gates else np.array([0.0, 1.0, 0.0])
+            # Identity (middle) bucket: the winning channel is 1, so the gate's
+            # winner weight must land on channel 1, not channel 0. Using
+            # ``soft_gates`` unchanged put 0.8 on the low-pass channel here and
+            # silently mis-routed every middle node.
+            assignment[i] = (
+                np.array((soft_gates[1], soft_gates[0], soft_gates[2]))
+                if soft_gates
+                else np.array([0.0, 1.0, 0.0])
+            )
     return assignment
 
 
@@ -388,30 +397,50 @@ def evaluate_decision_rules(
     Each value: {"mean_diff": float, "p_wilcoxon": float}.
     ``control_comparisons`` optionally supplies the D4 mechanism-matched
     positive control (oracle vs uniform on PC-1c-R).
+
+    D1-D4 are a single pre-registered family, so their p-values are corrected
+    with the Holm step-down procedure (:func:`holm_step_down`) before any rule is
+    declared to hold. The previous code compared every rule to the raw
+    ``alpha``, which does not control the family-wise error rate.
     """
 
-    def wins(alias: str, variants: tuple[str, ...]):
-        row, _found = _resolve(comparisons, alias, variants)
+    def resolve(alias: str, variants: tuple[str, ...], source: dict):
+        row, _found = _resolve(source, alias, variants)
+        if row is None:
+            return None
+        return float(row["mean_diff"]), float(row["p"])
+
+    rules_rows = {
+        "D1": resolve("oracle_vs_uniform", ("oracle_vs_uniform", "oracle_uniform"), comparisons),
+        "D2": resolve("label_free_vs_random", ("label_free_vs_random", "label_free_random"), comparisons),
+        "D3": resolve("oracle_vs_random", ("oracle_vs_random", "oracle_random"), comparisons),
+        "D4": (
+            resolve(
+                "oracle_vs_uniform",
+                ("oracle_vs_uniform", "oracle_uniform", "control_oracle_vs_uniform", "control_oracle_uniform"),
+                control_comparisons,
+            )
+            if control_comparisons is not None
+            else None
+        ),
+    }
+    order = ["D1", "D2", "D3", "D4"]
+    present = [(name, rules_rows[name]) for name in order if rules_rows[name] is not None]
+    reject = holm_step_down([row[1] for _name, row in present], alpha)
+    decisions = {
+        name: bool(row[0] > 0 and rej) for (name, row), rej in zip(present, reject)
+    }
+
+    def _rule(name: str):
+        row = rules_rows[name]
         if row is None:
             return None, None
-        p = float(row["p"])
-        return bool(float(row["mean_diff"]) > 0 and p < alpha), p
+        return decisions.get(name), row[1]
 
-    d1, d1_p = wins("oracle_vs_uniform", ("oracle_vs_uniform", "oracle_uniform"))
-    d2, d2_p = wins("label_free_vs_random", ("label_free_vs_random", "label_free_random"))
-    d3, d3_p = wins("oracle_vs_random", ("oracle_vs_random", "oracle_random"))
-
-    d4: bool | None = None
-    d4_p: float | None = None
-    if control_comparisons is not None:
-        row, _found = _resolve(
-            control_comparisons,
-            "oracle_vs_uniform",
-            ("oracle_vs_uniform", "oracle_uniform", "control_oracle_vs_uniform", "control_oracle_uniform"),
-        )
-        if row is not None:
-            d4_p = float(row["p"])
-            d4 = bool(float(row["mean_diff"]) > 0 and d4_p < alpha)
+    d1, d1_p = _rule("D1")
+    d2, d2_p = _rule("D2")
+    d3, d3_p = _rule("D3")
+    d4, d4_p = _rule("D4")
 
     rules = DecisionRules(
         D1=d1,

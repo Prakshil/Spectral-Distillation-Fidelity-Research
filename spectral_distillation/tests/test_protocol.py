@@ -116,6 +116,17 @@ def test_oracle_bucket_assignment_channels_and_soft_gates():
     assert np.allclose(soft[0], [0.8, 0.1, 0.1])
 
 
+def test_oracle_bucket_assignment_soft_gates_middle_channel():
+    # node 0 has two neighbors, one same-label -> h=0.5 -> identity/middle bucket
+    W = np.array([[0.0, 1.0, 1.0], [1.0, 0.0, 0.0], [1.0, 0.0, 0.0]])
+    y = np.array([0, 0, 1])
+    soft = oracle_bucket_assignment(W, y, h_low=0.4, h_high=0.6, soft_gates=(0.8, 0.1, 0.1))
+    # the gate's winner weight (0.8) must land on the identity channel (1)
+    assert np.allclose(soft[0], [0.1, 0.8, 0.1])
+    # high-pass bucket keeps the winner on channel 2
+    assert np.allclose(soft[2], [0.1, 0.1, 0.8])
+
+
 def test_budget_normalized_homophily_rescales_short_sentences():
     # sentence 0: 2 tokens, sentence 1: 6 tokens, sentence 2: 4 tokens.
     # Node 2 (sentence 1) has 1 same-sentence edge of a possible 6 -> low raw h
@@ -383,6 +394,62 @@ def test_m_expert_does_not_saturate(small_pc_graph):
     assert 0.3 < acc < 0.98  # above chance on 5 classes, but not saturated
 
 
+def test_assert_no_saturation_guard():
+    """The control is only valid if no arm saturates; the guard must enforce it."""
+    import spectral_distillation.experiments.run_protocol as rp
+
+    class _Log:
+        def info(self, *a, **k):
+            pass
+
+    graph = generate_pc_graph(n_nodes=150, n_patches=3, d_features=8, seed=42)
+    acc = rp.assert_no_saturation(graph, _Log())
+    assert acc is not None and 0.3 < acc < 0.95
+
+    # a graph without regimes is out of scope for the invariant
+    assert rp.assert_no_saturation({"W": graph["W"]}, _Log()) is None
+
+    # a saturated single-M expert must be rejected, not silently accepted
+    orig = rp.single_m_expert_accuracy
+    rp.single_m_expert_accuracy = lambda g, **kw: 0.99
+    try:
+        with pytest.raises(AssertionError):
+            rp.assert_no_saturation(graph, _Log())
+    finally:
+        rp.single_m_expert_accuracy = orig
+
+
+def test_summarize_uses_independent_control_for_d4():
+    """D4 must read the *separate* control arm, not the main run's own D1."""
+    import argparse
+
+    import spectral_distillation.experiments.run_protocol as rp
+
+    graph = generate_pc_graph(n_nodes=150, n_patches=3, d_features=8, seed=42)
+    regimes = np.asarray(graph["regimes"])
+    oracle = oracle_regime_assignment(regimes, 3)
+    assignments = {
+        "oracle": oracle,
+        "label_free": oracle,
+        "random": random_assignment(oracle, rng=1),
+        "uniform": uniform_assignment(graph["W"].shape[0], 3),
+    }
+    results = run_protocol(
+        run_fn=lambda cond, split, seed: rp.cell_accuracy(graph, assignments, cond, split, seed),
+        n_splits=2,
+        n_seeds=2,
+    )
+    args = argparse.Namespace(frozen_perms=1, router_seed=0)
+    control = {"oracle_vs_uniform": {"mean_diff": 0.05, "p_wilcoxon": 1e-6}}
+    record = rp._summarize(results, args, graph, assignments, control)
+    assert record["control_comparisons"] is control
+    assert record["findings"]["D4"] is True
+
+    # without a control the D4 row is absent (no vacuous pass)
+    record_none = rp._summarize(results, args, graph, assignments, None)
+    assert record_none["findings"]["D4"] is None
+
+
 def test_dilution_ladder_preserves_invariants():
     graph = generate_pc_graph(n_nodes=200, n_patches=4, d_features=8, seed=3)
     W = np.asarray(graph["W"], dtype=float)
@@ -403,6 +470,17 @@ def test_dilution_ladder_preserves_invariants():
     m05 = rungs[1]["converted_mask"]
     m10 = rungs[2]["converted_mask"]
     assert m10.sum() >= m05.sum()
+
+
+def test_dilution_ladder_converts_class_balanced_nested_subsets():
+    graph = generate_pc_graph(n_nodes=400, n_patches=4, d_features=8, seed=7)
+    y = np.asarray(graph["y"])
+    rungs = dilution_ladder(graph, [0.25, 0.5, 0.75], seed=7)
+    for rung in rungs:
+        mask = np.asarray(rung["converted_mask"])
+        counts = [int(((y == c) & mask).sum()) for c in np.unique(y)]
+        # each rung converts an equal number from every class (interleaved order)
+        assert max(counts) - min(counts) <= 1
 
 
 # --------------------------------------------------------------------------- #

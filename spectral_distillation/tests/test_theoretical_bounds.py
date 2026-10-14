@@ -10,6 +10,7 @@ from spectral_distillation.src.theoretical_bounds import (
     check_all_bounds,
     check_cauchy_interlacing,
     check_davis_kahan,
+    check_edge_removal_weyl,
     check_weyl,
 )
 
@@ -61,12 +62,21 @@ def test_davis_kahan_bound_vacuous_for_fiedler_collapse():
     assert 2.0 * frob / gap > 1.0
 
 
-def test_cauchy_interlacing_holds_for_every_edge_of_full_graph():
+def test_edge_removal_weyl_holds_for_every_edge_of_full_graph():
     edges = [(0, 1), (0, 2), (0, 3), (1, 2), (1, 3), (2, 3)]
     for i, j in edges:
-        result = check_cauchy_interlacing(L_FULL, i, j)
+        result = check_edge_removal_weyl(L_FULL, i, j)
         assert result["holds"]
-        assert result["max_decrease"] <= 2.0 * result["edge_weight"] + 1e-8
+        assert result["max_decrease"] <= result["weyl_bound"] + 1e-8
+        assert result["weyl_bound"] == 2.0 * result["edge_weight"]
+
+
+def test_cauchy_interlacing_holds_for_principal_submatrix():
+    for drop in range(4):
+        result = check_cauchy_interlacing(L_FULL, drop)
+        assert result["holds"]
+        assert result["min_lower_margin"] >= -1e-8
+        assert result["min_upper_margin"] >= -1e-8
 
 
 def test_cauchy_eigenvalues_only_decrease():

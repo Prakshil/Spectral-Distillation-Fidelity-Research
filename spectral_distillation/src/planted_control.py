@@ -156,7 +156,10 @@ def dilution_ladder(
     Each ladder element is a copy of ``base_graph`` with ``dilution * n`` nodes
     converted. Converted nodes have all their neighbors forced to same-class
     (p_homophily), keeping cross-class wiring at p_hetero. Conversion order is
-    fixed per class so converted sets are strictly nested across the ladder.
+    interleaved round-robin across classes, so each rung converts a
+    class-proportional (balanced) subset and the sets stay strictly nested as
+    dilution grows. Building the order class-by-class instead would confound the
+    dilution axis with class identity: low rungs would convert only class 0.
     """
     if dilution_values is None:
         dilution_values = [0.0, 0.25, 0.5, 0.75, 1.0]
@@ -165,11 +168,17 @@ def dilution_ladder(
     n = y.size
     classes = np.unique(y)
 
-    conversion_order: list[int] = []
+    per_class: list[list[int]] = []
     for c in classes:
-        idx = np.flatnonzero(y == c).tolist()
-        rng.shuffle(idx)
-        conversion_order.extend(idx)
+        members = np.flatnonzero(y == c).tolist()
+        rng.shuffle(members)
+        per_class.append(members)
+    conversion_order: list[int] = []
+    longest = max((len(m) for m in per_class), default=0)
+    for pos in range(longest):
+        for members in per_class:
+            if pos < len(members):
+                conversion_order.append(members[pos])
 
     base_W = base_graph["W"]
     p_hom = base_graph["p_homophily"]

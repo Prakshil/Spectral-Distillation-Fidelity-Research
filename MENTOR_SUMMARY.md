@@ -82,7 +82,7 @@ Dilution ladder = gradually scramble graph edges toward same-class wiring to tes
 
 1. **Protocol A (self-routing): all four rules pass (top-k ≥ 32).** Real attention carries a sentence-homophily signal that both the label-augmented oracle (D1, D3) and the **label-free structural router** (D2) detect; the router's gain survives a fair usage-matched control (+0.0131, p=0.002), so the "router survives sparsity" claim holds. (An earlier retraction had read the router as degenerate; that ablation is traced to a four-field router missing `snf` and is withdrawn — `docs/real_attention_results.md` §6–7.)
 2. **What survives + the one limit:** D1–D4 all pass at top-k ≥ 32; the only failure is D1 (the *oracle*) at top-k=16 (a sparse-oracle-instrument limit). A separate positive result stands: connectivity survival predicts routing **stability** (`docs/real_attention_results.md` §9.1; pooled partial rho survival +0.71, p=7.6e-09); low-frequency spectral distortion is a collinear proxy — significant pooled (partial rho −0.62, p=1.7e-06) but not within any single graph (§9.3).
-3. The dilution-ladder anomaly was investigated and shown to be a test artifact; reported honestly rather than overclaimed. Caveat: the label-free partition — and hence D2 — is sensitive to the exact attention export (`docs/real_attention_results.md` §6).
+3. The dilution-ladder anomaly was investigated and shown to be a test artifact; reported honestly rather than overclaimed. Caveat: the label-free partition — and hence D2 — is sensitive to the exact attention export; a cross-export check on a CUDA export reproduces the partition and D2's sign, but the k=16 magnitude roughly halves (`docs/real_attention_results.md` §6).
 
 ## 7. Reproduce / artifacts
 

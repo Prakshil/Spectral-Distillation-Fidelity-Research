@@ -7,6 +7,17 @@ Node features: attention entropy · Labels: real sentence membership from tokeni
 
 Protocol identical to the synthetic PC-1c-R D1–D4 pipeline (see `docs/does-your-router-actually-route 4.pdf`).
 
+> **⚠ Status — §1–§8 are the Protocol A (self-routing) record, superseded by the Protocol-B verdict.**
+> Sections §1–§8 below use the Protocol A (self-routing) instrument: the router both assigns nodes
+> *and* defines the expert pools, so a partition is scored on the nodes it selected. The project's
+> **operative accuracy verdict is Protocol B** (routing-blind fixed pool): the real-attention
+> Protocol-B rerun is **null** (§9.2), and the surviving project-level positive is routing
+> **stability** (§9.1, §9.3); the README headline is authoritative. Do **not** quote §1–§8 as an
+> accuracy claim. What §1–§8 *do* establish: the D1–D4 instrument is coherent on real data, and —
+> after the §6 rewrite — the shipped five-field router is **not degenerate** and its label-free gain
+> is **not** a usage-imbalance artifact (the earlier "degenerate router" retraction is withdrawn).
+> §9 is the corrective analysis.
+
 ## 1. Headline result
 
 | Rule | Meaning | k=32 | verdict |

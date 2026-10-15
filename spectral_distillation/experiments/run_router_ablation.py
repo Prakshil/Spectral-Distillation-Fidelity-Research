@@ -21,6 +21,11 @@ claim that the recorded D2 gain is a usage-imbalance artifact.
 Both ``random_assignment`` baselines are usage-matched (same expert histogram,
 random per-node) -- that is the recorded convention -- so the only thing that
 differs between the two baselines is *which* usage profile is matched.
+
+``--device`` selects the device for the linear algebra; ``--export-device``
+selects it for the attention export (defaults to ``--device``). Running
+``--device cpu --export-device cuda`` re-runs the whole section against a CUDA
+export while holding the code, corpus and protocol fixed.
 """
 
 from __future__ import annotations
@@ -190,11 +195,18 @@ def main() -> None:
     parser.add_argument("--random-seed", type=int, default=1)
     parser.add_argument("--spectral-k", type=int, default=8)
     parser.add_argument("--device", default="cpu")
+    parser.add_argument(
+        "--export-device",
+        default=None,
+        help="device for the attention export; defaults to --device. Setting "
+        "--device cpu --export-device cuda isolates the export in a cross-device check.",
+    )
     parser.add_argument("--no-progress", action="store_true")
     parser.add_argument("--out", default="logs/rk_ablation")
     args = parser.parse_args()
 
     args.device = device_config(args.device)
+    args.export_device = device_config(args.export_device or args.device)
     log = get_logger("router_ablation", "INFO")
     set_seed(args.router_seed)
 
@@ -212,11 +224,15 @@ def main() -> None:
     )
     log.info("loaded model in %.1fs", time.perf_counter() - t0)
     records = export_attention(
-        model, tokenizer, passages, max_tokens=args.max_tokens, device=args.device
+        model, tokenizer, passages, max_tokens=args.max_tokens, device=args.export_device
     )
     log.info("exported attention in %.1fs", time.perf_counter() - t0)
 
-    ablation: dict = {"device": args.device, "config": vars(args)}
+    ablation: dict = {
+        "device": args.device,
+        "export_device": args.export_device,
+        "config": vars(args),
+    }
     control: dict = {"config": vars(args)}
     for k in args.top_ks:
         graph = build_attention_graph(records, how="mean", max_edges_per_node=k)

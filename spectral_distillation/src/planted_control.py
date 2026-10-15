@@ -194,8 +194,16 @@ def dilution_ladder(
         # Converted nodes are *rewritten* to homogeneous low-pass wiring:
         # their original (regime-specific) edges are removed and replaced with
         # same-class edges at p_hom. This erases the structural routing
-        # signature that the label-free router reads; at dilution=1 the whole
-        # graph is low-pass and the label-free gain should collapse.
+        # signature that the label-free router reads; as dilution grows toward 1
+        # the graph becomes increasingly low-pass and the label-free gain falls.
+        #
+        # Each converted node draws its own edges from a per-node RNG seeded by
+        # (seed, node). This keeps a node's realized wiring a pure function of
+        # (seed, node): the rungs are strictly nested *including* the random
+        # wiring, and a rung does not depend on the other dilution values in the
+        # ladder. Sharing one RNG across rungs instead lets the full-dilution
+        # rung (which converts the most nodes) absorb the most RNG variance and
+        # couples every rung to the ladder's composition.
         for v in np.flatnonzero(convert):
             W[v, :] = 0.0
             W[:, v] = 0.0
@@ -203,7 +211,8 @@ def dilution_ladder(
             same = same[same != v]
             keep = np.empty(0, dtype=int)
             if same.size:
-                keep = same[rng.random(same.size) < p_hom]
+                node_rng = np.random.default_rng([int(seed), int(v)])
+                keep = same[node_rng.random(same.size) < p_hom]
             W[v, keep] = 1.0
             W[keep, v] = 1.0
         np.fill_diagonal(W, 0.0)

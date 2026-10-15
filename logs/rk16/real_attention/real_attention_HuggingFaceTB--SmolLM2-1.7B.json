@@ -2,7 +2,7 @@
   "config": {
     "config": "configs/default.yaml",
     "model_id": "HuggingFaceTB/SmolLM2-1.7B",
-    "text_file": "data/erp_attention/corpus.txt",
+    "text_file": "data/erp_attention/corpus_scaled.txt",
     "max_tokens": 480,
     "top_k": 16,
     "splits": 10,
@@ -25,74 +25,74 @@
     "adaptive_oracle": false,
     "budget_oracle": false,
     "no_progress": false,
-    "out": "logs/rk16",
-    "device": "cuda"
+    "out": "logs\\rk16",
+    "device": "cpu"
   },
   "graph": {
-    "n_nodes": 415,
-    "n_labels": 23,
+    "n_nodes": 11520,
+    "n_labels": 29,
     "n_layers": 24,
-    "n_passages": 1
+    "n_passages": 24
   },
   "assignments_usage": {
     "oracle": [
-      157,
-      129,
-      129
+      4699,
+      3716,
+      3105
     ],
     "label_free": [
-      2,
-      412,
-      1
+      7640,
+      3820,
+      60
     ],
     "random": [
-      152,
-      130,
-      133
+      4702,
+      3732,
+      3086
     ],
     "uniform": [
-      415,
+      11520,
       0,
       0
     ]
   },
   "findings": {
-    "D1": true,
+    "D1": false,
     "D2": true,
     "D3": true,
     "D4": true,
-    "D1_p": 0.0390625,
+    "D1_p": 0.001953125,
     "D2_p": 0.001953125,
     "D3_p": 0.001953125,
     "D4_p": 0.001953125,
-    "verdict": "Supported: signal exists, router finds it, not capacity, instrument valid."
+    "verdict": "Not supported; failed rule(s): D1."
   },
   "comparisons": {
     "oracle_vs_uniform": {
-      "mean_diff": 0.01025641025641028,
-      "ci_low": 0.0018633453956161394,
-      "ci_high": 0.018649475117204422,
-      "p_wilcoxon": 0.0390625,
-      "p_paired_t": 0.021954373074633087,
-      "effect_size_dz": 0.9214596539534531,
-      "significant": true
+      "mean_diff": -0.00531736388358503,
+      "ci_low": -0.006838214691554304,
+      "ci_high": -0.0037965130756157563,
+      "p_wilcoxon": 0.001953125,
+      "p_paired_t": 2.424556487198359e-05,
+      "effect_size_dz": -2.636399909340875,
+      "significant": false
     },
     "label_free_vs_random": {
-      "mean_diff": 0.04759615384615384,
-      "ci_low": 0.03659955652672419,
-      "ci_high": 0.05859275116558348,
+      "mean_diff": 0.022108430249377996,
+      "ci_low": 0.019876698822663397,
+      "ci_high": 0.024340161676092594,
       "p_wilcoxon": 0.001953125,
-      "p_paired_t": 4.2640525805748e-06,
-      "effect_size_dz": 3.2637362637362632,
+      "p_paired_t": 3.3216995882205937e-09,
+      "effect_size_dz": 7.469946614755521,
       "significant": true
     },
     "oracle_vs_random": {
-      "mean_diff": 0.06233974358974361,
-      "ci_low": 0.049353333280181384,
-      "ci_high": 0.07532615389930584,
+      "mean_diff": 0.009188219637794356,
+      "ci_low": 0.006898278739745594,
+      "ci_high": 0.01147816053584312,
       "p_wilcoxon": 0.001953125,
-      "p_paired_t": 1.7945006718984228e-06,
-      "effect_size_dz": 3.6197402805553858,
+      "p_paired_t": 7.964728326218912e-06,
+      "effect_size_dz": 3.025579813759106,
       "significant": true
     }
   },

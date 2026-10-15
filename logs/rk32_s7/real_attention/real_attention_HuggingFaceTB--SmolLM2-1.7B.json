@@ -2,7 +2,7 @@
   "config": {
     "config": "configs/default.yaml",
     "model_id": "HuggingFaceTB/SmolLM2-1.7B",
-    "text_file": "data/erp_attention/corpus.txt",
+    "text_file": "data/erp_attention/corpus_scaled.txt",
     "max_tokens": 480,
     "top_k": 32,
     "splits": 10,
@@ -19,39 +19,39 @@
       1.0
     ],
     "router_seed": 7,
-    "random_seed": 1,
-    "dilution_seed": 3,
+    "random_seed": 7,
+    "dilution_seed": 9,
     "skip_dilution": true,
     "adaptive_oracle": false,
     "budget_oracle": false,
     "no_progress": false,
-    "out": "logs/rk32_s7",
-    "device": "cuda"
+    "out": "logs\\rk32_s7",
+    "device": "cpu"
   },
   "graph": {
-    "n_nodes": 415,
-    "n_labels": 23,
+    "n_nodes": 11520,
+    "n_labels": 29,
     "n_layers": 24,
-    "n_passages": 1
+    "n_passages": 24
   },
   "assignments_usage": {
     "oracle": [
-      71,
-      97,
-      247
+      2048,
+      3839,
+      5633
     ],
     "label_free": [
-      2,
-      412,
-      1
+      7648,
+      3824,
+      48
     ],
     "random": [
-      69,
-      97,
-      249
+      2032,
+      3961,
+      5527
     ],
     "uniform": [
-      415,
+      11520,
       0,
       0
     ]
@@ -69,30 +69,30 @@
   },
   "comparisons": {
     "oracle_vs_uniform": {
-      "mean_diff": 0.07868589743589745,
-      "ci_low": 0.06149873676355634,
-      "ci_high": 0.09587305810823855,
+      "mean_diff": 0.00638199386680553,
+      "ci_low": 0.004975376954261382,
+      "ci_high": 0.007788610779349678,
       "p_wilcoxon": 0.001953125,
-      "p_paired_t": 2.6711367457335453e-06,
-      "effect_size_dz": 3.452186778522983,
+      "p_paired_t": 2.8800800396939117e-06,
+      "effect_size_dz": 3.4212283885626276,
       "significant": true
     },
     "label_free_vs_random": {
-      "mean_diff": 0.05480769230769228,
-      "ci_low": 0.04611380385661151,
-      "ci_high": 0.06350158075877305,
+      "mean_diff": 0.0172597349997107,
+      "ci_low": 0.015311967439797783,
+      "ci_high": 0.019207502559623613,
       "p_wilcoxon": 0.001953125,
-      "p_paired_t": 1.7480865901717716e-07,
-      "effect_size_dz": 4.753669370960502,
+      "p_paired_t": 8.898828719908794e-09,
+      "effect_size_dz": 6.6818775782302655,
       "significant": true
     },
     "oracle_vs_random": {
-      "mean_diff": 0.13798076923076924,
-      "ci_low": 0.11552598272940488,
-      "ci_high": 0.1604355557321336,
+      "mean_diff": 0.020551987502169754,
+      "ci_low": 0.01858344100238958,
+      "ci_high": 0.022520534001949928,
       "p_wilcoxon": 0.001953125,
-      "p_paired_t": 2.1810721333619732e-07,
-      "effect_size_dz": 4.633521163851306,
+      "p_paired_t": 2.0861761809389983e-09,
+      "effect_size_dz": 7.872445607984187,
       "significant": true
     }
   },
@@ -103,11 +103,11 @@
       "p_wilcoxon": 0.001953125
     },
     "label_free_vs_random": {
-      "mean_diff": 0.02299999999999993,
+      "mean_diff": 0.017933333333333235,
       "p_wilcoxon": 0.001953125
     },
     "oracle_vs_random": {
-      "mean_diff": 0.3209666666666666,
+      "mean_diff": 0.31589999999999996,
       "p_wilcoxon": 0.001953125
     }
   },

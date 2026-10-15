@@ -2,7 +2,7 @@
   "config": {
     "config": "configs/default.yaml",
     "model_id": "HuggingFaceTB/SmolLM2-1.7B",
-    "text_file": "data/erp_attention/corpus.txt",
+    "text_file": "data/erp_attention/corpus_scaled.txt",
     "max_tokens": 480,
     "top_k": 32,
     "splits": 10,
@@ -26,32 +26,32 @@
     "budget_oracle": false,
     "no_progress": false,
     "out": "logs",
-    "device": "cuda"
+    "device": "cpu"
   },
   "graph": {
-    "n_nodes": 415,
-    "n_labels": 23,
+    "n_nodes": 11520,
+    "n_labels": 29,
     "n_layers": 24,
-    "n_passages": 1
+    "n_passages": 24
   },
   "assignments_usage": {
     "oracle": [
-      71,
-      97,
-      247
+      2048,
+      3839,
+      5633
     ],
     "label_free": [
-      2,
-      412,
-      1
+      7648,
+      3824,
+      48
     ],
     "random": [
-      69,
-      97,
-      249
+      2081,
+      3713,
+      5726
     ],
     "uniform": [
-      415,
+      11520,
       0,
       0
     ]
@@ -69,30 +69,30 @@
   },
   "comparisons": {
     "oracle_vs_uniform": {
-      "mean_diff": 0.07868589743589745,
-      "ci_low": 0.06149873676355634,
-      "ci_high": 0.09587305810823855,
+      "mean_diff": 0.00638199386680553,
+      "ci_low": 0.004975376954261382,
+      "ci_high": 0.007788610779349678,
       "p_wilcoxon": 0.001953125,
-      "p_paired_t": 2.6711367457335453e-06,
-      "effect_size_dz": 3.452186778522983,
+      "p_paired_t": 2.8800800396939117e-06,
+      "effect_size_dz": 3.4212283885626276,
       "significant": true
     },
     "label_free_vs_random": {
-      "mean_diff": 0.05480769230769228,
-      "ci_low": 0.04611380385661151,
-      "ci_high": 0.06350158075877305,
+      "mean_diff": 0.018046635422091083,
+      "ci_low": 0.01633476524679481,
+      "ci_high": 0.019758505597387354,
       "p_wilcoxon": 0.001953125,
-      "p_paired_t": 1.7480865901717716e-07,
-      "effect_size_dz": 4.753669370960502,
+      "p_paired_t": 1.9139843469711882e-09,
+      "effect_size_dz": 7.949264333754061,
       "significant": true
     },
     "oracle_vs_random": {
-      "mean_diff": 0.13798076923076924,
-      "ci_low": 0.11552598272940488,
-      "ci_high": 0.1604355557321336,
+      "mean_diff": 0.02133888792455014,
+      "ci_low": 0.019941673931849407,
+      "ci_high": 0.02273610191725087,
       "p_wilcoxon": 0.001953125,
-      "p_paired_t": 2.1810721333619732e-07,
-      "effect_size_dz": 4.633521163851306,
+      "p_paired_t": 7.041082858977337e-11,
+      "effect_size_dz": 11.516231209163882,
       "significant": true
     }
   },
@@ -114,33 +114,33 @@
   "dilution": [
     {
       "dilution": 0.0,
-      "oracle_gain": 0.08493589743589743,
-      "label_free_gain": 0.06049679487179485,
-      "elapsed_s": 3.3
+      "oracle_gain": 0.007087889833940865,
+      "label_free_gain": 0.01910837238905284,
+      "elapsed_s": 269.0
     },
     {
       "dilution": 0.25,
-      "oracle_gain": 0.016025641025641024,
-      "label_free_gain": 0.04767628205128205,
-      "elapsed_s": 2.8
+      "oracle_gain": -0.0033703639414453443,
+      "label_free_gain": 0.007579702597928603,
+      "elapsed_s": 348.8
     },
     {
       "dilution": 0.5,
-      "oracle_gain": 0.00881410256410256,
-      "label_free_gain": -0.00881410256410256,
-      "elapsed_s": 3.0
+      "oracle_gain": -0.0010559509344442535,
+      "label_free_gain": 0.011572065035005496,
+      "elapsed_s": 375.6
     },
     {
       "dilution": 0.75,
-      "oracle_gain": -0.0016025641025641246,
-      "label_free_gain": 0.08453525641025639,
-      "elapsed_s": 4.1
+      "oracle_gain": 0.0,
+      "label_free_gain": 0.04184748018283863,
+      "elapsed_s": 518.5
     },
     {
       "dilution": 1.0,
       "oracle_gain": 0.0,
-      "label_free_gain": 0.09975961538461538,
-      "elapsed_s": 4.1
+      "label_free_gain": 0.14428918590522477,
+      "elapsed_s": 518.5
     }
   ]
 }

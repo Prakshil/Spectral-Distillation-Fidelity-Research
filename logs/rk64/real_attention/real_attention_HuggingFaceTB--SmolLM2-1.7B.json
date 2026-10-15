@@ -2,7 +2,7 @@
   "config": {
     "config": "configs/default.yaml",
     "model_id": "HuggingFaceTB/SmolLM2-1.7B",
-    "text_file": "data/erp_attention/corpus.txt",
+    "text_file": "data/erp_attention/corpus_scaled.txt",
     "max_tokens": 480,
     "top_k": 64,
     "splits": 10,
@@ -25,33 +25,33 @@
     "adaptive_oracle": false,
     "budget_oracle": false,
     "no_progress": false,
-    "out": "logs/rk64",
-    "device": "cuda"
+    "out": "logs\\rk64",
+    "device": "cpu"
   },
   "graph": {
-    "n_nodes": 415,
-    "n_labels": 23,
+    "n_nodes": 11520,
+    "n_labels": 29,
     "n_layers": 24,
-    "n_passages": 1
+    "n_passages": 24
   },
   "assignments_usage": {
     "oracle": [
-      0,
-      57,
-      358
+      383,
+      1628,
+      9509
     ],
     "label_free": [
-      2,
-      412,
-      1
+      3821,
+      7642,
+      57
     ],
     "random": [
-      0,
-      46,
-      369
+      386,
+      1612,
+      9522
     ],
     "uniform": [
-      415,
+      11520,
       0,
       0
     ]
@@ -69,30 +69,30 @@
   },
   "comparisons": {
     "oracle_vs_uniform": {
-      "mean_diff": 0.017948717948717947,
-      "ci_low": 0.010425410434108297,
-      "ci_high": 0.025472025463327597,
+      "mean_diff": 0.012520974367875934,
+      "ci_low": 0.010074580266975997,
+      "ci_high": 0.01496736846877587,
       "p_wilcoxon": 0.001953125,
-      "p_paired_t": 0.00043474455747788453,
-      "effect_size_dz": 1.7989791853690622,
+      "p_paired_t": 1.0438989139231268e-06,
+      "effect_size_dz": 3.859341638343503,
       "significant": true
     },
     "label_free_vs_random": {
-      "mean_diff": 0.018269230769230742,
-      "ci_low": 0.009110735079436931,
-      "ci_high": 0.027427726459024554,
+      "mean_diff": 0.016721633975582934,
+      "ci_low": 0.013632415896326121,
+      "ci_high": 0.019810852054839748,
       "p_wilcoxon": 0.001953125,
-      "p_paired_t": 0.0014624140594496724,
-      "effect_size_dz": 1.504172469812389,
+      "p_paired_t": 6.481642738065623e-07,
+      "effect_size_dz": 4.0816114954229885,
       "significant": true
     },
     "oracle_vs_random": {
-      "mean_diff": 0.040705128205128185,
-      "ci_low": 0.03001626914512102,
-      "ci_high": 0.051393987265135346,
+      "mean_diff": 0.020048602673147013,
+      "ci_low": 0.017275368718373197,
+      "ci_high": 0.022821836627920828,
       "p_wilcoxon": 0.001953125,
-      "p_paired_t": 1.2194872610489709e-05,
-      "effect_size_dz": 2.871569260952953,
+      "p_paired_t": 5.314603322356073e-08,
+      "effect_size_dz": 5.451287904530499,
       "significant": true
     }
   },

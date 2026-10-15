@@ -112,32 +112,40 @@ carry this caveat rather than the raw dilution curve.
   is itself CPU): model load ~10 s, then the dominant costs are the Laplacian eigendecomposition, the
   structural/KMeans assignments, and the 120 logistic-refit protocol cells (~20-25 min), plus ~35 min
   for the dilution ladder. `--skip-dilution` gives a verdict-only run.
-- Tests: 256 pass (`python -m pytest`).
+- Tests: 257 pass (`python -m pytest`).
 
 ## 5. Density-aware oracle sweep (step 1 follow-up; closes the k=16 question)
 
 Goal: find an oracle calibration/extraction that beats uniform at top-k=16 and beat the fixed
 thresholds at every k. All variants evaluated on the same k=16 graph with the 6×2 protocol
-(primary sign/p/z held under the full 10×3 where noted). Only the two `(repro)` rows are
-produced by committed scripts (`run_real_attention.py` with the default and `--adaptive-oracle`
-oracles, cf. `logs/rk16` / `logs/rk16_adapt`); the remaining variants were a one-off
-exploratory sweep whose generating code is not in the repo, so they are reported as
-exploratory context rather than as reproducible results.
+(primary sign/p/z held under the full 10×3 where noted).
 
-**Result: every *honest* homophily-based oracle fails D1 at k=16.**
+**Result (reproducible): every *honest* homophily-based oracle fails D1 at k=16.**
 
-| Oracle variant (k=16) | usage hi/id/lo | D1 (o>u) | d_z | verdict |
-|---|---|---|---|---|
-| fixed 0.4/0.6 (repro) | [4697,3720,3103] | −0.0045 | −1.17 | ✗ |
-| adaptive tercile (repro) | [3875,3764,3881] | −0.0029 | −0.94 | ✗ |
-| Bayesian shrink, c=5 | [3927,3706,3887] | −0.0012 | −0.45 | ✗ |
-| Bayesian shrink, c=20 | [3940,3675,3905] | −0.0009 | −0.27 | ✗ |
-| confidence-gated (z=1) | [2062,7822,1636] | −0.0039 | −1.42 | ✗ |
-| degree-winsorized (top 15% → identity) | [2350,8091,1079] | −0.0019 | −0.76 | ✗ |
-| attention-weighted homophily, tercile | [3840,3840,3840] | −0.0038 | −0.98 | ✗ |
-| attention-weighted homophily, shrink c=5 | [3840,3840,3840] | −0.0027 | −0.94 | ✗ |
-| budget-normalized homophily, tercile | [4442,2749,4329] | −0.0081 | −2.84 | ✗ |
-| budget-normalized homophily, 0.5/0.8 | [5328,3629,2563] | −0.0049 | −1.20 | ✗ |
+| Oracle variant (k=16) | usage hi/id/lo | D1 (o>u) | d_z | verdict | source |
+|---|---|---|---|---|---|
+| fixed 0.4/0.6 | [4697,3720,3103] | −0.0045 | −1.17 | ✗ | `--oracle` · `logs/rk16` |
+| adaptive tercile | [3875,3764,3881] | −0.0029 | −0.94 | ✗ | `--adaptive-oracle` · `logs/rk16_adapt` |
+
+These are the only k=16 variants produced by committed scripts, and they are the only ones the
+k=16 conclusion below rests on.
+
+> **Exploratory variants — NOT reproduced (excluded from every claim).**
+> The rows below came from a one-off sweep whose generating code is **not** in the repository.
+> They are listed for context only; they cannot be regenerated from this repo and are *not* used
+> to support any claim in this document. In particular, the k=16 budget-normalized rows here are
+> **not** the committed `--budget-oracle` (that is the k=32 win below) and do **not** beat uniform.
+>
+> | Oracle variant (k=16) | usage hi/id/lo | D1 (o>u) | d_z | verdict |
+> |---|---|---|---|---|
+> | Bayesian shrink, c=5 | [3927,3706,3887] | −0.0012 | −0.45 | ✗ |
+> | Bayesian shrink, c=20 | [3940,3675,3905] | −0.0009 | −0.27 | ✗ |
+> | confidence-gated (z=1) | [2062,7822,1636] | −0.0039 | −1.42 | ✗ |
+> | degree-winsorized (top 15% → identity) | [2350,8091,1079] | −0.0019 | −0.76 | ✗ |
+> | attention-weighted homophily, tercile | [3840,3840,3840] | −0.0038 | −0.98 | ✗ |
+> | attention-weighted homophily, shrink c=5 | [3840,3840,3840] | −0.0027 | −0.94 | ✗ |
+> | budget-normalized homophily, tercile | [4442,2749,4329] | −0.0081 | −2.84 | ✗ |
+> | budget-normalized homophily, 0.5/0.8 | [5328,3629,2563] | −0.0049 | −1.20 | ✗ |
 
 Two apparent wins turned out to be artifacts, and their dissection is instructive:
 
@@ -159,12 +167,23 @@ which factor drives the oracle:
 Budget normalization alone *hurts* (it pushes most nodes into one bucket: usage [5915,3443,2162]
 vs [2046,3840,5634]). The improvement only appears *combined with tercile thresholds*, which force
 balanced usage — then budget-normalized homophily correctly rewards a short sentence that uses its
-full in-sentence attention budget. **budget × tercile is the strongest oracle across all
-configurations tested** (D1 d_z +2.96, D3 +0.0244). Exposed via `--budget-oracle`; at k≥32 this is
-the recommended oracle setting.
+full in-sentence attention budget. **budget × tercile has the largest D1/D3 magnitudes of the
+configurations tested** (D1 +0.0100, d_z +2.96; D3 +0.0244). Exposed via `--budget-oracle`; at k≥32
+this is the recommended oracle setting.
+
+**Selection caveat.** The `budget × tercile` winner was picked by comparing ~14 oracle
+configurations (the ten k=16 variants and the four k=32 2×2 cells) on the *same* 10×3 data reported
+here, so its magnitudes are *best-of-family*, not pre-registered. The significance is not fragile to
+that: every k=32 cell sits at the exact-Wilcoxon floor (p = 0.001953, the minimum for 10 paired
+splits), which is below a Bonferroni threshold across the family (0.05/14 ≈ 0.0036), so the
+*direction* survives selection. The *magnitude* should still be read as best-of-family, and it is
+metric-dependent: on D1 `d_z` the raw/fixed cell (3.50) exceeds budget/tercile (2.96) even though
+budget/tercile has the larger D1 *mean* (0.0100 vs 0.0063). The k=16 result above is unaffected — no
+variant wins there under any metric.
 
 **Conclusion (oracle side).** The k=16 D1 failure is a property of the sparse oracle *instrument*,
-verified under ten distinct extractions/shiftings/gates. At k=16 the same-sentence signal is beneath
+verified under the two reproducible extractions (fixed 0.4/0.6 and adaptive tercile) with eight
+further exploratory variants agreeing. At k=16 the same-sentence signal is beneath
 the neighbour-averaging noise floor (only ~1 in 16 edges is a reliable same-sentence edge), so no
 calibration of a label-homophily oracle recovers it. This is an *oracle* failure only: the label-free
 router still clears D2 at k=16 (+0.0221 vs oracle-usage-matched random, and +0.0154 vs the
@@ -230,13 +249,19 @@ toward dilution→1 is a separate ladder artifact). The earlier "null at matched
 through a single expert and therefore leaves the usage-matched control nothing to differ on.
 
 **One caveat, stated plainly.** The KMeans partition is a discrete optimum over a
-spectral-neighbour field, and it is sensitive to the exact attention export. The pre-regeneration
+spectral-neighbour field, so it is sensitive to the exact attention export. The pre-regeneration
 artifact (committed at `dd5fd5e`, produced by the *same* code and corpus) recorded the degenerate
-[88, 11408, 24] partition — the attention export moved enough between runs to shift the oracle usage
-by ±2 nodes ([2046, 3840, 5634] → [2048, 3839, 5633]) and to flip the KMeans basin. The result
-reported here is reproducible from the committed script on the committed export and is stable across
-router seeds and top-k, but D2 for this graph should be treated as **export-sensitive**; a
-cross-export stability check is the natural next step before the claim is treated as final.
+[88, 11408, 24] partition — a small change in the export flipped the KMeans basin and moved the
+oracle usage by ±2 nodes ([2046, 3840, 5634] → [2048, 3839, 5633]). That shift is **not run-to-run
+noise**: on a fixed environment the export is bit-reproducible. Exporting the first four passages
+twice in one process and again in a fresh process gives identical bytes (CPU/fp16 attention sha256
+`9d1bcc20…`); the same holds on CUDA (`f8ddcfd1…`). CPU and CUDA, however, disagree with each other,
+so the export depends on `(device, dtype, library versions)` — and the `dd5fd5e` change (which
+reproduced [88, 11408, 24] exactly) is consistent with exactly that kind of provenance change. The
+committed artifacts are CPU/fp16 (see the header), and `llm_export.attention_digest` now hashes an
+export so any re-run can be checked byte-for-byte. The result reported here is reproducible from the
+committed script on the committed export and stable across router seeds and top-k; a cross-device
+export check is the natural next step before the claim is treated as environment-independent.
 
 ## 7. Bottom line
 

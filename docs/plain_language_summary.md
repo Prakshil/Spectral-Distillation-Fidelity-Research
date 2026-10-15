@@ -238,4 +238,8 @@ Still to do before submission:
   negative mean deltas on all six graphs except YelpChi (RouterGNN +0.0015, not significant; win 4/18 and 1/18 runs at the ±0.0005
   noise scale).
 - More real datasets.
-- Removing a place where we chose a setting ("k") using the same data we report.
+- ~~Removing a place where we chose a setting ("k") using the same data we report.~~ —
+  **done**: the spectral-`k` sweep is now confirmed out-of-fold (`experiments/run_k_confirmation.py`
+  chooses `k` on 9/10 splits and scores the winner on the held-out split), recovering `k=128` on
+  10/10 folds for Tolokers and YelpChi; the residual is the *real-attention* oracle configuration
+  (see `docs/real_attention_results.md` §5), where the winner is selected on the reported data.

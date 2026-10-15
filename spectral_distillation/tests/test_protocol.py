@@ -255,6 +255,33 @@ def test_label_free_strategies_both_produce_valid_rows(small_pc_graph):
         assert np.allclose(a.sum(axis=1), 1.0, atol=1e-9), strategy
 
 
+def test_router_ablation_replica_matches_label_free_assignment(small_pc_graph):
+    """The Sec. 6 ablation reuses an inlined KMeans replica (so the Laplacian
+    eigendecomposition can be shared across field-dropped variants). It must match
+    the shipped ``kmeans`` router exactly, or the usage-imbalance control would be
+    measured against a different router than the one reported for D2."""
+    from spectral_distillation.experiments.run_router_ablation import router_assignment
+
+    W = np.asarray(small_pc_graph["W"], dtype=float)
+    X = np.asarray(small_pc_graph["features"], dtype=float)
+    L = compute_laplacian(W)
+    evals, V = np.linalg.eigh(L)
+    feats = structural_features(W, X, evals, V, spectral_k=8)
+
+    shipped, _ = label_free_assignment(
+        W, X, hidden_dim=16, n_layers=2, n_experts=3, epochs=3, seed=0,
+        strategy="kmeans", order_feature="hx",
+    )
+    replica = router_assignment(W, feats, drop=None, seed=0)
+    assert np.array_equal(shipped.argmax(axis=1), replica.argmax(axis=1))
+
+    # every dropped-field variant is still a valid one-hot assignment
+    for field in ("snf", "hx", "spectral_ratio", "log_degree", "clustering"):
+        a = router_assignment(W, feats, drop=field, seed=0)
+        assert a.shape == (W.shape[0], 3), field
+        assert np.allclose(a.sum(axis=1), 1.0, atol=1e-9), field
+
+
 def test_proxy_quantile_is_monotone_in_order_feature(small_pc_graph):
     """The D2 fix depends on the shipped router bucketing the score directly."""
     W = np.asarray(small_pc_graph["W"], dtype=float)

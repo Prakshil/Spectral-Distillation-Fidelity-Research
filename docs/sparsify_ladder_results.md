@@ -108,11 +108,11 @@ D2 (label-free > random) by method and retention:
 | retention | Tolo ER | Tolo random | Tolo degree | Yelp ER | Yelp random | Yelp degree |
 |---|---|---|---|---|---|---|
 | 1.00 | −0.0003 | — | — | +0.0043† | — | — |
-| 0.60 | +0.0005 | +0.0005 | −0.0003 | +0.0044 | +0.0017 | +0.0009 |
-| 0.30 | +0.0009 | −0.0003 | **+0.0030 ✅** | +0.0023 | +0.0027 | −0.0003 |
+| 0.60 | +0.0005 | +0.0005 | −0.0003 | +0.0042 | +0.0017 | +0.0012 |
+| 0.30 | +0.0009 | −0.0003 | **+0.0030 ✅** | +0.0023 | +0.0027 | −0.0002 |
 | 0.15 | +0.0003 | +0.0000 | **+0.0041 ✅** | +0.0040 | +0.0019 | +0.0001 |
-| 0.08 | +0.0001 | −0.0001 | **+0.0055 ✅** | **+0.0055** | +0.0027 | +0.0011 |
-| 0.04 | +0.0000 | −0.0016 | **+0.0048 ✅** | +0.0030 | +0.0019 | +0.0013 |
+| 0.08 | +0.0001 | −0.0001 | **+0.0055 ✅** | **+0.0047** | +0.0027 | +0.0011 |
+| 0.04 | +0.0000 | −0.0016 | **+0.0048 ✅** | +0.0030 | +0.0021 | +0.0013 |
 
 (p = 0.001953 floor where marked.) † YelpChi full-graph D2 from a 3×1 pilot, not a full run.
 
@@ -195,7 +195,7 @@ changes it at every interesting point. Degree pruning of YelpChi at r=0.04 leave
 
 It saturates at **exactly 1.0000 at 43 of 45 measured points** (13/15 Amazon, 15/15 Tolokers,
 15/15 YelpChi). The only 2 non-saturated points are precisely the 2 Amazon points with
-`n_components == 1` � the diagnosis confirming itself. `rank_matched_distortion`
+`n_components == 1` — the diagnosis confirming itself. `rank_matched_distortion`
 (`src/distortion.py`) compares the largest eigenvalues instead, which are the modes a low-pass
 filter retains and stay ordered under fragmentation.
 

@@ -988,8 +988,10 @@ lint:            ruff check . ; format: ruff format . ; typecheck: ty check .
            do not beat one global model under Protocol B (0/234 cells; oracle
            negative 9/9), and Protocol-A oracle numbers are retracted. The
            supported positives are (i) connectivity survival predicts routing
-           *stability* (Spearman +0.78..+0.99; SD is a collinear proxy that
-           loses significance once isolated-fraction is partialled out) and
+           *stability* (survival Spearman +0.47..+0.99, significant on three
+           of four graphs; low-frequency SD is a collinear proxy that stays
+           significant only on the pooled sample, never within a single graph,
+           once isolated-fraction is partialled out) and
            (ii) top-k R_eff is rank-faithful to exact out to n=10^4.
 
 2. Introduction

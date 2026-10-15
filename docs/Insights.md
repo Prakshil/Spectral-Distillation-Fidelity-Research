@@ -11,7 +11,7 @@
 > so its oracle numbers are self-routing artifacts and are **retracted** for real
 > graphs. The planted-control numbers remain a valid **D4 instrument check**. On
 > **real graphs** under the fixed-expert Protocol B, no router beats a single
-> global model (2/234, both reduced-power cells) and the oracle is *negative*. The one supported positive
+> global model (0/234) and the oracle is *negative*. The one supported positive
 > is that spectral distortion predicts routing **stability**. Current numbers:
 > `docs/fixed_expert_protocol.md`, `docs/real_attention_results.md`.
 
@@ -352,23 +352,28 @@ expert) — this is documented; it is not an accident.
 
 ### 6.4 Dilution ladder (`logs/dilution/dilution_curve.json`)
 
-How the label-free gain behaves as we erase structure but keep labels:
+How the label-free gain behaves as we erase structure but keep labels. Each rung is
+averaged over 5 conversion seeds (`--dilution-seeds 0 1 2 3 5`); the ± column is the
+across-seed sd:
 
 | Dilution λ | Oracle gain | Label-free gain |
 |-----------|-------------|-----------------|
-| 0.00 | 0.2591 | **0.2308** |
-| 0.25 | 0.2591 | 0.1644 |
-| 0.50 | 0.2591 | 0.0486 |
-| 0.75 | 0.2591 | 0.0293 |
-| 1.00 | 0.2591 | **0.0810** |
+| 0.00 | 0.2591 | **0.2308** ± 0.0000 |
+| 0.25 | 0.2591 | 0.1641 ± 0.0010 |
+| 0.50 | 0.2591 | 0.0507 ± 0.0017 |
+| 0.75 | 0.2591 | 0.0294 ± 0.0018 |
+| 1.00 | 0.2591 | **0.0395** ± 0.0246 |
 
 This is the **cleanest mechanistic result** in the repo:
 - Oracle gain is **completely flat** (0.259) — it reads labels, and dilution never
   touches labels.
-- Label-free gain decreases up to dilution 0.75 but then increases slightly at λ=1.0
-  (non-monotone under the balanced, class-proportional conversion); it is substantially
-  reduced but does not collapse to ~0. This reflects that full homophilization still
-  leaves a class-based structural signal that the label-free router can exploit.
+- Label-free gain falls ~8× (0.231 → 0.029) up to dilution 0.75. At full dilution
+  (λ=1.0) it does not collapse to ~0: the mean is 0.0395 but with large across-seed
+  scatter (sd 0.025; per-seed values 0.012–0.066), so the full-dilution rung is noisy
+  and statistically indistinguishable from the λ=0.75 value. This reflects that full
+  homophilization still leaves a class-based structural signal the label-free router
+  can exploit, and that the last rung converts *every* node so it absorbs the most
+  random-rewiring variance.
 
 This is *exactly* the theoretical prediction: distillation erodes the *structural*
 signal but cannot corrupt the entropy/pre-construction signal. It confirms that the
@@ -432,10 +437,10 @@ threshold — good robustness evidence.
 | Experiment | Runtime |
 |-----------|---------|
 | `run_protocol` | 2.5 min |
-| `dilution_curve` | 6 min |
+| `dilution_curve` (5 conversion seeds) | ~70 min |
 | `ablation` (feature + oracle, combined) | ~45 s |
 | `reproduce_figures` | <1 s |
-| **full pipeline** | **~9 min** |
+| **full pipeline** | **~75 min** |
 
 (The dominant former bottleneck, the 10,000 × 10,000 eigendecomposition, was moved to
 GPU: 32 s vs 102 s CPU, eigenvalues bit-identical.)
@@ -451,16 +456,19 @@ evidence below is mutually consistent and theory-aligned *for the control*:
    label-free captures ~87% of the oracle's advantage on the planted control, and
    survives the frozen-gate intervention. **This does not transfer to real
    graphs**: under the fixed-expert Protocol B, no label-free or learned router
-   beats one global model (2/234, both reduced-power YelpChi GNN cells), and the
-   oracle is negative.
+   beats one global model (0/234), and the oracle is negative.
 
 **On real graphs (Protocol B), the honest verdict is a null plus one positive:**
 
-- Structural and learned routers do **not** beat no-routing on the fraud graphs,
-  and the label-free real-attention router degenerates to a single expert
-  (`docs/fixed_expert_protocol.md`, `docs/real_attention_results.md`).
+- Structural and learned routers do **not** beat no-routing on the fraud graphs
+  (fixed-expert Protocol B). For real attention (self-routing Protocol A) the
+  label-free router *does* route at top-k ≥ 32 — D2 survives a usage-matched
+  control — but its gain is carried by the `snf` field and is sensitive to the
+  exact attention export (`docs/fixed_expert_protocol.md`,
+  `docs/real_attention_results.md` §6).
 - The supported result is that **spectral distortion + connectivity survival
-  predict routing *stability*** (Spearman +0.78…+0.99); the accuracy claim is not
+  predict routing *stability*** (low-frequency Spearman −0.49…−0.87, survival
+  +0.47…+0.99); the accuracy claim is not
   supported.
 2. **The mechanism is structural.** Dilution kills the label-free gain while the oracle
    stays flat → the label-free router reads graph structure, exactly the channel that
@@ -493,11 +501,15 @@ rather than a flat plateau) — within expected noise and does not disturb the t
 - **Wilcoxon p-values at resolution floor.** With 30 paired samples the exact Wilcoxon
   p cannot go below 0.00195, so the tiny p's are "as significant as this test can
   express." The enormous effect sizes (`d_z > 100`) are the more informative number.
-- **Statistical resolution of dilution/ablation.** The dilution ladder now runs at the
-  protocol resolution (10 splits × 3 seeds); the ablation sweep still uses 4 × 2, so its
-  effect sizes are the noisier of the two.
-- **Dilution spacing is uneven** (0.25 → 0.50 spans 0.197 → 0.176) — the monotone
-  trend is clear across 0 → 1, but a tighter-rung run would smooth the middle points.
+- **Statistical resolution of dilution/ablation.** The dilution ladder runs at the
+  protocol resolution (10 splits × 3 seeds) with each rung averaged over 5 conversion
+  seeds; the ablation sweep still uses 4 × 2, so its effect sizes are the noisier of the
+  two.
+- **Full dilution is the noisiest rung.** The decoupled per-node rewiring keeps the
+  ladder a clean nested instrument, but λ=1.0 converts *every* node, so its label-free
+  gain carries the most random-rewiring scatter (sd 0.025 across the 5 conversion seeds).
+  The drop to λ=0.75 (0.231 → 0.029) is steep and stable; the λ=1.0 point (0.040 ± 0.025)
+  is not distinguishable from it.
 - **RouterGNN epoch-level variation across GPU/CPU** — the *crisp KMeans gate* is the
   operational router (deterministic); the GNN imitation is its transferable proxy.
 - **Top-k effective resistance is a lower bound** at high `n`; the code uses exact
@@ -596,4 +608,4 @@ reviewers.
 *Sources: committed `logs/**/*.json`, `docs/reproducibility.md`,
 `SPECTRAL_DISTILLATION_IMPLEMENTATION_GUIDE.md`, and the implementation in
 `spectral_distillation/src/` + `experiments/`. Measurements at n=10,000 with the
-committed logs as the CPU reference; 250 tests passing.*
+committed logs as the CPU reference; 256 tests passing.*

@@ -242,10 +242,10 @@ repo do not depend on them holding tightly.
 | Four-step chain (Thm 1) | valid chain under §7 assumptions; bound loose |
 | Random-retention `(1−2ε)^k` (Thm 2) | heuristic high-probability bound; running-example value exact arithmetic |
 | Lean edge-removal lemma | sketch, not compiled |
-| SD/fragility predict routing *stability* | **measured, proxy** — raw Spearman +0.78…+0.99 is against connectivity *survival*; after partialling out isolated-fraction the spectral term is not significant (pooled −0.20, p=0.16) while survival stays +0.83 (p=1e-13). See §8.1, `docs/real_attention_results.md` §9.1, §9.3 |
+| SD/fragility predict routing *stability* | **measured, proxy** — raw Spearman is +0.47…+0.99 against connectivity *survival* and −0.49…−0.87 against the low-frequency error; on the pooled points both stay significant after partialling out the isolated-fraction (spectral −0.62, p=1.7e-06; survival +0.71, p=7.6e-09), though the spectral partial is not significant within any single graph. See §8.1, `docs/real_attention_results.md` §9.1, §9.3 |
 | SD predicts routing *accuracy* drop | **not supported** (Spearman +0.231, p=0.448, §9.2) |
 
-### 8.1 Corollary (measured): stability is carried by connectivity survival
+### 8.1 Corollary (measured): stability and connectivity survival are jointly predictive
 
 The Step-3 Lipschitz router of §4 bounds the routing *assignment* change by the
 representation error, and the representation error is bounded by the spectral
@@ -257,13 +257,17 @@ graphs. Writing `S` for same-seed assignment stability, `SD` for low-frequency
 spectral error, and `π` for the isolated-node fraction, the measured relations on
 the collapse-free points (four graphs, n=51, §9.3) are
 
-- `rho(SD, S) = -0.549` (p=3e-05), but `rho(SD, S | π) = -0.200` (p=0.16);
-- `rho(survival, S) = +0.880` (p=2e-17), and `rho(survival, S | SD) = +0.829` (p=1e-13).
+- `rho(SD, S) = -0.687` (p=2.5e-08), and `rho(SD, S | π) = -0.618` (p=1.7e-06);
+- `rho(survival, S) = +0.765` (p=6.4e-11), and `rho(survival, S | SD) = +0.710` (p=7.6e-09).
 
 So the operational corollary — *emphasis is a claim about which variable to
-monitor, not a theorem* — is that routing stability is predicted by connectivity
-survival rather than by the raw spectral error. The Lipschitz chain is not
-contradicted: if the sparsifier's low-frequency distortion is precisely what
-destroys connectivity, then `π` is a *mediator* of `SD`, and conditioning on it
-over-controls (the two readings cannot be separated from observational data
-alone). Both readings agree that survival, not SD, is the deployable proxy.
+monitor, not a theorem* — is that routing stability is tracked at least as
+reliably by connectivity survival as by the raw spectral error: survival's
+partial correlation is significant on three of the four graphs, whereas the
+spectral partial is significant only on the pooled sample and never within a
+single graph. The Lipschitz chain is not contradicted: if the sparsifier's
+low-frequency distortion is precisely what destroys connectivity, then `π` is a
+*mediator* of `SD`, and conditioning on it over-controls (the two readings cannot
+be separated from observational data alone). Both readings agree that survival is
+the more robust proxy, with the low-frequency error remaining a correlated
+companion rather than a redundant one.

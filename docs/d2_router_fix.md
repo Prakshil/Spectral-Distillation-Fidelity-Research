@@ -91,9 +91,9 @@ Full protocol, 10 splits x 3 seeds, frozen-permutation gate with 20 permutations
 
 | comparison | Tolokers | Amazon |
 |---|---|---|
-| D1 oracle vs uniform | +0.0365 (p 0.001953, dz 14.94) | +0.0028 (p 0.001953, dz 2.68) |
-| **D2 label-free vs random** | **+0.0040 (p 0.001953, dz 4.24)** | +0.0004 (p 0.2324, dz 0.39) |
-| D3 oracle vs random | +0.0368 (p 0.001953, dz 13.31) | +0.0038 (p 0.001953, dz 3.43) |
+| D1 oracle vs uniform | +0.0365 (p 0.001953, dz 14.94) | +0.0028 (p 0.001953, dz 2.96) |
+| **D2 label-free vs random** | **+0.0040 (p 0.001953, dz 4.24)** | +0.0004 (p 0.3750, dz 0.40) |
+| D3 oracle vs random | +0.0368 (p 0.001953, dz 13.30) | +0.0038 (p 0.001953, dz 3.94) |
 | verdict | **Supported** | **Not supported (D2)** |
 
 Tolokers is the first real fraud graph to pass D1-D4 end to end. D2 recovers
@@ -101,9 +101,10 @@ about 11% of the oracle's gain, versus 0.3% under the legacy router.
 
 **Amazon still fails D2**, and the diagnostic explains why: `eig_nb_sim` has no
 correlation with label homophily there (`rho = -0.03`). The proxy that works on
-one fraud graph does not transfer. The best Amazon candidate is
-`eig_centrality` at `+0.00093` (`p = 0.0039`, Holm-corrected) against an oracle
-ceiling of `+0.00396`, so even a proxy chosen per-graph recovers only ~23%.
+one fraud graph does not transfer. No screened Amazon candidate beats random —
+the least-negative is `neigh_degree` at `-0.0011` (`p = 0.77`), and
+`eig_centrality` is itself `-0.0093` — so even a proxy chosen per-graph recovers
+none of the `+0.0028` oracle ceiling.
 
 The honest conclusion is that a single universal label-free proxy does not exist
 across these graphs. The router now works where a good proxy exists, and the
@@ -140,11 +141,10 @@ every previously committed artifact still reproduces exactly; the fix is opt-in.
 
 - `sd_laplacian` is `0.0` in the ladder artifacts; that is a `--skip-sd` placeholder,
   not a measured distortion.
-- The Amazon `eig_centrality` gain (`+0.00093`, dz 1.67) is Holm-significant but
-  only over the 6-candidate family screened at the time. Its `rho = -0.51` does
-  **not** mean a label-derived sign flip is doing the work: D2 is invariant to
-  score sign. Re-tested against a predeclared 28-candidate family it does not
-  survive Holm correction. Treat it as a screening artifact, not a fix.
+- The Amazon `eig_centrality` score (`rho = -0.51`) does **not** yield a positive
+  D2 gain (`-0.0093`, dz `-1.21`, not significant). Its `rho` does **not** mean a
+  label-derived sign flip is doing the work: D2 is invariant to score sign.
+  Treat it as a screening artifact, not a fix.
 - `eig_nb_sim` uses 8 nontrivial Laplacian modes (`--spectral-k`); the value is
   untuned and may be sensitive.
 - Only two real fraud graphs have been tested. A third is required before claiming

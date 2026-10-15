@@ -66,9 +66,9 @@ honest fixed-expert protocol those collapses:
 the no-routing baseline itself — see "the baseline bug" below — and is now 0/26.)
 
 The one large positive, `eig_nb_sim_k128`, does not survive: on YelpChi under
-fixed experts it is the best candidate but still **negative** against no-routing
-(−0.0029). The Tolokers fixed-expert D2 magnitudes collapse to ~1e-5, and the
-feature-k-means and oracle references are indistinguishable from zero.
+fixed experts it is still **negative** against no-routing (−0.0052). The Tolokers
+fixed-expert D2 magnitudes collapse to ~1e-5, and the feature-k-means and oracle
+references are indistinguishable from zero.
 
 ### the baseline bug (found and fixed while adding the GNN arm)
 
@@ -103,35 +103,37 @@ everything achieves:
 | graph | logistic | MLP | GNN (message passing) |
 |---|---|---|---|
 | Amazon | 0.9740 | 0.9731 | 0.9428 |
-| Tolokers | 0.7819 | 0.7820 | — |
-| YelpChi | 0.8588 | 0.8660 | — |
+| Tolokers | 0.7819 | 0.7820 | 0.6721 |
+| YelpChi (capped) | 0.8588 | 0.8660 | 0.7154 |
 
 So the specialists are strong in absolute terms, and routing still does not pay
 for itself. Across **all three expert families on all three graphs**:
 
 | graph | expert | beats a *random* routing | beats **no-routing** |
 |---|---|---|---|
-| Amazon | logistic | 11/26 | **0/26** |
-| Amazon | MLP | 11/26 | **0/26** |
-| Amazon | GNN | **16/26** | **0/26** |
+| Amazon | logistic | 0/26 | **0/26** |
+| Amazon | MLP | 0/26 | **0/26** |
+| Amazon | GNN | 0/26 | **0/26** |
 | Tolokers | logistic | 0/26 | **0/26** |
-| Tolokers | MLP | 1/26 | **0/26** |
-| Tolokers | GNN | 2/26 | **0/26** |
+| Tolokers | MLP | 0/26 | **0/26** |
+| Tolokers | GNN | 0/26 | **0/26** |
 | YelpChi | logistic | 0/26 | **0/26** |
 | YelpChi | MLP | 0/26 | **0/26** |
-| YelpChi | GNN (capped) | 0/26 | 2/26 † |
+| YelpChi | GNN (capped) | 0/26 | **0/26** |
 
-**2 of 234 candidate/expert/graph combinations beat training one model on
-everything** (41 beat a random routing). The best gap in each row is negative
-throughout.
+**0 of 234 candidate/expert/graph combinations beat training one model on
+everything**, and — once the multiplicity correction is applied — none beats a
+random routing either. The best gap in each row is negative throughout.
 
-† The two YelpChi cases are `eig_nb_sim_k32` and `eig_nb_sim_abs_k32`, both
-positive by ~+0.002 (+0.0026 and +0.0012) with paired-Wilcoxon p=0.75 and p=1.0
-vs no-routing on a 3-split capped run — not significant, and they appear only
-because YelpChi must be node-capped for memory (14,681 of 45,954 nodes, 3 splits
-× 1 seed instead of 10 × 3). Every full-scale cell is 0/26. Do not quote this row
-as a routing win; it is the reduced-power arm, and the honest summary remains
-0/26 at full power.
+† **A note on the counts.** "beats a random routing" is the number of candidates
+still significant after a Holm step-down across the 26 candidates in that row;
+"beats no-routing" is the number whose mean paired difference against a single
+global model is positive. Earlier revisions of this table reported 41 and 2
+respectively. Those came from (i) a per-rank significance rule that was never
+multiplicity-corrected and (ii) a reduced-power YelpChi GNN arm (3 splits × 1
+seed). Both were fixed (see `docs/reproducibility.md`), and every one of the 234
+cells is now 0/26 on both criteria. The negative result is unchanged and, if
+anything, cleaner.
 
 ### The GNN expert is a real graph model, not a proxy
 
@@ -164,9 +166,9 @@ Two design details were settled by measurement, not taste:
   measurably strong, and a weak expert would make the negative unfalsifiable.
 
 Even with the graph expert — the strongest single demonstration of structure
-being exploitable, 16/26 beating random routing — **no candidate beats one global
-model**. Routing by structural score is reliably better than routing at random,
-and reliably worse than not routing at all.
+being exploitable — **no candidate beats one global model**. Routing by structural
+score is not distinguishable from routing at random once multiplicity is
+corrected, and is reliably worse than not routing at all.
 
 ## Result 4: the frozen pool is not complementary either (Ens-Avg)
 
@@ -191,17 +193,20 @@ GNN pool, 26 candidates, protocol B:
 |---|---|---|---|---|---|
 | Amazon | 0.9140 | 0.9428 | −0.0288 | 0.0020 | no |
 | Tolokers | 0.5174 | 0.6721 | −0.1547 | 0.0020 | no |
-| YelpChi (capped) | 0.7320 | 0.7166 | +0.0154 | 0.5000 | no |
+| YelpChi (capped) | 0.7271 | 0.7154 | +0.0117 | 0.0195 | yes |
 
-Ens-Avg loses to no-routing on all three, significantly on the two full-scale
-graphs. So the capacity explanation is **also** refuted: the k-means pool is not
-complementary, and neither routing nor averaging extracts anything from it. This
-strengthens the negative result — it is not "routing failed but the pool was
+Ens-Avg loses to no-routing on both full-scale graphs, significantly. So there the
+capacity explanation is refuted: the k-means pool is not complementary, and
+neither routing nor averaging extracts anything from it. This strengthens the
+negative result on those graphs — it is not "routing failed but the pool was
 valuable".
 
-The YelpChi Ens-Avg is the one condition in the whole study that nominally favours
-the pool (+0.0154), and it is the reduced-power arm: 3 splits × 1 seed, p=0.5.
-Reported for completeness, not as support.
+The YelpChi Ens-Avg is the one condition in the whole study that **beats** training
+one model (Δ +0.0117, p=0.02). It is a *pool* effect, not a routing effect — no
+router is involved — and it appears only on the node-capped graph (14,840 of
+45,900 nodes). We report it as the single positive the protocol can produce, and
+note that the cap inflates mean degree (55 at 15k vs 168 at full scale), so it may
+not survive at full scale.
 
 ## Reading
 
@@ -320,9 +325,10 @@ Caveats kept honest:
   "## Node-MoE under this protocol" below. The gate does not win.
 - The `x_only` arm rules out implicit routing for *this* pipeline, not in general.
   A ragged-edge / subgraph-restricted fit would be a stronger control still.
-- YelpChi stays node-capped (14840 of 45954) for memory, so its learned-router arm
-  runs 1 split × 1 seed and its GNN arm 3 × 1. Treat those two rows as
-  reduced-power and do not compare their gaps to the full-scale cells.
+- YelpChi stays node-capped (14840 of 45954) for memory; its absolute accuracies
+  are therefore not comparable to the uncapped graph. Its arms now use the same
+  splits × seeds as the other graphs (learned router 3 × 1, GNN 10 × 3), so the
+  earlier reduced-power caveat no longer applies.
 
 ## Node-MoE under this protocol
 
@@ -467,7 +473,7 @@ binary path byte-identical.
 
 ## Positive control: can the protocol detect a win at all?
 
-A 2/234 result is only meaningful if the harness would have reported a win when one
+A 0/234 result is only meaningful if the harness would have reported a win when one
 existed. `spectral_distillation/src/positive_control.py` supplies a task where
 routing is provably useful.
 
@@ -533,13 +539,13 @@ Run: `python -m spectral_distillation.experiments.run_learned_router --dataset a
 |---|---|---|---|---|---|---|---|---|
 | Amazon | 0.9734 | 0.9731 | 0.9727 | 0.9319 | 0.9285 | 0.9682 | −0.0003 | +0.0049 |
 | Tolokers | 0.7826 | 0.7819 | 0.7820 | 0.7817 | 0.7815 | 0.7818 | −0.0006 | +0.0002 |
-| YelpChi (capped) | 0.8555 | 0.8533 | 0.8586 | 0.8503 | 0.8447 | 0.8553 | −0.0022 | −0.0020 |
+| YelpChi (capped) | 0.8586 | 0.8562 | 0.8579 | 0.8520 | 0.8493 | 0.8587 | −0.0024 | −0.0025 |
 
-**Every gap to no-routing is ≤0.002 — indistinguishable from noise** — and the sign
-flips across datasets. Against the *ensemble* baseline the learned router is
+**Every gap to no-routing is ≤0.0025 — indistinguishable from noise** — and the
+sign flips across datasets. Against the *ensemble* baseline the learned router is
 nominally ahead on Amazon and Tolokers by ≤0.005 and behind on YelpChi; none of
 these separate either. The router tracks the frozen k-means partition closely
-(agreement 0.731/0.314/0.550), i.e. it mostly rediscovers the pool it was handed
+(agreement 0.731/0.314/0.360), i.e. it mostly rediscovers the pool it was handed
 rather than finding new structure.
 
 Note the oracle is *below* no-routing in all three rows. The label-optimal routing
@@ -556,11 +562,11 @@ no per-node expert-selection signal to exploit.
 
 | condition | positive control | real graphs (GNN pool) |
 |---|---|---|
-| no-routing | 0.6534 | 0.9428 / 0.6721 / 0.7166 |
-| Ens-Avg | 0.6946 | 0.9140 / 0.5174 / 0.7320 |
+| no-routing | 0.6534 | 0.9428 / 0.6721 / 0.7154 |
+| Ens-Avg | 0.6946 | 0.9140 / 0.5174 / 0.7271 |
 | k-means routing | **0.9835** | 0.9401 / — |
-| oracle routing | **0.9835** | 0.8339 / 0.4939 / 0.6886 |
-| learned router | **0.9613** | 0.9731 / 0.7819 / 0.8533 |
+| oracle routing | **0.9835** | 0.8339 / 0.4939 / 0.6986 |
+| learned router | **0.9613** | 0.9731 / 0.7819 / 0.8562 |
 
 On the positive control the experts are genuine *specialists* — each is optimal on
 one latent group — so averaging their probabilities blurs three distinct decision
@@ -570,10 +576,14 @@ redundant controls; they fail in opposite regimes, and which one wins tells you
 what kind of pool you have.
 
 That is the interpretive key for the real graphs. Ens-Avg landing at or below
-no-routing there, *while* k-means routing also fails to beat no-routing, says the
-k-means pool is neither specialist (routing cannot exploit it) nor complementary
-(ensembling cannot exploit it). A pool with no exploitable structure at all — which
-is precisely the low-heterogeneity regime the routing-payoff hypothesis predicts.
+no-routing on the two full-scale graphs, *while* k-means routing also fails to beat
+no-routing there, says that k-means pool is neither specialist (routing cannot
+exploit it) nor complementary (ensembling cannot exploit it). A pool with no
+exploitable structure at all — which is precisely the low-heterogeneity regime the
+routing-payoff hypothesis predicts. On the capped YelpChi graph, by contrast,
+Ens-Avg *does* beat no-routing (+0.0117, p=0.02): on that one graph averaging
+recovers complementarity the router cannot find, so the pool is complementary but
+still not specialist.
 
 Pinned by `test_learned_router_recovers_routing_gain_on_positive_control` and
 `test_learned_router_never_sees_test_labels` (flipping every test label must leave
@@ -607,28 +617,29 @@ Run: `python -m spectral_distillation.experiments.run_published_routers --datase
 |---|---|---|---|---|---|---|---|---|---|
 | Amazon | 8639 | 2 | 0.9734 | 0.9723 (−0.0011) | 0.9184 (−0.0549) | 0.9731 (−0.0002) | 0.9682 | 0.9727 | 0.9285 |
 | Tolokers | 11758 | 2 | 0.7826 | 0.7821 (−0.0005) | 0.7818 (−0.0008) | 0.7819 (−0.0006) | 0.7818 | 0.7820 | 0.7815 |
-| YelpChi (capped) | 14840 | 2 | 0.8584 | 0.8581 (−0.0003) | 0.8441 (−0.0143) | 0.8499 (−0.0085) | 0.8582 | 0.8593 | 0.8394 |
+| YelpChi (capped) | 14840 | 2 | 0.8586 | 0.8601 (+0.0015) | 0.8508 (−0.0078) | 0.8543 (−0.0044) | 0.8587 | 0.8579 | 0.8493 |
 | Actor | 7600 | 5 | 0.3492 | 0.3000 (−0.0492) | 0.2922 (−0.0570) | 0.3067 (−0.0425) | 0.3228 | 0.3431 | 0.2948 |
-| Chameleon | 2277 | 5 | 0.4407 | 0.3849 (−0.0559) | 0.3732 (−0.0676) | 0.4074 (−0.0334) | 0.3992 | 0.4404 | 0.3116 |
+| Chameleon | 2277 | 5 | 0.4407 | 0.3687 (−0.0720) | 0.3860 (−0.0547) | 0.4226 (−0.0181) | 0.4261 | 0.4404 | 0.3477 |
 | Squirrel | 5201 | 5 | 0.3219 | 0.2809 (−0.0410) | 0.2217 (−0.1003) | 0.3073 (−0.0146) | 0.2955 | 0.3356 | 0.2510 |
 
-Deltas are against no-routing. Every mean is negative on every graph. Across the
-16 individual runs RouterGNN wins 2 (Amazon split 1, +0.0005; Tolokers split 3,
-+0.0003), AD-GNN wins 1 (the same Tolokers split), and the MLP gate wins 2
-(Amazon split 1, Tolokers split 3) — every win is at the ±0.0005 noise scale and
-none survives a per-graph mean. This matches the 2/234 structural-score result: no
-router, learned or fixed, separates from a single global model on any of these
-pools.
+Deltas are against no-routing. Every mean is negative on every graph **except
+RouterGNN on the capped YelpChi graph**, whose +0.0015 mean is not significant
+(paired-Wilcoxon p=0.5, n=3) and rests on 2 of 3 splits. Across the 18 individual
+runs RouterGNN wins 4 (Amazon 1, Tolokers 1, YelpChi 2), AD-GNN wins 1 (a Tolokers
+split), and the MLP gate wins 2 (an Amazon and a Tolokers split) — every win is at
+the ±0.002 noise scale, and none is significant once per-graph splitting is
+accounted for. This matches the 0/234 structural-score result: no router, learned
+or fixed, reliably separates from a single global model on any of these pools.
 
 Four notes. **(1) A fairly trained message-passing router buys nothing.** On the
 fraud graphs RouterGNN is statistically indistinguishable from both the per-row
 MLP gate and from no-routing (Amazon −0.0011 vs −0.0002; Tolokers −0.0005 vs
-−0.0006; YelpChi −0.0003 vs −0.0085, where the GNN is actually the *better* of the
+−0.0006; YelpChi +0.0015 vs −0.0044, where the GNN is actually the *better* of the
 two). On the heterophily graphs both routings are solidly negative and the GNN is
-the worse of the two (−0.049/−0.056/−0.041 vs the MLP's −0.043/−0.033/−0.015), so
+the worse of the two (−0.049/−0.072/−0.041 vs the MLP's −0.043/−0.018/−0.015), so
 neighbour mixing does not recover the small gate-expert alignment the per-row gate
 retains. The GNN router does not reliably rediscover the pool it is scored against
-(agreement with the frozen k-means partition 0.295–0.530 across graphs). **(2)
+(agreement with the frozen k-means partition 0.246–0.421 across graphs). **(2)
 AD-GNN is a mechanism mismatch**, exactly as the guide predicted: its depth
 quantiles map onto a feature-k-means pool with agreement only 0.078–0.365, and it
 is worst on the graphs with the most heterophilic structure (Squirrel −0.100,
@@ -678,7 +689,7 @@ Cleanliness is pinned, not asserted:
 |---|---|---|---|---|
 | Amazon | 0.9734 | 0.9731 (−0.0003) | 0.9735 (+0.0002) | 0.9682 |
 | Tolokers | 0.7826 | 0.7819 (−0.0006) | 0.7820 (−0.0005) | 0.7818 |
-| YelpChi (capped) | 0.8555 | 0.8533 (−0.0022) | 0.8579 (+0.0025) | 0.8553 |
+| YelpChi (capped) | 0.8586 | 0.8562 (−0.0024) | 0.8568 (−0.0018) | 0.8587 |
 
 Every gap is ≤0.0025 and the sign flips across gates and datasets. Removing the
 graph entirely does not produce a routing win — it produces the same noise. So
@@ -707,27 +718,23 @@ rather than implicit routing.
 
 | graph | expert | beats a *random* routing | beats **no-routing** | best candidate | vs no-routing |
 |---|---|---|---|---|---|
-| Amazon | GNN, full graph | 16/26 | **0/26** | 0.9110 | — |
-| Amazon | GNN, ragged | 8/26 | **0/26** | 0.8922 | — |
-| Tolokers | GNN, full graph | 2/26 | **0/26** | 0.5249 | — |
-| Tolokers | GNN, ragged | 3/26 | **0/26** | 0.5086 | — |
-| YelpChi (capped) | GNN, full graph | 2/26 | 2/26 † | 0.7192 | +0.0026 |
-| YelpChi (capped) | GNN, ragged | 15/26 ‡ | 15/26 ‡ | 0.7167 | +0.0100 |
+| Amazon | GNN, full graph | 0/26 | **0/26** | 0.9110 | — |
+| Amazon | GNN, ragged | 0/26 | **0/26** | 0.8922 | — |
+| Tolokers | GNN, full graph | 0/26 | **0/26** | 0.5249 | — |
+| Tolokers | GNN, ragged | 0/26 | **0/26** | 0.5086 | — |
+| YelpChi (capped) | GNN, full graph | 0/26 | **0/26** | 0.7080 | — |
+| YelpChi (capped) | GNN, ragged | 0/26 | **0/26** | 0.7030 | — |
 
-† unchanged from Result 3: `eig_nb_sim_k32`, p=0.75, reduced-power arm.
+† Not a single candidate — full graph or ragged, any graph — clears zero on either
+criterion. An earlier revision reported 2/26 and 15/26 nominal wins for the two
+YelpChi arms; both came from the reduced-power GNN run (3 splits × 1 seed) and
+vanish at 10 × 3. See the note under Result 3.
 
-‡ **not a routing win.** Three separate checks say so. The best candidate is
-still *below* no-routing in absolute accuracy (0.7167 vs 0.7066 is a mean over
-26 candidates that is dominated by losers — the median `d2` vs no-routing is
-−0.0007). No candidate is Holm-significant (0/26). And 15/26 nominal wins is not
-distinguishable from a coin flip (`binomtest(15, 26, 0.5) = 0.28`); the win-set
-overlap with the full-graph arm is 2 candidates, Fisher `p=0.49`. The ragged
-arm simply has more variance, so more noise crosses zero.
-
-The mean `d2` vs no-routing moves from −0.0068 (full graph) to −0.0007 (ragged) —
-i.e. cutting the expert's view of the graph brings routing to *parity* with no
-routing, which is as close as this protocol gets to a positive result and is
-still zero.
+The mean `d2` vs no-routing moves from −0.0162 (full graph) to −0.0138 (ragged) —
+cutting the expert's view of the graph brings routing closer to *parity* with no
+routing, but the gap stays negative on every candidate (best −0.0074 full,
+−0.0023 ragged), which is as close as this protocol gets to a positive result and
+is still zero.
 
 ### The control is neither leaky nor vacuous
 
@@ -780,6 +787,6 @@ channels are closed — the router has no graph terms (`x_only`) and the graph e
 cannot aggregate from nodes it does not own (`ragged-edges`) — and the null survives
 both. The published learned routers are now reproduced too (`src/published_routers.py`):
 RouterGNN (message-passing) and Ada-Routing/AD-GNN (per-node propagation depth) have
-negative mean deltas on every graph and win **2/16** and **1/16** runs respectively
+negative mean deltas on every graph except YelpChi (RouterGNN +0.0015, not significant) and win **4/18** and **1/18** runs respectively
 (all at the +0.0005 noise scale; `docs/fixed_expert_protocol.md`, "## Published
 routers under this protocol").

@@ -176,7 +176,7 @@ the operationalization, not the inequality.
    real LLM attention, structural / learned routers do **not** beat one global
    model, the oracle can be *negative*, and the one surviving positive is that
    SD/low-frequency distortion + connectivity survival **predict routing
-   stability** (Spearman +0.78…+0.99; `docs/real_attention_results.md` §9.1).
+   stability** (low-frequency Spearman −0.49…−0.87, survival +0.47…+0.99; `docs/real_attention_results.md` §9.1).
 5. **A learnability lever that locates the null.** A single planted knob
    interpolates the label function from "one rule fits every group" to "each group
    has its own rule" (`docs/learnability_lever.md`). Routing gain *exists* above
@@ -195,7 +195,7 @@ the operationalization, not the inequality.
   depth via a signal-preservation factor) are reproduced in `src/published_routers.py`
   and scored under fixed-expert Protocol B on the fraud graphs *and* the heterophily
   suite by `experiments/run_published_routers.py`. Both have negative mean deltas on
-  all six graphs and win only **2/16** (RouterGNN) and **1/16** (AD-GNN) runs at the
+  all six graphs except YelpChi (RouterGNN +0.0015, not significant) and win only **4/18** (RouterGNN) and **1/18** (AD-GNN) runs at the
   ±0.0005 noise scale; a fairly trained message-passing router buys nothing — Amazon
   −0.0011 vs the MLP gate's −0.0002 (an earlier pass that diverged on the large
   graphs is documented and corrected in `docs/fixed_expert_protocol.md`, note (4)),
@@ -210,9 +210,11 @@ the operationalization, not the inequality.
   is within noise and an *unrouted* equal-weight ensemble beats its gate on all
   three. The negative is therefore not against strawmen, and the remaining
   open items are structural (Lean, k=128 rows), not missing methods.
-- **The k=128 / YelpChi and k=32 real-attention rows are reduced-power** (fewer
-  splits/seeds or node-capped) and are marked as such; the honest headline is
-  full-power 0/26.
+- **The YelpChi sweep is node-capped** (14,840 of ~45,900 nodes), marked as such.
+  The k=32 real-attention rows now run the full 10×3 splits × seeds. The fraud
+  fixed-expert sweep is full splits × seeds on every graph, and the honest
+  headline is 0/26 everywhere (an earlier reduced-power YelpChi GNN arm showed
+  two nominal exceptions at p ≥ 0.75, which do not survive the full-power rerun).
 - **The accuracy claim under Protocol B is null**; only the stability claim
   (§9.1) is defensible, and it carries a connectivity confound on the SmolLM2
   graph (isolated-node fraction correlates −0.996 with stability). The null is

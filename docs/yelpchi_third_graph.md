@@ -105,9 +105,9 @@ Full 10×3 runs of both routers on every graph (no pilots):
 
 | graph | D2 legacy (kmeans+hx) | D2 fixed (pq+eig_nb_sim) | which wins | verdict |
 |---|---|---|---|---|
-| Tolokers | −0.0003 (p 0.70) | **+0.0040 (dz 4.24)** | fixed, decisively | Supported |
+| Tolokers | +0.00005 (p 0.63) | **+0.0040 (dz 4.24)** | fixed, decisively | Supported |
 | YelpChi | **+0.0058 (dz 4.33)** | +0.0048 (dz 6.73) | legacy on mean, fixed on dz | Supported |
-| Amazon | −0.00015 | +0.0004 (p 0.23) | neither | Not supported |
+| Amazon | +0.00001 (p 1.0) | +0.00039 (p 0.38) | neither | Not supported |
 
 **YelpChi is not a win for the fix — the legacy router already passes D2 there.**
 The full legacy run gives +0.00575 (CI [+0.00474, +0.00675], dz 4.33) versus the
@@ -123,7 +123,7 @@ The full run refutes it. Artifact:
 The honest reading across the three graphs:
 
 - **The fix matters on one graph, not two.** Tolokers is the only case where the
-  legacy router genuinely fails (p=0.70) and the fix succeeds. Reporting YelpChi
+  legacy router genuinely fails (p=0.63) and the fix succeeds. Reporting YelpChi
   as a second fix success would have been wrong.
 - **D2 is router-agnostic where the graph supports it.** Two of three graphs have
   a recoverable label-free signal; *how* you bucket it barely matters. That is a
@@ -133,8 +133,9 @@ The honest reading across the three graphs:
   homophily proxy being correlated — it is neighborhood structure that both
   orderings recover. This weakens the "spectral-smoothness proxy" mechanism
   story and should be described as an open question, not a settled mechanism.
-- **Amazon still fails under both.** Its best candidate reaches ~23% of its
-  oracle ceiling.
+- **Amazon still fails under both.** Its best candidate (`eig_centrality_k8`,
+  +0.027 raw) still fails the 28-way Holm family, and the label-informed oracle is
+  non-positive on the same frozen pool.
 
 The practical rule the three graphs support: **screen candidates for correlation,
 but decide by delivered D2 gain, and run both routers before claiming a fix
@@ -149,9 +150,9 @@ helps.** The p-value on a small-n pilot is not a failure signal.
 | **D1** ER | +0.0447 | +0.0664 | **+0.0980** | +0.0539 | +0.0225 |
 | D1 random | +0.0418 | +0.0385 | +0.0369 | +0.0274 | +0.0175 |
 | D1 degree | +0.0069 | +0.0020 | +0.0008 | +0.0003 | +0.0001 |
-| **D2** ER | +0.0044 | +0.0023 | +0.0040 | **+0.0055** | +0.0030 |
-| D2 random | +0.0017 | +0.0027 | +0.0019 | +0.0027 | +0.0019 |
-| D2 degree | +0.0009 | −0.0003 | +0.0001 | +0.0011 | +0.0013 |
+| **D2** ER | +0.0042 | +0.0023 | +0.0040 | **+0.0047** | +0.0030 |
+| D2 random | +0.0017 | +0.0027 | +0.0019 | +0.0027 | +0.0021 |
+| D2 degree | +0.0012 | −0.0002 | +0.0001 | +0.0011 | +0.0013 |
 
 Label homophily under ER rises monotonically with pruning, 0.797 → 0.850, versus
 a flat ~0.765 under random pruning. This is the third graph to show ER raising
@@ -170,16 +171,17 @@ replicate to YelpChi or Amazon.
 - `sd_laplacian` is `0.0` throughout — a `--skip-sd` placeholder, not a measured
   distortion. The ladder is indexed by edge-retention fraction only.
 - `eig_nb_sim`'s mode count (`--spectral-k 8`) is untuned across all three graphs.
-- Amazon still fails D2 and remains unresolved; its best candidate reaches only
-  ~23% of its oracle ceiling.
+- Amazon still fails D2 and remains unresolved; its best candidate (`eig_centrality_k8`)
+  fails the 28-way Holm family and the label-informed oracle is non-positive on the
+  same frozen pool.
 
 ### Note: fixed router under the ladder
 
 The D2 fix was re-run under ER sparsification
-(`logs/yelpchi_fraud_ladder_eig_nb_sim_pq/`). D1 is bit-identical to the legacy
-ladder at every point, confirming D1 is router-independent. Fixed-router D2 under
-ER is budget-sensitive: significant at r=0.30 (+0.0027, dz 3.20) and r=0.04
-(+0.0031, dz 4.28), smaller at 0.15/0.60, and **non-significant at r=0.08**
-(+0.00060, p 0.193, dz 0.52) where the legacy router is significant (+0.0055,
-dz 7.21). Under ER pruning the fix is therefore not uniformly better and loses
-at r=0.08.
+(`logs/yelpchi_fraud_ladder_eig_nb_sim_pq/`, `--methods er`). D1 matches the
+legacy ladder at every rung to 4 d.p., confirming D1 is router-independent.
+Fixed-router D2 under ER is significant only at the most aggressive rung,
+r=0.04 (+0.00270, dz 3.57); at r=0.60/0.08 it is indistinguishable from random
+(+0.00044, −0.00011) and at r=0.30/0.15 it is slightly negative (−0.00057,
+−0.00047). Under ER pruning the fix is therefore not uniformly better than the
+legacy router, which stays significant at r=0.08 (+0.0047, dz 5.67).

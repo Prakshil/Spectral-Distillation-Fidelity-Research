@@ -225,14 +225,15 @@ experiments/run_fixed_expert_protocol.py, run_sd_vs_routing.py,
 
 - The method's *supported* claim is the pre-training diagnostic: SD/low-frequency
   distortion + connectivity survival predict routing **stability**
-  (Spearman +0.78…+0.99, `docs/real_attention_results.md` §9.1). The accuracy
+  (low-frequency Spearman −0.49…−0.87, survival +0.47…+0.99, `docs/real_attention_results.md` §9.1). The accuracy
   claim is a **null**.
 - Under the fixed-expert protocol, **no label-free or learned router beats one
-  global model** on the fraud graphs (2/234, both reduced-power cells) or on the heterophily suite, and the
+  global model** on the fraud graphs (0/234) or on the heterophily suite, and the
   oracle is *negative* (9/9 fraud). RouterGNN (message-passing router,
   `published_routers.py`) and Ada-Routing/AD-GNN (per-node propagation depth via a
   signal-preservation factor) are reproduced; their mean deltas are negative on
-  every graph and they win **2/16** and **1/16** runs (all at the ±0.0005 noise
+  every graph except YelpChi, where RouterGNN is +0.0015 (paired p=0.26, not
+  significant), and they win **4/18** and **1/18** runs (all at the ±0.0005 noise
   scale; a fairly trained message-passing router buys nothing — Amazon −0.0011
   vs the MLP gate's −0.0002, with an earlier divergent pass documented and
   corrected). Node-MoE is reproduced in full (`node_moe.py`) and is

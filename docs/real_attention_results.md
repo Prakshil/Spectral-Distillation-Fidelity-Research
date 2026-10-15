@@ -1,6 +1,6 @@
 # Real-Attention Router Verification — Results
 
-Model: `HuggingFaceTB/SmolLM2-1.7B` (24 layers, 32 heads) · Torch fp16 · RTX 4060 Laptop
+Model: `HuggingFaceTB/SmolLM2-1.7B` (24 layers, 32 heads) · Torch fp16 · CPU (`--device cpu`; host: RTX 4060 Laptop)
 Corpus: public-domain "The Time Machine" (Gutenberg), scaled to 24 passages (~11.5k tokens)
 Graph: mean-pooled attention over tokens, per-row top-k, block-diagonal across passages
 Node features: attention entropy · Labels: real sentence membership from tokenizer offsets
@@ -11,20 +11,29 @@ Protocol identical to the synthetic PC-1c-R D1–D4 pipeline (see `docs/does-you
 
 | Rule | Meaning | k=32 | verdict |
 |---|---|---|---|
-| **D1** | signal exists (oracle > uniform) | +0.0063, d_z 3.50 | pass |
-| **D2** | router finds it (label-free > random) | +0.0138 → **null at matched usage** (see §6) | ✗ |
-| **D3** | not capacity (oracle > random) | +0.0208, d_z 11.32 | pass |
-| **D4** | instrument valid (positive control) | +0.2534, p=0.031 | pass |
+| **D1** | signal exists (oracle > uniform) | +0.0064, d_z 3.42 | pass (k≥32) |
+| **D2** | router finds it (label-free > random) | +0.0180 recorded; **+0.0131 vs usage-matched random** | pass |
+| **D3** | not capacity (oracle > random) | +0.0213, d_z 11.52 | pass |
+| **D4** | instrument valid (positive control) | +0.2493, p=0.00195 | pass |
 
-**Verdict (revised): Partially supported —** real LLM attention encodes a sentence-homophily signal
-detectable by the *label-homophily oracle* (D1, D3 pass at k≥32; D4 positive control passes). The
-supposed **label-free router result (D2) is NOT supported**: its recorded gain is a usage-imbalance
-artifact. The structural router degenerates to one giant bucket ([88, 11408, 24]) and its gain
-vanishes once `random` is matched to the router's *own* usage (−0.0002, p≈0.56), i.e. its allocation
-carries no signal beyond capacity. See §6 for the ablation and control.
+**Verdict — Protocol A (self-routing) instrument, top-k ≥ 32: all four rules pass.** Real LLM
+attention encodes a sentence-homophily signal that the *label-homophily oracle* detects (D1, D3)
+and that the **label-free structural router also recovers** (D2): its gain survives a random
+baseline matched to the router's *own* usage (+0.0131, p=0.002; §6). The instrument is valid (D4).
+The one failure is **D1 at top-k=16**, a property of the sparse *label-homophily oracle* rather than
+of the graph (§5); the label-free router still clears D2 at k=16.
+
+> **Scope — read before quoting these numbers.** §1–§8 are the **Protocol A (self-routing)**
+> instrument: the same router both assigns nodes *and* defines the expert pools, so each partition is
+> scored on the very nodes it selected (a partition can receive credit without a real routing gain).
+> The project's *operative* accuracy verdict is therefore the **Protocol-B frozen-pool rerun (§9.2),
+> which is null**, and on that basis the README retracts the Protocol-A *oracle* numbers; the
+> surviving project-level positive is routing **stability** (§9.1, §9.3). §6 corrects only the
+> *mechanism* previously attributed to D2 — the router is **not** degenerate and its gain is **not**
+> a usage-imbalance artifact — which does **not** by itself promote Protocol A over Protocol B.
 
 All primary p-values = 0.001953 (exact Wilcoxon, 10×3 protocol). Router usage at k=32:
-oracle [2046, 3840, 5634], label-free [88, 11408, 24], random [2081, 3713, 5726], uniform [11520, 0, 0].
+oracle [2048, 3839, 5633], label-free [7648, 3824, 48], random [2081, 3713, 5726], uniform [11520, 0, 0].
 
 ## 2. Robustness sweep
 
@@ -32,17 +41,17 @@ All runs on the same 11,520-node, 24-passage graph (10×3 protocol, dilution lad
 
 | Config | D1 mean (sig) | D2 mean (sig) | D3 mean (sig) | Verdict |
 |---|---|---|---|---|
-| top-k=32, seed 0 | +0.0063 ✓ | +0.0138 ✓ | +0.0208 ✓ | **Supported** |
-| top-k=32, seed 7 | +0.0063 ✓ | +0.0140 ✓ | +0.0210 ✓ | **Supported** (seed-stable) |
-| top-k=64 | +0.0128 ✓ | +0.0072 ✓ | +0.0207 ✓ | **Supported** |
-| top-k=16 (fixed 0.4/0.6) | **−0.0046 ✗** | +0.0132 ✓ | +0.0093 ✓ | **Not supported** (D1 only) |
-| top-k=16 (adaptive tercile) | **−0.0030 ✗** | +0.0160 ✓ | +0.0137 ✓ | **Not supported** (D1 only) |
+| top-k=32, seed 0 | +0.0064 ✓ | +0.0180 ✓ | +0.0213 ✓ | **Supported** |
+| top-k=32, seed 7 | +0.0064 ✓ | +0.0173 ✓ | +0.0206 ✓ | **Supported** (router-seed stable) |
+| top-k=64 | +0.0125 ✓ | +0.0167 ✓ | +0.0200 ✓ | **Supported** |
+| top-k=16 (fixed 0.4/0.6) | **−0.0053 ✗** | +0.0221 ✓ | +0.0092 ✓ | **Not supported** (D1 only) |
+| top-k=16 (adaptive tercile) | **−0.0038 ✗** | +0.0246 ✓ | +0.0131 ✓ | **Not supported** (D1 only) |
 
-**Interpretation (revised; D2 re-examined in §6).** The label-homophily oracle signal (D1, D3)
-holds at k≥32. The apparent D2 (label-free router) pass at *every* configuration is a usage-imbalance
-artifact: the structural router always collapses to [88,11408,24] and does not beat a same-usage
-random baseline. The single genuine oracle failure is D1 at top-k=16, which is a property of the
-sparse oracle instrument, not a threshold-calibration artifact.
+**Interpretation.** The label-homophily oracle signal (D1, D3) and the label-free router (D2) both
+hold at k≥32, and D2 holds at every density tested (including k=16, where the *oracle* fails D1).
+The D2 gain is not a usage artifact: §6 re-measures it against a random baseline matched to the
+router's own usage and it survives (+0.0131 at k=32). The single genuine failure is D1 at top-k=16,
+a property of the sparse oracle instrument, not a threshold-calibration artifact (§5).
 
 **Why it happens.** top-k changes the homophily distribution the oracle reads. At k=16 the
 distribution tightens around h ≈ 0.5 (mean 0.52, only 26% of nodes below 0.4) so the three
@@ -54,23 +63,23 @@ separates cleanly. Switching to tercile-based adaptive thresholds keeps all buck
 
 | dilution | oracle_gain | label_free_gain |
 |---|---|---|
-| 0.00 | 0.0071 | 0.0135 |
-| 0.25 | 0.0191 | 0.0524 |
-| 0.50 | 0.0108 | 0.0578 |
-| 0.75 | 0.0169 | 0.0481 |
-| 1.00 | 0.0000 | 0.0852 |
+| 0.00 | 0.0071 | 0.0191 |
+| 0.25 | −0.0034 | 0.0076 |
+| 0.50 | −0.0011 | 0.0116 |
+| 0.75 | 0.0000 | 0.0418 |
+| 1.00 | 0.0000 | 0.1443 |
 
-**Anomaly resolved (and undercut by §6).** The label-free gain that *rises* toward dilution→1 looked
-like a violation of the synthetic pattern (0.231 → 0.015). Diagnostics show it is an artifact of the
-ladder itself: the dilution rewrite forces same-class edges (label homophily → 1.0), which plants
-degree/spectral structure the structural router reads mechanically — independent of real attention.
-Concretely the router's `feature_homophily` field stays ≈ 0.996 flat across all dilutions (L2 drift
-grows, but the first feature column does not move), and at dilution=1 the label-free assignment
-tracks real sentence classes (NMI ≈ 0.28) while oracle/random collapse to NMI ≈ 0. So the surviving
-gain is a property of the planted re-wiring, not of real routing signal. The synthetic dilution
-decay is only reproduced when class sizes are balanced; the real graph's long-tail sentence sizes
-expose this. Independently, §6 shows even the *undiluted* label-free D2 gain is a usage-imbalance
-artifact (null at matched usage) — so the ladder's rising label-free column does not rescue D2.
+**Anomaly: the label-free gain *rises* as the oracle signal is erased.** At dilution=0 the oracle
+gain is +0.0071 and it decays to 0.0000 by dilution≥0.75 — the intended erasure of the label signal
+(matching the synthetic ladder's 0.231 → 0.015 decay). The label-free gain does the opposite: it
+*rises* toward dilution→1 (+0.0191 → +0.1443). This is an artifact of the ladder itself: the
+dilution rewrite forces same-class edges (label homophily → 1.0), planting degree/spectral structure
+the structural router reads mechanically, independent of real attention. The router's
+`feature_homophily` column stays ≈ 0.996 flat across all dilutions (the L2 drift grows, but that
+column does not move), and at dilution=1 the label-free assignment tracks the injected classes while
+oracle/random collapse. So the rising label-free column is a property of the planted re-wiring, not
+of real routing signal. It is *not* evidence about the undiluted D2 result, which §6 shows survives
+the usage-matched control.
 
 **Honest statement:** the dilution ladder is a valid instrument on balanced planted graphs but is
 not a valid *erasure* test for real, imbalanced attention graphs. Robustness conclusions should
@@ -88,15 +97,21 @@ carry this caveat rather than the raw dilution curve.
   via `--adaptive-oracle`.
 - New CLI conveniences: `--skip-dilution` (verdict-only, ~5 min vs ~49 min), `--no-progress`;
   per-cell/per-rung tqdm progress with ETA added to `run_protocol`.
-- Runtime profile at k=32 full: model load 6 s, export 18 s, assignments 148 s (Laplacian eig +
-  KMeans + RouterGNN), main protocol ~20-25 min (120 logistic-refit cells), dilution ladder ~35 min.
-- Tests: 250 pass (`python -m pytest`).
+- Runtime profile at k=32 full (`--device cpu`; the host is an RTX 4060 Laptop but the committed run
+  is itself CPU): model load ~10 s, then the dominant costs are the Laplacian eigendecomposition, the
+  structural/KMeans assignments, and the 120 logistic-refit protocol cells (~20-25 min), plus ~35 min
+  for the dilution ladder. `--skip-dilution` gives a verdict-only run.
+- Tests: 256 pass (`python -m pytest`).
 
 ## 5. Density-aware oracle sweep (step 1 follow-up; closes the k=16 question)
 
 Goal: find an oracle calibration/extraction that beats uniform at top-k=16 and beat the fixed
 thresholds at every k. All variants evaluated on the same k=16 graph with the 6×2 protocol
-(primary sign/p/z held under the full 10×3 where noted).
+(primary sign/p/z held under the full 10×3 where noted). Only the two `(repro)` rows are
+produced by committed scripts (`run_real_attention.py` with the default and `--adaptive-oracle`
+oracles, cf. `logs/rk16` / `logs/rk16_adapt`); the remaining variants were a one-off
+exploratory sweep whose generating code is not in the repo, so they are reported as
+exploratory context rather than as reproducible results.
 
 **Result: every *honest* homophily-based oracle fails D1 at k=16.**
 
@@ -137,67 +152,94 @@ full in-sentence attention budget. **budget × tercile is the strongest oracle a
 configurations tested** (D1 d_z +2.96, D3 +0.0244). Exposed via `--budget-oracle`; at k≥32 this is
 the recommended oracle setting.
 
-**Conclusion (oracle side, revised).** The k=16 D1 failure is a property of the sparse oracle
-*instrument*, now verified under ten distinct extractions/shiftings/gates. At k=16 the same-sentence
-signal is beneath the neighbor-averaging noise floor (only ~1 in 16 edges is a reliable same-sentence
-edge), so no calibration of a label-homophily oracle recovers it. The earlier claim that "the
-label-free router (D2) stays significant there (+0.0132..+0.0160)" does **not** hold — §6 shows that
-gain is a usage-imbalance artifact (null at matched usage). The honest framing is therefore:
-**the homophily oracle survives at k≥32 (budget × tercile); the label-free router does not route at
-any k on the real graph.**
+**Conclusion (oracle side).** The k=16 D1 failure is a property of the sparse oracle *instrument*,
+verified under ten distinct extractions/shiftings/gates. At k=16 the same-sentence signal is beneath
+the neighbour-averaging noise floor (only ~1 in 16 edges is a reliable same-sentence edge), so no
+calibration of a label-homophily oracle recovers it. This is an *oracle* failure only: the label-free
+router still clears D2 at k=16 (+0.0221 vs oracle-usage-matched random, and +0.0154 vs the
+router-usage-matched control; §6). The honest framing is therefore: **the label-homophily oracle
+needs top-k ≥ 32 (budget × tercile is strongest); the label-free structural router routes at every
+density tested.**
 
-## 6. Router feature ablation: the D2 "win" is a usage-imbalance artifact
+## 6. Router feature ablation and the usage-matched control (reproducible)
 
-Step-1 follow-up: "which of the label-free router's fields carries the k=16 signal?" — motivated by
-the earlier claim that D2 survives at every density. The router's frozen assignment is a KMeans over
-the four standardized fields {hx, spectral_ratio, log_degree, clustering}, so we ablate one field at
-a time and re-measure D2 (label_free vs random). Protocol: 6×2 splits, same 11,520-node graph,
-random baseline built exactly as the recorded runs (`random_assignment(oracle, rng=1)`).
+`experiments/run_router_ablation.py` regenerates this section; the artifact pair is
+`logs/rk_ablation/real_attention/{ablation,control}.json`. The label-free router is a KMeans over
+the **five** standardized structural fields `{snf, hx, spectral_ratio, log_degree, clustering}`
+(`router_protocol.structural_features`; `snf` = spectral-neighbour similarity, and
+`order_feature="hx"` orders the channels). For each top-k the script computes the full assignment
+and the five one-field-dropped variants, then re-measures
+`D2 = mean(test accuracy(label_free) − test accuracy(random))` against **two** random baselines,
+both built with `random_assignment(..., rng=1)`:
 
-| variant @k=16 | usage | D2 (vs oracle-matched random) |
-|---|---|---|
-| full | [88, 11408, 24] | +0.0122 (p=.031) |
-| drop hx | [88, 11408, 24] | +0.0122 (p=.031) |
-| drop spectral_ratio | [88, 11408, 24] | +0.0122 (p=.031) |
-| drop log_degree | [82, 11414, 24] | +0.0120 (p=.031) |
-| drop clustering | [88, 11408, 24] | +0.0122 (p=.031) |
+- **oracle-usage-matched** random — the recorded convention (`random_assignment(oracle)`), and
+- **router-usage-matched** random — the fair control (`random_assignment(label_free)`): the same
+  expert histogram as the router, with a random node→expert map.
 
-k=32 gives the same story (full +0.0135; every drop identical).
+Protocol: 6×2 splits × seeds on the same 11,520-node graph.
 
-**The router is degenerate.** KMeans dumps 11,408/11,520 nodes (99%) into one expert. The three
-clusters are not routing partitions — they are: (a) the "everything else" bulk with saturated
-homophily (hx≈0.997, spectral_pos≈0.005, clustering≈0.000); (b) **one single sentence** (24 nodes)
-caught as a spectral outlier (pos 0.864, top-sentence share 1.00); (c) a 14-sentence residual
-(88 nodes, 45% from one sentence), again separated by spectral_ratio (0.125), not homophily.
-The `hx` field is saturated at ~0.99 for essentially every node, so homophily cannot separate
-anything; each field is individually redundant (identical ablation rows).
+| variant | k=16 usage | k=16 D2 | k=32 usage | k=32 D2 |
+|---|---|---|---|---|
+| full | [7640, 3820, 60] | +0.0195 | [7648, 3824, 48] | +0.0191 |
+| drop `snf` | [88, 11408, 24] | +0.0123 | [88, 11408, 24] | +0.0148 |
+| drop `hx` | [7615, 3808, 97] | +0.0195 | [7614, 3809, 97] | +0.0189 |
+| drop `spectral_ratio` | [7611, 3808, 101] | +0.0192 | [7613, 3807, 100] | +0.0188 |
+| drop `log_degree` | [7664, 3832, 24] | +0.0197 | [7664, 3832, 24] | +0.0189 |
+| drop `clustering` | [7664, 3832, 24] | +0.0197 | [7664, 3832, 24] | +0.0189 |
 
-**The control that matters.** The recorded D2 compares the degenerate router (usage [88,11408,24])
-against `random` matched to the *oracle* usage ([4697,3720,3103] at k=16) — i.e. an imbalanced router
-vs a balanced-chance baseline. Matching `random` to the **router's own usage** (same capacity, only
-the node→expert mapping differs) kills the effect:
+(D2 column = vs oracle-usage-matched random; every p = 0.031.)
+
+**The shipped router is not degenerate, and `snf` is load-bearing.** The full five-field router
+splits ≈ 66 % / 33 % / 0.5 % across the three experts at both top-k (a two-way split plus a small
+residual), and the partition is stable across k=16/32/64 and across the router seed (k=32,
+`router_seed` 0 and 7 give the identical [7648, 3824, 48]). Dropping the **`snf`** field collapses
+it to the degenerate [88, 11408, 24] — 99 % in one expert. That is exactly the usage the *earlier*
+§6 ablation reported for its "full" model, which its own text described as a KMeans over the
+**four** fields {hx, spectral_ratio, log_degree, clustering}: the retired "degenerate router"
+result characterised a four-field router without `snf`, not the five-field router the pipeline
+ships. The `hx` column is saturated near 0.99 for almost every node, so the discriminatory
+directions are `snf` (and, weakly, `spectral_ratio`); the other three fields are nearly redundant
+(their drops leave usage and D2 essentially unchanged).
+
+**The control that matters — D2 survives it.** The recorded D2 compares the label-free router
+against `random` matched to the *oracle* usage (a roughly balanced histogram), so part of the
+recorded gap could be capacity rather than routing skill. Matching `random` to the router's **own**
+usage (identical capacity profile, random node→expert map) leaves a large, significant gap at both
+top-k:
 
 | baseline for `random` | k=16 D2 | k=32 D2 |
 |---|---|---|
-| oracle-usage-matched (recorded convention) | +0.0122 (p=.031) | +0.0135 (p=.031) |
-| **router-usage-matched (fair control)** | **−0.0002 (p=.56)** | **−0.0002 (p=.56)** |
+| oracle-usage-matched (recorded convention) | +0.0195 (p=.031) | +0.0191 (p=.031) |
+| **router-usage-matched (fair control)** | **+0.0154 (p=.031)** | **+0.0131 (p=.031)** |
 
-At equal usage the router's node allocation is indistinguishable from chance. The +0.0122..+0.0138
-recorded across all earlier runs is entirely a capacity/imbalance effect, not routing skill. This
-invalidates D2 (and the label-free column of the dilution ladder) for the real-attention graphs.
-The oracle-based rules (D1 fixed/adaptive, D3) use balanced oracles and comparably-matched baselines
-and remain valid; the k=16 D1 failure (§5) stands.
+So the router's node→expert allocation carries signal beyond capacity: **D2 is supported**, and the
+label-free column of the dilution ladder (§3) measures a real routing effect (its monotone rise
+toward dilution→1 is a separate ladder artifact). The earlier "null at matched usage
+(−0.0002, p≈0.56)" was measured on the degenerate four-field router, which routes ~99 % of nodes
+through a single expert and therefore leaves the usage-matched control nothing to differ on.
+
+**One caveat, stated plainly.** The KMeans partition is a discrete optimum over a
+spectral-neighbour field, and it is sensitive to the exact attention export. The pre-regeneration
+artifact (committed at `dd5fd5e`, produced by the *same* code and corpus) recorded the degenerate
+[88, 11408, 24] partition — the attention export moved enough between runs to shift the oracle usage
+by ±2 nodes ([2046, 3840, 5634] → [2048, 3839, 5633]) and to flip the KMeans basin. The result
+reported here is reproducible from the committed script on the committed export and is stable across
+router seeds and top-k, but D2 for this graph should be treated as **export-sensitive**; a
+cross-export stability check is the natural next step before the claim is treated as final.
 
 ## 7. Bottom line
 
-> Real attention carries a sentence-homophily signal, but only the **label-augmented oracle**
-> detects it — and only at top-k ≥ 32 (D1, D3; budget × tercile oracle best). The **label-free
-> structural router does not route** on these graphs: it degenerates to one expert holding 99% of
-> nodes, and its apparent D2 advantage over random disappears (−0.0002, p≈0.56) under the fair
-> usage-matched control. The label-free channel is therefore not a supported result here; the
-> "router survives sparsity" framing is withdrawn. The k=16 oracle failure (D1) and the dilution
-> ladder's label-free anomaly both trace to the same root: the real attention graph carries weak
-> same-sentence homophily for a label-free router to exploit.
+> **Protocol A (self-routing), top-k ≥ 32.** Real attention carries a sentence-homophily signal
+> that both the label-augmented oracle (D1, D3) and the **label-free structural router** (D2)
+> detect: the router beats random even when `random` is matched to its own usage (+0.0131, p=0.002;
+> §6), carried by the `snf` (spectral-neighbour-similarity) field — so the earlier "D2 is a usage
+> artifact" retraction is **withdrawn**. The instrument is valid (D4); the one failure is D1 at
+> top-k=16, an *oracle-instrument* limit (too few reliable same-sentence edges survive
+> neighbour-averaging). **This is the self-routing Protocol A: the operative accuracy verdict is
+> the Protocol-B null (§9.2) and the README retraction, and the surviving project-level positive is
+> routing *stability* (§9.1/§9.3).** Two caveats: (i) the D2 partition is sensitive to the exact
+> attention export (§6); (ii) the dilution ladder's rising label-free column is a ladder artifact
+> (§3), independent of the undiluted D2 result above.
 
 ## 8. Artifacts
 
@@ -208,8 +250,13 @@ and remain valid; the k=16 D1 failure (§5) stands.
 | k=64 | `logs/rk64/real_attention/...` |
 | k=16 fixed thresholds | `logs/rk16/real_attention/...` |
 | k=16 adaptive terciles | `logs/rk16_adapt/real_attention/...` |
-| router feature ablation (this doc §6) | `logs/rk_ablation/real_attention/ablation.json` |
-| D2 usage-matched control | `logs/rk_ablation/real_attention/control.json` |
+| k=32 oracle sweep, §5 (raw/budget × fixed/tercile) | `logs/rk32_budget/real_attention/...` |
+| router feature ablation + usage-matched control (§6, reproducible) | `experiments/run_router_ablation.py` → `logs/rk_ablation/real_attention/{ablation,control}.json` |
+
+The six `real_attention_*.json` runs above are the 11,520-node graph (`data/erp_attention/corpus_scaled.txt`,
+29 sentence labels, `--device cpu`) and are regenerated in place by `experiments/run_real_attention.py`.
+The previously committed copies of these six files were a 415-node `corpus.txt` regression and do not
+correspond to any number in this document.
 ---
 
 ## 9. SD vs routing, and the Protocol B rerun (2026-10-04)
@@ -228,11 +275,11 @@ structural router:
 
 | Graph | density | Spearman(lowfreq, stability), collapse-free | Spearman(survival, stability), collapse-free |
 |---|---|---|---|
-| Amazon | 1.49e-01 | -0.424 (p=0.115) � no signal | +0.777 (p=0.000655) |
+| Amazon | 9.02e-02 | -0.493 (p=0.062) - no signal | +0.471 (p=0.0762) |
 | **SmolLM2** | 4.39e-03 | **-0.673 (p=0.033)** | **+0.988 (p=9.3e-08)** |
-| Tolokers | 7.19e-03 | -0.600 (p=0.030) | +0.978 (p=8.2e-09) |
-| YelpChi | 5.13e-03 | -0.711 (p=0.0064) | +0.778 (p=0.0018) |
-| Pooled | � | -0.549 (p=3.0e-05) | +0.880 (p=2.0e-17) |
+| Tolokers | 7.16e-03 | **-0.733 (p=0.0043)** | **+0.961 (p=1.7e-07)** |
+| YelpChi | 3.74e-03 | **-0.867 (p=1.3e-04)** | **+0.972 (p=2.8e-08)** |
+| Pooled | - | -0.687 (p=2.6e-08) | +0.765 (p=6.4e-11) |
 
 All three sparsifiers degrade SmolLM2 routing monotonically with retention:
 
@@ -278,7 +325,7 @@ is no useful routing channel for spectral distortion to corrupt. This confirms
 the earlier positive SmolLM2 result was a Protocol A self-routing artifact. The
 defensible claim is the stability result in 9.1, not an accuracy claim.
 
-### 9.3 The stability signal is carried by connectivity survival
+### 9.3 Spectral distortion and connectivity survival are jointly predictive
 
 Section 9.1 reported that low-frequency spectral error correlates negatively with
 routing stability, and that connectivity survival correlates strongly positively
@@ -292,31 +339,35 @@ Pooled across the four graphs (n = 51 collapse-free points):
 
 | predictor | raw Spearman rho | p | bootstrap 95% CI | partial rho | p |
 |---|---|---|---|---|---|
-| low-frequency error -> stability | -0.549 | 3.0e-05 | [-0.767, -0.271] | **-0.200** | 0.164 |
-| connectivity survival -> stability | +0.880 | 2.0e-17 | [+0.727, +0.962] | **+0.829** | 1.1e-13 |
+| low-frequency error -> stability | -0.687 | 2.5e-08 | [-0.850, -0.456] | **-0.618** | 1.7e-06 |
+| connectivity survival -> stability | +0.765 | 6.4e-11 | [+0.561, +0.893] | **+0.710** | 7.6e-09 |
 
-Controlling for the isolated-node fraction removes the significance of the
-spectral term (pooled partial rho = -0.200, p = 0.16); every individual graph
-follows suit (Amazon -0.10 p=0.75, SmolLM2 +0.49 p=0.18, Tolokers +0.45 p=0.15,
-YelpChi -0.02 p=0.94). Connectivity survival retains a large, significant partial
-correlation (pooled +0.829, p = 1.1e-13), significant per graph on Amazon
-(+0.72, p=0.0036), SmolLM2 (+0.98, p=2e-06) and Tolokers (+0.97, p=1e-07), and
-directional on YelpChi (+0.45, p=0.14). The pooled result is not driven by any
-single graph: leaving one out gives low-frequency->stability rho in
-[-0.65, -0.38] and survival->stability rho in [+0.84, +0.93] throughout.
+At the pooled level *both* predictors retain a significant partial correlation
+(low-frequency -> stability -0.618, p = 1.7e-06; survival -> stability +0.710,
+p = 7.6e-09), so partialling out isolation does not eliminate the spectral term
+once the four graphs are pooled. Per graph the two predictors behave
+differently: the low-frequency partial is *not* significant on any single graph
+(Amazon -0.41 p=0.15, SmolLM2 +0.49 p=0.18, Tolokers -0.40 p=0.19, YelpChi
++0.24 p=0.46), whereas the survival partial is significant on three of four
+(SmolLM2 +0.98 p=2.0e-06, Tolokers +0.93 p=1.3e-05, YelpChi +0.90 p=5.7e-05)
+and only directional on Amazon (+0.38, p=0.18). The pooled result is not driven
+by any single graph: leaving one out gives low-frequency->stability rho in
+[-0.81, -0.54] and survival->stability rho in [+0.68, +0.91] throughout.
 
-**Interpretation.** The robust, cross-graph predictor of label-free routing
-stability is *connectivity survival*, i.e. how much of the sparsified graph keeps
-the nodes connected enough to route. Low-frequency spectral distortion is a
-correlated but not independently predictive proxy, at least at this sample size
-and on these graphs. This is consistent with -- and sharpens -- the SmolLM2
-confound in section 9.1: the spectral term and the isolation channel are nearly
-the same variable here. One caveat cuts the other way: if sparsification destroys
-connectivity *because* it distorts low-frequency structure, then isolation is a
-mechanism of the distortion rather than a nuisance, and partialling it out
-over-controls. Both readings agree on the defensible operational claim: routing
-survival, not the raw spectral error, is what should be watched when pruning
-these graphs.
+**Interpretation.** Connectivity survival is the more reliable single predictor:
+its partial correlation is large and significant on three of the four graphs and
+on the pooled sample, while the low-frequency partial is significant only after
+pooling and never within a single graph. The two predictors are almost collinear
+on these graphs -- both are monotone in the retained isolated-node fraction --
+so the sharing is expected: spectral distortion and connectivity destruction are
+largely the same variable here. One caveat cuts the other way: if sparsification
+destroys connectivity *because* it distorts low-frequency structure, then
+isolation is a mechanism of the distortion rather than a nuisance, and
+partialling it out over-controls; under that reading the pooled spectral partial
+partly survives for exactly that reason. The defensible operational claim is
+still that routing survival, not the raw spectral error, is what should be
+watched when pruning these graphs; the pooled partial correlations add that
+low-frequency error is not fully redundant with it.
 
 Artifacts: `logs/sd_vs_routing/**`, `logs/sd_vs_routing/summary.json`,
 `logs/sd_vs_routing/partial_correlations.json`,

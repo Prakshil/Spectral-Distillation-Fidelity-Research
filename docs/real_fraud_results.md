@@ -21,10 +21,10 @@ Protocol: identical D1–D4 machinery as the PC-1c-R / real-attention / ERP-frau
 
 | Rule | Meaning | value (n=8,639, 10×3) | verdict |
 |---|---|---|---|
-| **D1** | signal exists (oracle > uniform) | +0.0028, d_z 2.68, p 0.001953 | pass |
-| **D2** | router finds it (label-free > random) | −0.0002, d_z −0.17, p 0.846 | **fail** |
-| **D3** | not capacity (oracle > random) | +0.0038, d_z 3.42, p 0.001953 | pass |
-| **D4** | instrument valid (frozen gate + PC control) | PC oracle gain +0.253 (p 0.031); perm-std 0.0011 | pass |
+| **D1** | signal exists (oracle > uniform) | +0.0028, d_z 2.96, p 0.001953 | pass |
+| **D2** | router finds it (label-free > random) | +0.0000, d_z 0.01, p 1.000 | **fail** |
+| **D3** | not capacity (oracle > random) | +0.0038, d_z 3.94, p 0.001953 | pass |
+| **D4** | instrument valid (frozen gate + PC control) | PC oracle gain +0.249 (p 0.002); perm-std 0.00096 | pass |
 
 **Verdict: D1/D3/D4 supported, D2 not supported on the real Amazon fraud graph** — the oracle
 that reads the real labels beats uniform and usage-matched random, but the label-free
@@ -36,7 +36,7 @@ synthetic ERP-fraud result.
 | condition | usage (n=8,639) |
 |---|---|
 | oracle (adaptive homophily buckets) | [2881, 2878, 2880] — balanced |
-| label_free (structural KMeans) | [3673, 400, 4566] — collapses into 2 dominated channels |
+| label_free (structural KMeans) | [4038, 70, 4531] — collapses into 2 dominated channels |
 | random (matched to oracle) | [2926, 2783, 2930] |
 | uniform | [8639, 0, 0] (argmax-convention display of equal soft rows) |
 
@@ -49,7 +49,7 @@ genuine co-review fraud networks there is **no routing-recoverable structural si
 the labels**; the +0.0038 oracle gain is the true ceiling tied to the label signal.
 
 The D4 instrument is honest here: the PC-1c-R positive control inside the same run shows the
-machinery *can* recover structure when it exists (oracle gain +0.253, all three control
+machinery *can* recover structure when it exists (oracle gain +0.249, all three control
 comparisons significant), so the D2 failure is graph-specific, not a broken test.
 
 ## 4. Caveats

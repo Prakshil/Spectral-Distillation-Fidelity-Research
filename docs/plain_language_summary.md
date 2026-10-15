@@ -94,15 +94,19 @@ genuinely does understand the structure it is given.
 Then we re-ran everything. Across **all 234 combinations** of router, expert type,
 and graph:
 
-**Only 2 of the 234 beat simply training one model on everything — both are
-reduced-power YelpChi GNN cells, positive by ~0.002 with p >= 0.75 (noise). Every
-full-scale cell is a loss (0 of 26).**
+**None of the 234 beats simply training one model on everything — every cell is
+0 of 26. An earlier revision reported two tiny exceptions on a reduced-power
+YelpChi GNN arm (positive by ~0.002, p >= 0.75, i.e. noise); at full power even
+those disappear.**
 
-The graph expert is the interesting case, because it made *more* routers look
-good than before (16 of 26 on Amazon beat a random split, up from 11 with the
-logistic expert) — and still not one of them beat the single model. So:
+The graph expert is the interesting case, because it is the strongest single
+demonstration that the structure is exploitable — and it still changes nothing.
+No candidate beats the single model, and once we correct for testing 26
+candidates at once, not one of them beats a random split either (0 of 26, versus
+16 of 26 before the correction). So:
 
-- Beating *random* routing is easy and does not mean much.
+- Beating *random* routing was the wrong bar, and the graph expert does not even
+  clear that once the comparison is corrected.
 - The real question is whether routing beats *no routing*, and it never does.
 
 ### A bug we found along the way
@@ -214,8 +218,9 @@ Done and reproducible:
 - The fair protocol, with the weak-baseline bug found and fixed, and a test that
   stops it returning.
 - All three graphs (Amazon, Tolokers, YelpChi) × three expert families × 26
-  routers = 234 comparisons. Two beat one model (both reduced-power YelpChi GNN
-  cells, p >= 0.75); every full-scale cell is a loss.
+  routers = 234 comparisons. None beats one model; every cell is 0 of 26 at full
+  power (an earlier reduced-power YelpChi GNN arm showed two nominal exceptions,
+  both at p >= 0.75).
 - A positive control where routing wins by +0.34, so the null result is not a
   broken harness.
 - A label-trained router that recovers +0.31 of +0.33 on the positive control and
@@ -230,7 +235,7 @@ Still to do before submission:
 
 - ~~A fair head-to-head against the published learned routers (RouterGNN,
   Ada-Routing/AD-GNN)~~ — **done** (`src/published_routers.py`): both have
-  negative mean deltas on all six graphs (win 2/16 and 1/16 runs at the ±0.0005
+  negative mean deltas on all six graphs except YelpChi (RouterGNN +0.0015, not significant; win 4/18 and 1/18 runs at the ±0.0005
   noise scale).
 - More real datasets.
 - Removing a place where we chose a setting ("k") using the same data we report.

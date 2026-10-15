@@ -39,9 +39,9 @@ make figures          # all paper figures
 
 ## Status
 
-**Phase 1 (diagnostics + theory), Phase 2 (sparsifiers + comparison), Phase 3 (router protocol: label-free GNN router, D1-D4 decision rules, PC-1c-R planted control, dilution ladder, ablations, figures), the fair published-router audit (`RouterGNN` / `AD-GNN` / MLP gate under Protocol B), and the learnability lever (`β`-sweep + abstaining selective router) are implemented and tested — 250 tests pass.**
+**Phase 1 (diagnostics + theory), Phase 2 (sparsifiers + comparison), Phase 3 (router protocol: label-free GNN router, D1-D4 decision rules, PC-1c-R planted control, dilution ladder, ablations, figures), the fair published-router audit (`RouterGNN` / `AD-GNN` / MLP gate under Protocol B), and the learnability lever (`β`-sweep + abstaining selective router) are implemented and tested — 256 tests pass.**
 
-> **Headline result (honest, Protocol B).** On the planted **PC-1c-R control** the D1–D4 instrument is valid and routing helps (see "Phase 3 findings"). On **real graphs** (fraud benchmarks and real LLM attention) under the fixed-expert protocol, **no label-free or learned router beats training one global model** (2/234 candidate/expert/graph cells — both reduced-power YelpChi GNN cells at ~+0.002, p>=0.75; every full-scale cell is 0/26), and the oracle is *negative* (9/9). The one supported positive is that connectivity **survival** predicts routing *stability* (Spearman +0.78..+0.99); low-frequency spectral distortion is a collinear proxy that loses significance once the isolated-node fraction is partialled out (pooled partial rho = -0.20, p = 0.16, vs survival +0.83, p = 1e-13; `docs/real_attention_results.md` §9.3). Protocol-A self-routing oracle numbers are **retracted**. See `docs/fixed_expert_protocol.md` and `docs/real_attention_results.md`.
+> **Headline result (honest, Protocol B).** On the planted **PC-1c-R control** the D1–D4 instrument is valid and routing helps (see "Phase 3 findings"). On **real graphs** (fraud benchmarks and real LLM attention) under the fixed-expert protocol, **no label-free or learned router beats training one global model** (0/234 candidate/expert/graph cells; every cell is 0/26, including after a Holm correction that removes 41 nominal "beats a random routing" wins, and after the YelpChi GNN arm was brought to full power, which removes the 2 previous nominal exceptions), and the oracle is *negative* (9/9). The one supported positive is that connectivity **survival** predicts routing *stability* (low-frequency Spearman -0.49..-0.87, survival +0.47..+0.99); low-frequency spectral distortion is a collinear proxy: on the pooled points both stay significant after partialling out the isolated-node fraction (pooled partial rho = -0.62, p = 1.7e-06, vs survival +0.71, p = 7.6e-09), though the spectral partial is not significant within any single graph (`docs/real_attention_results.md` §9.3). The Protocol-A self-routing *oracle* numbers are **retracted** (the fixed-expert Protocol B is the operative test); note that the earlier "D2 is a usage-imbalance artifact" retraction is itself **withdrawn** — the real-attention label-free router is not degenerate (`docs/real_attention_results.md` §6). See `docs/fixed_expert_protocol.md` and `docs/real_attention_results.md`.
 
 ## System requirements
 
@@ -53,7 +53,7 @@ make figures          # all paper figures
 
 ```bash
 pip install -e ".[dev]"          # or: make install
-python -m pytest                 # 250 tests: theory bounds, sparsifiers, router protocol, statistics
+python -m pytest                 # 256 tests: theory bounds, sparsifiers, router protocol, statistics
 
 # Phase 1-2
 python -m spectral_distillation.experiments.run_diagnostic     # golden 4-node + ERP SD/fragility preview

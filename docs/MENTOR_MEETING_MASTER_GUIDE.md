@@ -402,4 +402,4 @@ Use this exact structure when presenting to your mentor tomorrow:
 > *"We didn't leave this as a negative result. We built the Learnability Lever ($\beta$) to pinpoint where routing actually becomes deployable ($\beta \ge 0.3$), built a Selective Abstaining Router that safely defaults to a global model on real pools, and showed on 11,520 SmolLM2 attention nodes that pre-training SD predicts multi-seed router stability with $p < 10^{-6}$."*
 
 ### 5. The Submission Target (Minute 5)
-> *"We have 256 passing tests, pyflakes is completely clean, all publication LaTeX tables are exported, and we are targeting the NeurIPS Datasets & Benchmarks Track."*
+> *"We have 257 passing tests, pyflakes is completely clean, all publication LaTeX tables are exported, and we are targeting the NeurIPS Datasets & Benchmarks Track."*

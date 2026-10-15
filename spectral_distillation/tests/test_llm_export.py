@@ -15,6 +15,7 @@ from spectral_distillation.src.llm_export import (
     AttentionRecord,
     _sentence_ids_from_offsets,
     aggregate_attention,
+    attention_digest,
     build_attention_graph,
     passage_to_sentence_ids,
     renormalize_attention,
@@ -144,3 +145,14 @@ def test_entropy_features_on_single_layer():
     H = compute_attention_entropy(np.stack([A[0]], axis=0))
     assert H.shape == (1, 8)
     assert np.all(H >= 0.0)
+
+
+def test_attention_digest_reproducible_and_sensitive():
+    # Identical exports fingerprint identically (reproducibility check) ...
+    a = _fake_record()
+    b = _fake_record()
+    assert attention_digest([a]) == attention_digest([b])
+    # ... and any change to the exported bytes changes the digest.
+    c = _fake_record()
+    c.attention[0, 0, 1] += 1.0
+    assert attention_digest([c]) != attention_digest([a])

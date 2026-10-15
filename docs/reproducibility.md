@@ -29,7 +29,7 @@ Companion documents:
 | Phase 5 | Publication materials from verified results | Partially drafted (`docs/*`) |
 | Phase 6 | Robustness and scaling (budget/epsilon bands, top-k R_eff, extended frozen interventions) | **Implemented & tested** (`docs/robustness_scaling.md`) |
 
-**Tests:** 256 pass (`python -m pytest` on CPU, cosmetic warnings only).
+**Tests:** 257 pass (`python -m pytest` on CPU, cosmetic warnings only).
 
 **Lint:** `pyflakes` clean on `src/`, `experiments/`, and `tests/`. (`ruff`/`ty` are not installed locally; the Makefile targets remain for CI.)
 
@@ -108,7 +108,7 @@ reproducible; `per_layer` gives one column per transformer layer and is required
 for any downstream accuracy arm. A 29-way task from 3 features is near-chance
 regardless of routing.
 
-### 2.3 Tests (`spectral_distillation/tests/`, 256 tests)
+### 2.3 Tests (`spectral_distillation/tests/`, 257 tests)
 
 | File | Coverage |
 |------|----------|
@@ -244,7 +244,7 @@ real graph at a specific β.
 ```bash
 pip install -e ".[dev]"          # or: make dev-install
 
-python -m pytest                 # 256 tests
+python -m pytest                 # 257 tests
 python -m spectral_distillation.experiments.run_protocol        # D1-D4 + frozen gates
 python -m spectral_distillation.experiments.dilution_curve      # dilution ladder
 python -m spectral_distillation.experiments.ablation            # oracle δ + feature ablation

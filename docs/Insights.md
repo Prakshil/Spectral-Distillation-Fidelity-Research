@@ -608,4 +608,4 @@ reviewers.
 *Sources: committed `logs/**/*.json`, `docs/reproducibility.md`,
 `SPECTRAL_DISTILLATION_IMPLEMENTATION_GUIDE.md`, and the implementation in
 `spectral_distillation/src/` + `experiments/`. Measurements at n=10,000 with the
-committed logs as the CPU reference; 256 tests passing.*
+committed logs as the CPU reference; 257 tests passing.*

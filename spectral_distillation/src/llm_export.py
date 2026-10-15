@@ -298,3 +298,22 @@ def _sentence_ids_from_offsets(text: str, offsets, n_tokens: int) -> np.ndarray:
         start = offsets[i][0] if offsets[i] else 0
         ids[i] = bisect.bisect_left(ordered, start)
     return ids
+
+
+def attention_digest(records: list[AttentionRecord]) -> str:
+    """Stable sha256 fingerprint of an exported attention batch.
+
+    The live export is deterministic for a fixed
+    ``(model, device, dtype, library versions)``: re-running in that environment
+    reproduces the same bytes, so this digest is a cheap way to check that a
+    regenerated artifact came from the committed export. It intentionally
+    changes when any of those inputs change (e.g. CPU vs CUDA), so a mismatch is
+    a provenance signal, not necessarily a bug.
+    """
+    import hashlib
+
+    digest = hashlib.sha256()
+    for rec in records:
+        digest.update(np.ascontiguousarray(rec.attention.astype(np.float32)).tobytes())
+        digest.update(np.ascontiguousarray(rec.sentence_ids.astype(np.int64)).tobytes())
+    return digest.hexdigest()
